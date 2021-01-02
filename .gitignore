@@ -35,6 +35,8 @@
 *.i*86
 *.x86_64
 *.hex
+*.lnx
+*.osx
 
 # Debug files
 *.dSYM/
@@ -42,11 +44,13 @@
 *.idb
 *.pdb
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# Other compiler-generated files
+*.S
+*.s
+*.mod
+*.optrpt
+
+# Data
+.svn/
+out/
+*.dbl
