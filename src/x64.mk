@@ -16,6 +16,7 @@ CPUFLAGS=-DUSE_INTEL -DUSE_X64 -fPIC -fexceptions -fno-omit-frame-pointer -qopen
 ifdef TEST
 CPUFLAGS += -DTEST=$(TEST)
 endif # TEST
+SUFX=-$(ARCH)_$(TEST)$(DEBUG)_$(ABI)
 C18FLAGS=$(CPUFLAGS)
 FPUFLAGS=-fp-model precise -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -fimf-use-svml=true
 ifdef NDEBUG
@@ -34,7 +35,7 @@ ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
 LIBFLAGS += -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
-LDFLAGS=-L. -lvecjac_$(TEST)$(DEBUG)_$(ABI)
+LDFLAGS=-L. -lvecjac$(SUFX)
 ifeq ($(ARCH),Darwin)
 LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib -lmkl_intel_$(ABI) -lmkl_sequential -lmkl_core
 else # Linux
