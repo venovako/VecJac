@@ -210,6 +210,7 @@ typedef uint32_t fnat;
 
 extern size_t atoz(const char *const s);
 
+extern char *stoa(char s[static 17], const float x);
 extern char *dtoa(char s[static 26], const double x);
 extern char *xtoa(char s[static 31], const long double x);
 
