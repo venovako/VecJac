@@ -11,6 +11,8 @@
 #error AVX-512 instructions not available
 #endif /* ?__AVX512F__ */
 
+/* vector types */
+
 /* vector type containing floats */
 #ifdef VS
 #error VS already defined
@@ -24,6 +26,24 @@
 #else /* !VD */
 #define VD __m512d
 #endif /* ?VD */
+
+/* mask types */
+
+/* mask type for float lanes */
+#ifdef MS
+#error MS already defined
+#else /* !MS */
+#define MS __mmask16
+#endif /* ?MS */
+
+/* mask type for double lanes */
+#ifdef MD
+#error MD already defined
+#else /* !MD */
+#define MD __mmask8
+#endif /* ?MD */
+
+/* various vectorization constants */
 
 /* vector length in 32-bit lanes */
 #ifdef VSL
@@ -74,19 +94,7 @@
 #define VA 64u
 #endif /* ?VA */
 
-/* mask type for float lanes */
-#ifdef MS
-#error MS already defined
-#else /* !MS */
-#define MS __mmask16
-#endif /* ?MS */
-
-/* mask type for double lanes */
-#ifdef MD
-#error MD already defined
-#else /* !MD */
-#define MD __mmask8
-#endif /* ?MD */
+/* vector instructions */
 
 /* VS instruction name */
 #ifdef VSI
@@ -106,15 +114,17 @@
 #ifdef VSLT
 #error VSLT already defined
 #else /* !VSLT */
-#define VSLT _mm512_cmplt_ps_mask
+#define VSLT(x,y) _mm512_cmplt_ps_mask((x),(y))
 #endif /* ?VSLT */
 
 /* double <-comparison */
 #ifdef VDLT
 #error VDLT already defined
 #else /* !VDLT */
-#define VDLT _mm512_cmplt_pd_mask
+#define VDLT(x,y) _mm512_cmplt_pd_mask((x),(y))
 #endif /* ?VDLT */
+
+/* bitwise operations */
 
 #ifdef VSAND
 #error VSAND already defined
@@ -144,37 +154,45 @@
 #error VDXOR already defined
 #endif /* VDXOR */
 
+#ifdef __AVX512DQ__
+#define VSAND(x,y) VSI(and)((x),(y))
+#define VSANDNOT(x,y) VSI(andnot)((x),(y))
+#define VSOR(x,y) VSI(or)((x),(y))
+#define VSXOR(x,y) VSI(xor)((x),(y))
+
+#define VDAND(x,y) VDI(and)((x),(y))
+#define VDANDNOT(x,y) VDI(andnot)((x),(y))
+#define VDOR(x,y) VDI(or)((x),(y))
+#define VDXOR(x,y) VDI(xor)((x),(y))
+#else /* AVX512F only */
+#define VSAND(x,y) VSI(castsi512)(_mm512_and_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
+#define VSANDNOT(x,y) VSI(castsi512)(_mm512_andnot_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
+#define VSOR(x,y) VSI(castsi512)(_mm512_or_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
+#define VSXOR(x,y) VSI(castsi512)(_mm512_xor_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
+
+#define VDAND(x,y) VDI(castsi512)(_mm512_and_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
+#define VDANDNOT(x,y) VDI(castsi512)(_mm512_andnot_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
+#define VDOR(x,y) VDI(castsi512)(_mm512_or_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
+#define VDXOR(x,y) VDI(castsi512)(_mm512_xor_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
+#endif /* ?__AVX512DQ__ */
+
+/* mask conversion */
+
 #ifdef MS2U
 #error MS2U already defined
-#endif /* MS2U */
+#else /* !MS2U */
+#define MS2U(m) _cvtmask16_u32(m)
+#endif /* ?MS2U */
+
 #ifdef MD2U
 #error MD2U already defined
-#endif /* MD2U */
-
+#else /* !MD2U */
 #ifdef __AVX512DQ__
-#define VSAND(x,y) VSI(and)((x), (y))
-#define VSANDNOT(x,y) VSI(andnot)((x), (y))
-#define VSOR(x,y) VSI(or)((x), (y))
-#define VSXOR(x,y) VSI(xor)((x), (y))
-
-#define VDAND(x,y) VDI(and)((x), (y))
-#define VDANDNOT(x,y) VDI(andnot)((x), (y))
-#define VDOR(x,y) VDI(or)((x), (y))
-#define VDXOR(x,y) VDI(xor)((x), (y))
 #define MD2U(m) _cvtmask8_u32(m)
 #else /* AVX512F only */
-#define VSAND(x,y) _mm512_castsi512_ps(_mm512_and_epi32(_mm512_castps_si512(x), _mm512_castps_si512(y)))
-#define VSANDNOT(x,y) _mm512_castsi512_ps(_mm512_andnot_epi32(_mm512_castps_si512(x), _mm512_castps_si512(y)))
-#define VSOR(x,y) _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(x), _mm512_castps_si512(y)))
-#define VSXOR(x,y) _mm512_castsi512_ps(_mm512_xor_epi32(_mm512_castps_si512(x), _mm512_castps_si512(y)))
-
-#define VDAND(x,y) _mm512_castsi512_pd(_mm512_and_epi64(_mm512_castpd_si512(x), _mm512_castpd_si512(y)))
-#define VDANDNOT(x,y) _mm512_castsi512_pd(_mm512_andnot_epi64(_mm512_castpd_si512(x), _mm512_castpd_si512(y)))
-#define VDOR(x,y) _mm512_castsi512_pd(_mm512_or_epi64(_mm512_castpd_si512(x), _mm512_castpd_si512(y)))
-#define VDXOR(x,y) _mm512_castsi512_pd(_mm512_xor_epi64(_mm512_castpd_si512(x), _mm512_castpd_si512(y)))
 #define MD2U(m) _cvtmask16_u32((__mmask16)(m))
-#endif /* __AVX512DQ__ */
-#define MS2U(m) _cvtmask16_u32(m)
+#endif /* ?__AVX512DQ__ */
+#endif /* ?MD2U */
 
 /*** end of vector definitions ***/
 
