@@ -1,0 +1,85 @@
+#include "rnd.h"
+
+static void rdrand8(const size_t n, uint8_t r[static 1])
+{
+  for (size_t i = (size_t)0u; i < n; ++i) {
+    uint16_t w;
+    while (!_rdrand16_step(&w)) /**/;
+    r[i] = (uint8_t)w;
+    if (++i < n)
+      r[i] = (uint8_t)(w >> 8u);
+    else
+      break;
+  }
+}
+
+static void rdrand16(const size_t n, uint16_t r[static 1])
+{
+  for (size_t i = (size_t)0u; i < n; ++i) {
+    uint16_t *const p = r + i;
+    while (!_rdrand16_step(p)) /**/;
+  }
+}
+
+static void rdrand32(const size_t n, uint32_t r[static 1])
+{
+  for (size_t i = (size_t)0u; i < n; ++i) {
+    uint32_t *const p = r + i;
+    while (!_rdrand32_step(p)) /**/;
+  }
+}
+
+static void rdrand64(const size_t n, uint64_t r[static 1])
+{
+  for (size_t i = (size_t)0u; i < n; ++i) {
+    uint64_t *const p = r + i;
+    while (!_rdrand64_step(p)) /**/;
+  }
+}
+
+int rdrand(const size_t n, const size_t s, void *r)
+{
+  if (!n)
+    return 0;
+  if (!s)
+    return -2;
+  if (!r)
+    return -3;
+
+  const uintptr_t p = (uintptr_t)r;
+  unsigned a = 1u;
+  do {
+    if (p & (uintptr_t)a)
+      break;
+    a <<= 1u;
+  } while (a <= 4u);
+
+  for (size_t b = (n * s); a && b; a >>= 1u) {
+    const size_t e = b / a;
+    if (e) {
+      switch (a) {
+      case 8u:
+        rdrand64(e, (uint64_t*)r);
+        r = ((uint64_t*)r + e);
+        break;
+      case 4u:
+        rdrand32(e, (uint32_t*)r);
+        r = ((uint32_t*)r + e);
+        break;
+      case 2u:
+        rdrand16(e, (uint16_t*)r);
+        r = ((uint16_t*)r + e);
+        break;
+      case 1u:
+        rdrand8(e, (uint8_t*)r);
+        r = ((uint8_t*)r + e);
+        break;
+      default: /* should never happen */
+        return -1;
+      }
+      b -= (e * a);
+    }
+  }
+
+  return 0;
+}
