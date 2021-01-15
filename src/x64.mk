@@ -11,20 +11,21 @@ endif # ?NDEBUG
 RM=rm -rfv
 AR=xiar
 ARFLAGS=-qnoipo -lib rsv
-CC=icc -std=c18
-CPUFLAGS=-DUSE_INTEL -DUSE_X64 -fPIC -fexceptions -fno-omit-frame-pointer -qopenmp -rdynamic
-ifdef TEST
-CPUFLAGS += -DTEST=$(TEST)
-endif # TEST
-SUFX=-$(ARCH)_$(TEST)$(DEBUG)_$(ABI)
-C18FLAGS=$(CPUFLAGS)
+CC=icc
+CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer -qopenmp -rdynamic
+ifdef NDEBUG
+SUFX=-$(ABI)_$(NDEBUG)
+else # DEBUG
+SUFX=-$(ABI)_$(DEBUG)
+endif # ?NDEBUG
+DBGFLAGS=-traceback -w3
 FPUFLAGS=-fp-model precise -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -fimf-use-svml=true
 ifdef NDEBUG
 OPTFLAGS=-O$(NDEBUG) -xHost -qopt-multi-version-aggressive
-DBGFLAGS=-DNDEBUG -qopt-report=5 -traceback -w3
+DBGFLAGS += -DNDEBUG -qopt-report=5
 else # DEBUG
 OPTFLAGS=-O0 -xHost -qopt-multi-version-aggressive
-DBGFLAGS=-$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -traceback -check=stack,uninit -w3
+DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -check=stack,uninit
 ifneq ($(ARCH),Darwin) # Linux
 DBGFLAGS += -debug parallel
 endif # ?Linux
@@ -43,4 +44,4 @@ LIBFLAGS += -static-libgcc -D_GNU_SOURCE
 LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_intel_$(ABI) -lmkl_sequential -lmkl_core
 endif # ?Darwin
 LDFLAGS += -lpthread -lm -ldl
-CFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(C18FLAGS) $(FPUFLAGS)
+CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)

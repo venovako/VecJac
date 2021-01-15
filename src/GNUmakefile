@@ -9,7 +9,7 @@ MKFS=GNUmakefile $(COMPILER).mk
 all: libvecjac$(SUFX).a
 
 help:
-	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [TEST=0|1|2|3|4|5|6|7] [ABI=lp64|ilp64] [all|clean|help]"
+	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [all|clean|help]"
 
 libvecjac$(SUFX).a: common$(SUFX).o rnd$(SUFX).o vec$(SUFX).o $(MKFS)
 	$(AR) $(ARFLAGS) $@ common$(SUFX).o rnd$(SUFX).o vec$(SUFX).o
