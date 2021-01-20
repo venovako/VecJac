@@ -53,4 +53,4 @@
 # Data
 .svn/
 out/
-*.dbl
+var/

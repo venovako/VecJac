@@ -8,6 +8,9 @@ DEBUG=
 else # DEBUG
 DEBUG=g
 endif # ?NDEBUG
+ifndef FPU
+FPU=precise
+endif # !FPU
 RM=rm -rfv
 AR=xiar
 ARFLAGS=-qnoipo -lib rsv
@@ -19,7 +22,7 @@ else # DEBUG
 SUFX=-$(ABI)_$(DEBUG)
 endif # ?NDEBUG
 DBGFLAGS=-traceback -w3
-FPUFLAGS=-fp-model precise -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -fimf-use-svml=true
+FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -fimf-use-svml=true
 ifdef NDEBUG
 OPTFLAGS=-O$(NDEBUG) -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high
 DBGFLAGS += -DNDEBUG -qopt-report=5

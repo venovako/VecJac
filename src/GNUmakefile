@@ -9,7 +9,7 @@ MKFS=GNUmakefile $(COMPILER).mk
 all: libvecjac$(SUFX).a
 
 help:
-	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [all|clean|help]"
+	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [all|clean|help]"
 
 libvecjac$(SUFX).a: common$(SUFX).o rnd$(SUFX).o vec$(SUFX).o $(MKFS)
 	$(AR) $(ARFLAGS) $@ common$(SUFX).o rnd$(SUFX).o vec$(SUFX).o
@@ -24,7 +24,7 @@ vec$(SUFX).o: vec.c vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	-$(RM) common$(SUFX).o
-	-$(RM) rnd$(SUFX).o
-	-$(RM) vec$(SUFX).o
+	-$(RM) common$(SUFX).o common$(SUFX).optrpt
+	-$(RM) rnd$(SUFX).o rnd$(SUFX).optrpt
+	-$(RM) vec$(SUFX).o vec$(SUFX).optrpt
 	-$(RM) libvecjac$(SUFX).a
