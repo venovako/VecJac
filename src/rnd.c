@@ -100,10 +100,8 @@ void gensrand(const size_t n, float r[static 1])
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r)
 #endif /* _OPENMP */
-  for (size_t i = (size_t)0u; i < n; ++i) {
-    uint32_t *const p = (uint32_t*)r + i;
-    while (!_rdrand32_step(p) || !isfinite(r[i])) /**/;
-  }
+  for (size_t i = (size_t)0u; i < n; ++i)
+    r[i] = sfrand();
 }
 
 void gendrand(const size_t n, double r[static 1])
@@ -111,8 +109,6 @@ void gendrand(const size_t n, double r[static 1])
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r)
 #endif /* _OPENMP */
-  for (size_t i = (size_t)0u; i < n; ++i) {
-    uint64_t *const p = (uint64_t*)r + i;
-    while (!_rdrand64_step(p) || !isfinite(r[i])) /**/;
-  }
+  for (size_t i = (size_t)0u; i < n; ++i)
+    r[i] = dfrand();
 }
