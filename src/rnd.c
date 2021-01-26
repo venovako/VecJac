@@ -6,8 +6,7 @@ static void gen_rand8(const size_t n, uint8_t r[static 1])
 #pragma omp parallel for default(none) shared(n,r)
 #endif /* _OPENMP */
   for (size_t i = (size_t)0u; i < n; i += (size_t)2u) {
-    uint16_t w;
-    while (!_rdrand16_step(&w)) /**/;
+    const uint16_t w = uwrand();
     r[i] = (uint8_t)w;
     const size_t j = i + (size_t)1u;
     if (j < n)
@@ -20,10 +19,8 @@ static void gen_rand16(const size_t n, uint16_t r[static 1])
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r)
 #endif /* _OPENMP */
-  for (size_t i = (size_t)0u; i < n; ++i) {
-    uint16_t *const p = r + i;
-    while (!_rdrand16_step(p)) /**/;
-  }
+  for (size_t i = (size_t)0u; i < n; ++i)
+    r[i] = uwrand();
 }
 
 static void gen_rand32(const size_t n, uint32_t r[static 1])
@@ -31,10 +28,8 @@ static void gen_rand32(const size_t n, uint32_t r[static 1])
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r)
 #endif /* _OPENMP */
-  for (size_t i = (size_t)0u; i < n; ++i) {
-    uint32_t *const p = r + i;
-    while (!_rdrand32_step(p)) /**/;
-  }
+  for (size_t i = (size_t)0u; i < n; ++i)
+    r[i] = udrand();
 }
 
 static void gen_rand64(const size_t n, uint64_t r[static 1])
@@ -42,10 +37,8 @@ static void gen_rand64(const size_t n, uint64_t r[static 1])
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r)
 #endif /* _OPENMP */
-  for (size_t i = (size_t)0u; i < n; ++i) {
-    uint64_t *const p = r + i;
-    while (!_rdrand64_step(p)) /**/;
-  }
+  for (size_t i = (size_t)0u; i < n; ++i)
+    r[i] = uqrand();
 }
 
 int gen_rand(const size_t n, const size_t s, void *r)
