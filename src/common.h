@@ -9,7 +9,7 @@ extern __float128 __fmaxq(__float128, __float128);
 extern __float128 __fminq(__float128, __float128);
 extern __float128 __hypotq(__float128, __float128);
 extern __float128 __scalbq(__float128, __float128);
-extern __float128 __invsqrtq(__float128, __float128);
+extern __float128 __invsqrtq(__float128);
 #endif /* !USE_EXTENDED */
 #else /* !__ICC */
 #include <complex.h>
@@ -47,6 +47,9 @@ extern __float128 __invsqrtq(__float128, __float128);
 #ifdef invsqrtw
 #error invsqrtw already defined
 #endif /* invsqrtw */
+#ifdef W_ONE
+#error W_ONE already defined
+#endif /* W_ONE */
 #ifdef W_ZERO
 #error W_ZERO already defined
 #endif /* W_ZERO */
@@ -65,6 +68,7 @@ typedef long double wide;
 #define hypotw   hypotl
 #define scalbw   scalbl
 #define invsqrtw invsqrtl
+#define W_ONE     1.0L
 #define W_ZERO    0.0L
 #define W_MONE   -1.0L
 #define CMPLXW(r,i) CMPLXL((r),(i))
@@ -76,6 +80,7 @@ typedef __float128  wide;
 #define hypotw   __hypotq
 #define scalbw   __scalbq
 #define invsqrtw __invsqrtq
+#define W_ONE     1.0q
 #define W_ZERO    0.0q
 #define W_MONE   -1.0q
 #define CMPLXW(r,i) ((wide)(r) + I * (wide)(i))
