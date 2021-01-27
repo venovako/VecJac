@@ -45,7 +45,7 @@ static inline wide w1rand()
 }
 
 /* returns a tangent in [0,1) and the corresponding cosine */
-static inline void rnd_rot(wide t[static 1], wide c[static 1])
+static inline void wrot2rand(wide t[static 1], wide c[static 1])
 {
   *t = w1rand();
   *c = invsqrtw(fmaw(*t, *t, W_ONE));
@@ -55,5 +55,8 @@ extern int gen_rand(const size_t n, const size_t s, void *r);
 
 extern void gensrand(const size_t n, float r[static 1]);
 extern void gendrand(const size_t n, double r[static 1]);
+extern void genwrand(const size_t n, wide r[static 1]);
+
+extern void gen2rand(const size_t n, wide t[static 1], wide c[static 1]);
 
 #endif /* !RND_H */
