@@ -106,20 +106,11 @@ void gendrand(const size_t n, double r[static 1])
     r[i] = dfrand();
 }
 
-void genwrand(const size_t n, wide r[static 1])
-{
-#ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r)
-#endif /* _OPENMP */
-  for (size_t i = (size_t)0u; i < n; ++i)
-    r[i] = w1rand();
-}
-
 void gen2rand(const size_t n, wide t[static 1], wide c[static 1])
 {
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,t,c)
 #endif /* _OPENMP */
   for (size_t i = (size_t)0u; i < n; ++i)
-    wrot2rand((t + i), (c + i));
+    wo2rand((t + i), (c + i));
 }
