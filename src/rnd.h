@@ -96,11 +96,21 @@ static inline void wo2rand(wide t[static 1], wide c[static 1])
   *c = invsqrtw(fmaw(*t, *t, W_ONE));
 }
 
+/* returns a tangent in [-1,1) and the corresponding cosine */
+/* & r + I*i = cos(alpha) + I*sin(alpha); alpha in [-pi,pi) */
+static inline void wu2rand(wide t[static 1], wide c[static 1], wide r[static 1], wide i[static 1])
+{
+  wo2rand(t, c);
+  const wide a = w2rand() * W_PI;
+  sincosw(a, r, i);
+}
+
 extern int gen_rand(const size_t n, const size_t s, void *r);
 
 extern void gensrand(const size_t n, float r[static 1]);
 extern void gendrand(const size_t n, double r[static 1]);
 
-extern void gen2rand(const size_t n, wide t[static 1], wide c[static 1]);
+extern void geno2rand(const size_t n, wide t[static 1], wide c[static 1]);
+extern void genu2rand(const size_t n, wide t[static 1], wide c[static 1], wide r[static 1], wide i[static 1]);
 
 #endif /* !RND_H */
