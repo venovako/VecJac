@@ -102,7 +102,7 @@ static inline void wu2rand(wide t[static 1], wide c[static 1], wide r[static 1],
 {
   wo2rand(t, c);
   const wide a = w2rand() * W_PI;
-  sincosw(a, r, i);
+  sincosw(a, i, r);
 }
 
 extern int gen_rand(const size_t n, const size_t s, void *r);
