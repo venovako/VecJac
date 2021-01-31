@@ -1,5 +1,8 @@
 #include "rnd.h"
 
+static const float  saub = FLT_MAX / 2;
+static const double daub = DBL_MAX / 2;
+
 static void gen_rand8(const size_t n, uint8_t r[static 1])
 {
 #ifdef _OPENMP
@@ -112,14 +115,13 @@ void gendfrand(const size_t n, const double aub, double r[static 1])
 
 void ssym2rand(const size_t n, float l1[static 1], float l2[static 1], float f[static 1], float g[static 1], float h[static 1])
 {
-  static const float aub = FLT_MAX / 2;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,aub,l1,l2,f,g,h)
+#pragma omp parallel for default(none) shared(n,saub,l1,l2,f,g,h)
 #endif /* _OPENMP */
   for (size_t i = (size_t)0u; i < n; ++i) {
     wide w1, w2, t, c;
-    w1 = l1[i] = sfrand(aub);
-    w2 = l2[i] = sfrand(aub);
+    w1 = l1[i] = sfrand(saub);
+    w2 = l2[i] = sfrand(saub);
     wo2rand(&t, &c);
     h[i] = (float)((t * (w1 - w2)) / c);
     t *= t;
@@ -130,14 +132,13 @@ void ssym2rand(const size_t n, float l1[static 1], float l2[static 1], float f[s
 
 void dsym2rand(const size_t n, double l1[static 1], double l2[static 1], double f[static 1], double g[static 1], double h[static 1])
 {
-  static const double aub = DBL_MAX / 2;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,aub,l1,l2,f,g,h)
+#pragma omp parallel for default(none) shared(n,daub,l1,l2,f,g,h)
 #endif /* _OPENMP */
   for (size_t i = (size_t)0u; i < n; ++i) {
     wide w1, w2, t, c;
-    w1 = l1[i] = dfrand(aub);
-    w2 = l2[i] = dfrand(aub);
+    w1 = l1[i] = dfrand(daub);
+    w2 = l2[i] = dfrand(daub);
     wo2rand(&t, &c);
     h[i] = (double)((t * (w1 - w2)) / c);
     t *= t;
@@ -148,14 +149,13 @@ void dsym2rand(const size_t n, double l1[static 1], double l2[static 1], double 
 
 void cher2rand(const size_t n, float l1[static 1], float l2[static 1], float f[static 1], float g[static 1], float hr[static 1], float hi[static 1])
 {
-  static const float aub = FLT_MAX / 2;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,aub,l1,l2,f,g,hr,hi)
+#pragma omp parallel for default(none) shared(n,saub,l1,l2,f,g,hr,hi)
 #endif /* _OPENMP */
   for (size_t i = (size_t)0u; i < n; ++i) {
     wide w1, w2, t, c, r, j, h;
-    w1 = l1[i] = sfrand(aub);
-    w2 = l2[i] = sfrand(aub);
+    w1 = l1[i] = sfrand(saub);
+    w2 = l2[i] = sfrand(saub);
     wu2rand(&t, &c, &r, &j);
     h = (t * (w1 - w2)) / c;
     hr[i] = (float)(r * h);
@@ -168,14 +168,13 @@ void cher2rand(const size_t n, float l1[static 1], float l2[static 1], float f[s
 
 void zher2rand(const size_t n, double l1[static 1], double l2[static 1], double f[static 1], double g[static 1], double hr[static 1], double hi[static 1])
 {
-  static const double aub = DBL_MAX / 2;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,aub,l1,l2,f,g,hr,hi)
+#pragma omp parallel for default(none) shared(n,daub,l1,l2,f,g,hr,hi)
 #endif /* _OPENMP */
   for (size_t i = (size_t)0u; i < n; ++i) {
     wide w1, w2, t, c, r, j, h;
-    w1 = l1[i] = dfrand(aub);
-    w2 = l2[i] = dfrand(aub);
+    w1 = l1[i] = dfrand(daub);
+    w2 = l2[i] = dfrand(daub);
     wu2rand(&t, &c, &r, &j);
     h = (t * (w1 - w2)) / c;
     hr[i] = (double)(r * h);
