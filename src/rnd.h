@@ -52,12 +52,12 @@ static inline float s_rand()
   return f;
 }
 
-static inline float sfrand()
+static inline float sfrand(const float aub)
 {
   float f;
   do {
     f = s_rand();
-  } while (!isfinite(f));
+  } while (!(fabsf(f) <= aub));
   return f;
 }
 
@@ -68,12 +68,12 @@ static inline double d_rand()
   return d;
 }
 
-static inline double dfrand()
+static inline double dfrand(const double aub)
 {
   double d;
   do {
     d = d_rand();
-  } while (!isfinite(d));
+  } while (!(fabs(d) <= aub));
   return d;
 }
 
@@ -89,28 +89,34 @@ static inline wide w2rand()
   return scalbw(iqrand(), -63);
 }
 
-/* returns a tangent in [-1,1) and the corresponding cosine */
+/* returns a tangent in [-1,1) and the corresponding secant squared */
 static inline void wo2rand(wide t[static 1], wide c[static 1])
 {
   *t = w2rand();
-  *c = invsqrtw(fmaw(*t, *t, W_ONE));
+  *c = fmaw(*t, *t, W_ONE);
 }
 
-/* returns a tangent in [-1,1) and the corresponding cosine */
-/* & r + I*i = cos(alpha) + I*sin(alpha); alpha in [-pi,pi) */
-static inline void wu2rand(wide t[static 1], wide c[static 1], wide r[static 1], wide i[static 1])
+/* returns a tangent in [-1,1) and the corresponding secant squared */
+/* & r + I*j = cos(alpha) + I*sin(alpha); alpha in [-pi,pi) */
+static inline void wu2rand(wide t[static 1], wide c[static 1], wide r[static 1], wide j[static 1])
 {
   wo2rand(t, c);
-  const wide a = w2rand() * W_PI;
-  sincosw(a, i, r);
+  sincosw((w2rand() * W_PI), j, r);
 }
 
 extern int gen_rand(const size_t n, const size_t s, void *r);
 
-extern void gensrand(const size_t n, float r[static 1]);
-extern void gendrand(const size_t n, double r[static 1]);
+extern void gensfrand(const size_t n, const float aub, float r[static 1]);
+extern void gendfrand(const size_t n, const double aub, double r[static 1]);
 
-extern void geno2rand(const size_t n, wide t[static 1], wide c[static 1]);
-extern void genu2rand(const size_t n, wide t[static 1], wide c[static 1], wide r[static 1], wide i[static 1]);
+/* [ c -s ] [ l1 0 ] [  c s ] = [ f h ] */
+/* [ s  c ] [ 0 l2 ] [ -s c ]   [ h g ] */
+extern void ssym2rand(const size_t n, float l1[static 1], float l2[static 1], float f[static 1], float g[static 1], float h[static 1]);
+extern void dsym2rand(const size_t n, double l1[static 1], double l2[static 1], double f[static 1], double g[static 1], double h[static 1]);
+
+/* [          c -exp(-a*I)s ] [ l1 0 ] [           c exp(-a*I)*s ] [ f       h ] */
+/* [ exp(a*I)*s           c ] [ 0 l2 ] [ -exp(a*I)*s           c ] [ conj(h) g ] */
+extern void cher2rand(const size_t n, float l1[static 1], float l2[static 1], float f[static 1], float g[static 1], float hr[static 1], float hi[static 1]);
+extern void zher2rand(const size_t n, double l1[static 1], double l2[static 1], double f[static 1], double g[static 1], double hr[static 1], double hi[static 1]);
 
 #endif /* !RND_H */
