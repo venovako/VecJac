@@ -1,4 +1,5 @@
 #include "rnd.h"
+#include "timer.h"
 
 static const char fm[3] = { 'w', 'b', '\0' };
 
@@ -61,6 +62,9 @@ int main(int argc, char *argv[])
     perror(fn);
     return EXIT_FAILURE;
   }
+  unsigned rd[2u] = { 0u, 0u };
+  uint64_t hz = tsc_get_freq_hz(rd), be[2u] = { UINT64_C(0), UINT64_C(0) };
+  (void)fprintf(stdout, "TSC frequency: %lu+(%u/%u) Hz.\n", hz, rd[0u], rd[1u]);
   const char t = (char)toupper(argv[1][0]);
   if (!t)
     return EXIT_FAILURE;
@@ -81,7 +85,9 @@ int main(int argc, char *argv[])
     float *const h = (float*)malloc(ns);
     if (!h)
       return EXIT_FAILURE;
+    be[0u] = rdtsc_beg(rd);
     ssym2rand(n, l1, l2, f, g, h);
+    be[1u] = rdtsc_end(rd);
     if (n != fwrite(h, sizeof(float), n, fr)) {
       perror("fwrite(r)");
       return EXIT_FAILURE;
@@ -129,7 +135,9 @@ int main(int argc, char *argv[])
     double *const h = (double*)malloc(ns);
     if (!h)
       return EXIT_FAILURE;
+    be[0u] = rdtsc_beg(rd);
     dsym2rand(n, l1, l2, f, g, h);
+    be[1u] = rdtsc_end(rd);
     if (n != fwrite(h, sizeof(double), n, fr)) {
       perror("fwrite(r)");
       return EXIT_FAILURE;
@@ -180,7 +188,9 @@ int main(int argc, char *argv[])
     float *const hi = (float*)malloc(ns);
     if (!hi)
       return EXIT_FAILURE;
+    be[0u] = rdtsc_beg(rd);
     cher2rand(n, l1, l2, f, g, hi, hr);
+    be[1u] = rdtsc_end(rd);
     if (n != fwrite(hi, sizeof(float), n, fj)) {
       perror("fwrite(j)");
       return EXIT_FAILURE;
@@ -232,7 +242,9 @@ int main(int argc, char *argv[])
     double *const hi = (double*)malloc(ns);
     if (!hi)
       return EXIT_FAILURE;
+    be[0u] = rdtsc_beg(rd);
     zher2rand(n, l1, l2, f, g, hi, hr);
+    be[1u] = rdtsc_end(rd);
     if (n != fwrite(hi, sizeof(double), n, fj)) {
       perror("fwrite(j)");
       return EXIT_FAILURE;
@@ -268,6 +280,7 @@ int main(int argc, char *argv[])
     (void)fprintf(stderr, "%s does not start with S, D, C, or Z\n", argv[1]);
     return EXIT_FAILURE;
   }
+  (void)fprintf(stdout, "The generation took %Lf s.\n", tsc_lap(hz, be[0u], be[1u]));
   if (fclose(fj))
     perror("j");
   if (fclose(fr))

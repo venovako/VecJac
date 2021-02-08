@@ -15,7 +15,7 @@ RM=rm -rfv
 AR=xiar
 ARFLAGS=-qnoipo -lib rsv
 CC=icc
-CPUFLAGS=-DKNL -fPIC -fexceptions -fno-omit-frame-pointer -qopenmp -rdynamic
+CPUFLAGS=-DKNL -fPIC -fexceptions -fno-omit-frame-pointer -qopenmp -rdynamic -DTSC_FREQ_HZ=$(shell if [ `if [ -r /etc/redhat-release ]; then grep -c 'release 7' /etc/redhat-release; else echo 0; fi` = 1 ]; then echo `dmesg | grep 'TSC clocksource calibration' | cut -d':' -f3 | cut -d' ' -f2 | sed 's/\.//g'`000; else echo 0; fi)ull
 ifdef NDEBUG
 SUFX=-$(ABI)_$(NDEBUG)
 else # DEBUG
