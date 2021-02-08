@@ -112,6 +112,7 @@ typedef __float128  wide;
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 
 #ifdef FINT_C
 #error FINT_C already defined

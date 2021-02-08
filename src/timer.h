@@ -53,4 +53,17 @@ static inline long double tsc_lap(const uint64_t freq_hz, const uint64_t beg, co
   return (long double)INFINITY;
 }
 
+static inline int64_t t2ns(const struct timespec tp[static 1])
+{
+  return (int64_t)(tp->tv_sec * INT64_C(1000000000) + tp->tv_nsec);
+}
+
+static inline int64_t t2us(const struct timeval tp[static 1])
+{
+  return (int64_t)(tp->tv_sec * INT64_C(1000000) + tp->tv_usec);
+}
+
+extern int64_t get_thread_ns();
+extern int64_t get_sys_us();
+
 #endif /* !TIMER_H */
