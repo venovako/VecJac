@@ -6,6 +6,13 @@ int main(int argc, char *argv[])
 {
   if (argc != 4) {
     (void)fprintf(stderr, "%s { S | D | C | Z } n filename\n", *argv);
+    (void)fprintf(stderr, "Outputs the following binary files: filename.\n");
+    (void)fprintf(stderr, "k: \\lambda_1\n");
+    (void)fprintf(stderr, "l: \\lambda_2\n");
+    (void)fprintf(stderr, "f: A_{11}\n");
+    (void)fprintf(stderr, "g: A_{22}\n");
+    (void)fprintf(stderr, "r: \\Re{A_{12}}\n");
+    (void)fprintf(stderr, "j: \\Im{A_{12}}\n");
     return EXIT_FAILURE;
   }
   const size_t n = atoz(argv[2]);
