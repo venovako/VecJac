@@ -16,31 +16,6 @@ static inline uint64_t rdtsc_end(unsigned aux[static 1])
   return tsc;
 }
 
-static inline uint64_t tsc_get_freq_hz(unsigned rem_den[static 2])
-{
-  rem_den[0u] = 0u;
-  rem_den[1u] = 0u;
-#ifdef TSC_FREQ_HZ
-#if (TSC_FREQ_HZ == 0ull)
-  unsigned eax = 0u, ebx = 0u, ecx = 0u, edx = 0u;
-  __cpuid(0x15u, eax, ebx, ecx, edx);
-  if (eax) {
-    const uint64_t num = (uint64_t)ebx * ecx;
-    const uint64_t den = (uint64_t)eax;
-    rem_den[0u] = (unsigned)(num % den);
-    rem_den[1u] = eax;
-    return (num / den);
-  }
-  return UINT64_C(0);
-#else /* TSC_FREQ_HZ > 0 */
-  rem_den[1u] = 1u;
-  return (TSC_FREQ_HZ);
-#endif /* ?TSC_FREQ_HZ */
-#else /* !TSC_FREQ_HZ */
-  return UINT64_C(0);
-#endif /* TSC_FREQ_HZ */
-}
-
 static inline long double tsc_lap(const uint64_t freq_hz, const uint64_t beg, const uint64_t end)
 {
   if (freq_hz) {
@@ -62,6 +37,8 @@ static inline int64_t t2us(const struct timeval tp[static 1])
 {
   return (int64_t)(tp->tv_sec * INT64_C(1000000) + tp->tv_usec);
 }
+
+extern uint64_t tsc_get_freq_hz(unsigned rem_den[static 2]);
 
 extern int64_t get_thread_ns();
 extern int64_t get_sys_us();
