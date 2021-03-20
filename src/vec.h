@@ -96,34 +96,6 @@
 
 /* vector instructions */
 
-/* VS instruction name */
-#ifdef VSI
-#error VSI already defined
-#else /* !VSI */
-#define VSI(x) _mm512_##x##_ps
-#endif /* ?VSI */
-
-/* VD instruction name */
-#ifdef VDI
-#error VDI already defined
-#else /* !VDI */
-#define VDI(x) _mm512_##x##_pd
-#endif /* ?VDI */
-
-/* float <-comparison */
-#ifdef VSLT
-#error VSLT already defined
-#else /* !VSLT */
-#define VSLT(x,y) _mm512_cmplt_ps_mask((x),(y))
-#endif /* ?VSLT */
-
-/* double <-comparison */
-#ifdef VDLT
-#error VDLT already defined
-#else /* !VDLT */
-#define VDLT(x,y) _mm512_cmplt_pd_mask((x),(y))
-#endif /* ?VDLT */
-
 /* bitwise operations */
 
 #ifdef VSAND
@@ -157,34 +129,34 @@
 #ifdef VSLSB
 #error VSLSB already defined
 #else /* !VSLSB */
-#define VSLSB(x) VSI(cvtepi32)(_mm256_and_si256(_mm512_cvtps_epi32(x),_mm256_set1_epi32(1)))
+#define VSLSB(x) _mm512_cvtepi32_ps(_mm256_and_si256(_mm512_cvtps_epi32(x),_mm256_set1_epi32(1)))
 #endif /* ?VSLSB */
 #ifdef VDLSB
 #error VDLSB already defined
 #endif /* VDLSB */
 
 #ifdef __AVX512DQ__
-#define VSAND(x,y) VSI(and)((x),(y))
-#define VSANDNOT(x,y) VSI(andnot)((x),(y))
-#define VSOR(x,y) VSI(or)((x),(y))
-#define VSXOR(x,y) VSI(xor)((x),(y))
+#define VSAND(x,y) _mm512_and_ps((x),(y))
+#define VSANDNOT(x,y) _mm512_andnot_ps((x),(y))
+#define VSOR(x,y) _mm512_or_ps((x),(y))
+#define VSXOR(x,y) _mm512_xor_ps((x),(y))
 
-#define VDAND(x,y) VDI(and)((x),(y))
-#define VDANDNOT(x,y) VDI(andnot)((x),(y))
-#define VDOR(x,y) VDI(or)((x),(y))
-#define VDXOR(x,y) VDI(xor)((x),(y))
-#define VDLSB(x) VDI(cvtepi64)(_mm512_and_epi64(_mm512_cvtpd_epi64(x),_mm512_set1_epi64(INT64_C(1))))
+#define VDAND(x,y) _mm512_and_pd((x),(y))
+#define VDANDNOT(x,y) _mm512_andnot_pd((x),(y))
+#define VDOR(x,y) _mm512_or_pd((x),(y))
+#define VDXOR(x,y) _mm512_xor_pd((x),(y))
+#define VDLSB(x) _mm512_cvtepi64_pd(_mm512_and_epi64(_mm512_cvtpd_epi64(x),_mm512_set1_epi64(INT64_C(1))))
 #else /* AVX512F only */
-#define VSAND(x,y) VSI(castsi512)(_mm512_and_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
-#define VSANDNOT(x,y) VSI(castsi512)(_mm512_andnot_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
-#define VSOR(x,y) VSI(castsi512)(_mm512_or_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
-#define VSXOR(x,y) VSI(castsi512)(_mm512_xor_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
+#define VSAND(x,y) _mm512_castsi512_ps(_mm512_and_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
+#define VSANDNOT(x,y) _mm512_castsi512_ps(_mm512_andnot_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
+#define VSOR(x,y) _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
+#define VSXOR(x,y) _mm512_castsi512_ps(_mm512_xor_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
 
-#define VDAND(x,y) VDI(castsi512)(_mm512_and_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
-#define VDANDNOT(x,y) VDI(castsi512)(_mm512_andnot_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
-#define VDOR(x,y) VDI(castsi512)(_mm512_or_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
-#define VDXOR(x,y) VDI(castsi512)(_mm512_xor_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
-#define VDLSB(x) VDI(cvtepi32)(_mm256_and_si256(_mm512_cvtpd_epi32(x),_mm256_set1_epi32(1)))
+#define VDAND(x,y) _mm512_castsi512_pd(_mm512_and_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
+#define VDANDNOT(x,y) _mm512_castsi512_pd(_mm512_andnot_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
+#define VDOR(x,y) _mm512_castsi512_pd(_mm512_or_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
+#define VDXOR(x,y) _mm512_castsi512_pd(_mm512_xor_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
+#define VDLSB(x) _mm512_cvtepi32_pd(_mm256_and_si256(_mm512_cvtpd_epi32(x),_mm256_set1_epi32(1)))
 #endif /* ?__AVX512DQ__ */
 
 /* mask conversion */

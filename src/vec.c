@@ -15,7 +15,7 @@ int VSprintf(FILE f[static 1], const char *const h, const VS v)
     return -2;
   }
 
-  VSI(store)(s, v);
+  _mm512_store_ps(s, v);
 
   char a[17];
   for (unsigned i = 0u; i < VSL; ++i) {
@@ -49,7 +49,7 @@ int VDprintf(FILE f[static 1], const char *const h, const VD v)
     return -2;
   }
 
-  VDI(store)(d, v);
+  _mm512_store_pd(d, v);
 
   char a[26];
   for (unsigned i = 0u; i < VDL; ++i) {
