@@ -11,6 +11,19 @@
 #error AVX-512 instructions not available
 #endif /* ?__AVX512F__ */
 
+/* default MXCSR */
+#ifdef STD_MXCSR
+#error STD_MXCSR already defined
+#else /* !STD_MXCSR */
+#define STD_MXCSR 0x1F80u
+#endif /* ?STD_MXCSR */
+
+#ifdef ASSERT_VFPENV
+#error ASSERT_VFPENV already defined
+#else /* !ASSERT_VFPENV */
+#define ASSERT_VFPENV assert((_mm_getcsr() & 0xFFC0u) == (STD_MXCSR))
+#endif /* ?ASSERT_VFPENV */
+
 /* vector types */
 
 /* vector type containing floats */

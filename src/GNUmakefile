@@ -6,7 +6,7 @@ MKFS=GNUmakefile $(COMPILER).mk
 
 .PHONY: all help clean
 
-all: libvecjac$(SUFX).a gen2rand$(SUFX).exe
+all: libvecjac$(SUFX).a gen2rand$(SUFX).exe proba$(SUFX).exe
 
 help:
 	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [all|clean|help]"
@@ -26,7 +26,10 @@ timer$(SUFX).o: timer.c timer.h common.h $(MKFS)
 vec$(SUFX).o: vec.c vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-gen2rand$(SUFX).exe: gen2rand.c libvecjac$(SUFX).a $(MKFS)
+gen2rand$(SUFX).exe: gen2rand.c gen2rand.h libvecjac$(SUFX).a $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
+proba$(SUFX).exe: proba.c proba.h libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
 clean:
@@ -36,3 +39,4 @@ clean:
 	-$(RM) vec$(SUFX).o vec$(SUFX).optrpt
 	-$(RM) libvecjac$(SUFX).a
 	-$(RM) gen2rand$(SUFX).exe gen2rand.optrpt
+	-$(RM) proba$(SUFX).exe proba.optrpt

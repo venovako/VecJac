@@ -1,5 +1,4 @@
-#include "rnd.h"
-#include "timer.h"
+#include "gen2rand.h"
 
 static const char fm[3] = { 'w', 'b', '\0' };
 
