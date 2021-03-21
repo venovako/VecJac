@@ -142,7 +142,7 @@
 #ifdef VSLSB
 #error VSLSB already defined
 #else /* !VSLSB */
-#define VSLSB(x) _mm512_cvtepi32_ps(_mm256_and_si256(_mm512_cvtps_epi32(x),_mm256_set1_epi32(1)))
+#define VSLSB(x) _mm512_cvtepi32_ps(_mm512_and_epi32(_mm512_cvtps_epi32(x),_mm512_set1_epi32(1)))
 #endif /* ?VSLSB */
 #ifdef VDLSB
 #error VDLSB already defined
@@ -189,6 +189,46 @@
 #define MD2U(m) _cvtmask16_u32((__mmask16)(m))
 #endif /* ?__AVX512DQ__ */
 #endif /* ?MD2U */
+
+#ifdef VSP
+#error VSP already defined
+#else /* !VSP */
+#ifdef NDEBUG
+#define VSP(v) (void)0
+#else /* !NDEBUG */
+#define VSP(v) (void)VSprintf(stderr, #v, (v))
+#endif /* ?NDEBUG */
+#endif /* ?VSP */
+
+#ifdef VDP
+#error VDP already defined
+#else /* !VDP */
+#ifdef NDEBUG
+#define VDP(v) (void)0
+#else /* !NDEBUG */
+#define VDP(v) (void)VDprintf(stderr, #v, (v))
+#endif /* ?NDEBUG */
+#endif /* ?VDP */
+
+#ifdef MSP
+#error MSP already defined
+#else /* !MSP */
+#ifdef NDEBUG
+#define MSP(m) (void)0
+#else /* !NDEBUG */
+#define MSP(m) (void)MSprintf(stderr, #m, (m))
+#endif /* ?NDEBUG */
+#endif /* ?MSP */
+
+#ifdef MDP
+#error MDP already defined
+#else /* !MDP */
+#ifdef NDEBUG
+#define MDP(m) (void)0
+#else /* !NDEBUG */
+#define MDP(m) (void)MDprintf(stderr, #m, (m))
+#endif /* ?NDEBUG */
+#endif /* ?MDP */
 
 /*** end of vector definitions ***/
 
