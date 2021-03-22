@@ -1,6 +1,6 @@
 #include "proba.h"
 
-static double dnorme_(const fnat m[static restrict 1], const double x[static restrict 1], double e[static restrict 1], double f[static restrict 1])
+double dnorme_(const fnat m[static restrict 1], const double x[static restrict 1], double e[static restrict 1], double f[static restrict 1])
 {
   ASSERT_VFPENV;
 
@@ -15,6 +15,9 @@ static double dnorme_(const fnat m[static restrict 1], const double x[static res
   register const VD _inf = _mm512_set1_pd(-HUGE_VAL);
   register const VD _one = _mm512_set1_pd(-1.0);
   register const VD  one = _mm512_set1_pd( 1.0);
+#ifndef NDEBUG
+  register const VD  inf = _mm512_set1_pd( HUGE_VAL);
+#endif /* !NDEBUG */
 
   register VD re = _inf;
   register VD rf =  one;
@@ -23,6 +26,10 @@ static double dnorme_(const fnat m[static restrict 1], const double x[static res
     register const VD xi = _mm512_load_pd(x + i); VDP(xi);
     register const VD fi = _mm512_getmant_pd(xi, _MM_MANT_NORM_1_2, _MM_MANT_SIGN_zero); VDP(fi);
     register const VD ei = _mm512_getexp_pd(xi); VDP(ei);
+#ifndef NDEBUG
+    if (MD2U(_mm512_cmplt_pd_mask(ei, inf)) != 0xFFu)
+      return -2.0;
+#endif /* !NDEBUG */
 
     register const VD reh = VDLSB(re); VDP(reh);
     register const VD rep = _mm512_sub_pd(re, reh); VDP(rep);
