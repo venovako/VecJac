@@ -12,19 +12,43 @@
 #endif /* ?__AVX512F__ */
 
 /* default MXCSR */
+
 #ifdef STD_MXCSR
 #error STD_MXCSR already defined
 #else /* !STD_MXCSR */
 #define STD_MXCSR 0x1F80u
 #endif /* ?STD_MXCSR */
 
-#ifdef ASSERT_VFPENV
-#error ASSERT_VFPENV already defined
-#else /* !ASSERT_VFPENV */
-#define ASSERT_VFPENV assert((_mm_getcsr() & 0xFFC0u) == (STD_MXCSR))
-#endif /* ?ASSERT_VFPENV */
+#ifdef IS_NOT_VFPENV
+#error IS_NOT_VFPENV already defined
+#else /* !IS_NOT_VFPENV */
+#define IS_NOT_VFPENV ((_mm_getcsr() & 0xFFC0u) != (STD_MXCSR))
+#endif /* ?IS_NOT_VFPENV */
+
+/* default alignment */
+
+/* vector alignment in bytes */
+#ifdef VA
+#error VA already defined
+#else /* !VA */
+#define VA 64u
+#endif /* ?VA */
+
+#ifdef IS_NOT_ALIGNED
+#error IS_NOT_ALIGNED already defined
+#else /* !IS_NOT_ALIGNED */
+#define IS_NOT_ALIGNED(x) ((uintptr_t)(x) & 0x3Fu)
+#endif /* ?IS_NOT_ALIGNED */
 
 /* vector types */
+
+/* vector type containing integers */
+
+#ifdef VI
+#error VI already defined
+#else /* !VI */
+#define VI __m512i
+#endif /* ?VI */
 
 /* vector type containing floats */
 #ifdef VS
@@ -100,13 +124,6 @@
 #define VDLlg 3u
 #endif /* ?VDLlg */
 
-/* vector alignment in bytes */
-#ifdef VA
-#error VA already defined
-#else /* !VA */
-#define VA 64u
-#endif /* ?VA */
-
 /* vector instructions */
 
 /* bitwise operations */
@@ -139,15 +156,6 @@
 #error VDXOR already defined
 #endif /* VDXOR */
 
-#ifdef VSLSB
-#error VSLSB already defined
-#else /* !VSLSB */
-#define VSLSB(x) _mm512_cvtepi32_ps(_mm512_and_epi32(_mm512_cvtps_epi32(x),_mm512_set1_epi32(1)))
-#endif /* ?VSLSB */
-#ifdef VDLSB
-#error VDLSB already defined
-#endif /* VDLSB */
-
 #ifdef __AVX512DQ__
 #define VSAND(x,y) _mm512_and_ps((x),(y))
 #define VSANDNOT(x,y) _mm512_andnot_ps((x),(y))
@@ -158,8 +166,7 @@
 #define VDANDNOT(x,y) _mm512_andnot_pd((x),(y))
 #define VDOR(x,y) _mm512_or_pd((x),(y))
 #define VDXOR(x,y) _mm512_xor_pd((x),(y))
-#define VDLSB(x) _mm512_cvtepi64_pd(_mm512_and_epi64(_mm512_cvtpd_epi64(x),_mm512_set1_epi64(INT64_C(1))))
-#else /* AVX512F only */
+#else /* !__AVX512DQ__ */
 #define VSAND(x,y) _mm512_castsi512_ps(_mm512_and_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
 #define VSANDNOT(x,y) _mm512_castsi512_ps(_mm512_andnot_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
 #define VSOR(x,y) _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(x),_mm512_castps_si512(y)))
@@ -169,26 +176,26 @@
 #define VDANDNOT(x,y) _mm512_castsi512_pd(_mm512_andnot_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
 #define VDOR(x,y) _mm512_castsi512_pd(_mm512_or_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
 #define VDXOR(x,y) _mm512_castsi512_pd(_mm512_xor_epi64(_mm512_castpd_si512(x),_mm512_castpd_si512(y)))
-#define VDLSB(x) _mm512_cvtepi32_pd(_mm256_and_si256(_mm512_cvtpd_epi32(x),_mm256_set1_epi32(1)))
 #endif /* ?__AVX512DQ__ */
 
-/* mask conversion */
+/* mask operations */
 
 #ifdef MS2U
 #error MS2U already defined
 #else /* !MS2U */
 #define MS2U(m) _cvtmask16_u32(m)
 #endif /* ?MS2U */
-
 #ifdef MD2U
 #error MD2U already defined
 #else /* !MD2U */
 #ifdef __AVX512DQ__
 #define MD2U(m) _cvtmask8_u32(m)
-#else /* AVX512F only */
+#else /* !__AVX512DQ__ */
 #define MD2U(m) _cvtmask16_u32((__mmask16)(m))
 #endif /* ?__AVX512DQ__ */
 #endif /* ?MD2U */
+
+/* printout */
 
 #ifdef VSP
 #error VSP already defined
