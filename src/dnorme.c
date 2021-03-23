@@ -97,7 +97,7 @@
   }
 #endif /* ?VDEFRED */
 
-double dnorme_(const fnat m[static restrict 1], const double x[static restrict 1], double e[static restrict 1], double f[static restrict 1])
+double dnorme_(const fnat m[static restrict 1], const double x[static restrict VDL], double e[static restrict 2], double f[static restrict 2])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -154,7 +154,16 @@ double dnorme_(const fnat m[static restrict 1], const double x[static restrict 1
   VDKVSORT(re, rf);
   VDEFRED(re, rf);
 
-  _mm512_mask_storeu_pd(e, 0x01u, re);
-  _mm512_mask_storeu_pd(f, 0x01u, rf);
-  return scalbln(*f, (long)*e);
+  _mm512_mask_storeu_pd((e + 1u), 0x01u, re);
+  _mm512_mask_storeu_pd((f + 1u), 0x01u, rf);
+
+  if ((long)(e[1u]) & 1l) {
+    e[0u] = scalbn((e[1u] - 1.0), -1);
+    f[0u] = sqrt(scalbn(f[1u], 1));
+  }
+  else {
+    e[0u] = scalbn(e[1u], -1);
+    f[0u] = sqrt(f[1u]);
+  }
+  return scalb(f[0u], e[0u]);
 }
