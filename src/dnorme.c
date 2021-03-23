@@ -6,7 +6,7 @@
 #ifdef __AVX512DQ__
 #define MDOR(a,b) _kor_mask8((a),(b))
 #else /* !__AVX512DQ__ */
-#define MDOR(a,b) (__mmask8)_kor_mask16((__mmask16)(a),(__mmask16)(b))
+#define MDOR(a,b) (__mmask8)_kor_mask16((a),(b))
 #endif /* ?__AVX512DQ__ */
 #endif /* ?MDOR */
 

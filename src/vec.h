@@ -191,7 +191,7 @@
 #ifdef __AVX512DQ__
 #define MD2U(m) _cvtmask8_u32(m)
 #else /* !__AVX512DQ__ */
-#define MD2U(m) _cvtmask16_u32((__mmask16)(m))
+#define MD2U(m) _cvtmask16_u32(m)
 #endif /* ?__AVX512DQ__ */
 #endif /* ?MD2U */
 
