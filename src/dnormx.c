@@ -44,7 +44,7 @@ double dnormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
   for (fnat j = 0u; j < *n; ++j) {
     const double *const Aj = A + j * (*ldA);
     for (fnat i = 0u; i < *m; i += VDL) {
-      x = _mm512_max_pd(_mm512_min_pd(_mm512_abs_pd(_mm512_load_pd(Aj + i)), inf), x); VP(x);
+      x = _mm512_max_pd(_mm512_min_pd(_mm512_abs_pd(_mm512_load_pd(Aj + i)), inf), x); VDP(x);
     }
   }
 
