@@ -1,5 +1,6 @@
 #include "proba.h"
 #include "dnorme.h"
+#include "dnormx.h"
 
 int main(int argc, char *argv[])
 {
