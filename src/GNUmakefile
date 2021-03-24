@@ -11,8 +11,8 @@ all: libvecjac$(SUFX).a gen2rand$(SUFX).exe proba$(SUFX).exe
 help:
 	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [all|clean|help]"
 
-libvecjac$(SUFX).a: common$(SUFX).o ddpscl$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o $(MKFS)
-	$(AR) $(ARFLAGS) $@ common$(SUFX).o ddpscl$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o
+libvecjac$(SUFX).a: common$(SUFX).o ddpscl$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o zdpscl$(SUFX).o $(MKFS)
+	$(AR) $(ARFLAGS) $@ common$(SUFX).o ddpscl$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o zdpscl$(SUFX).o
 
 common$(SUFX).o: common.c common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -35,6 +35,9 @@ timer$(SUFX).o: timer.c timer.h common.h $(MKFS)
 vec$(SUFX).o: vec.c vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+zdpscl$(SUFX).o: zdpscl.c zdpscl.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 gen2rand$(SUFX).exe: gen2rand.c gen2rand.h libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
@@ -49,6 +52,7 @@ clean:
 	-$(RM) rnd$(SUFX).o rnd$(SUFX).optrpt
 	-$(RM) timer$(SUFX).o timer$(SUFX).optrpt
 	-$(RM) vec$(SUFX).o vec$(SUFX).optrpt
+	-$(RM) zdpscl$(SUFX).o zdpscl$(SUFX).optrpt
 	-$(RM) libvecjac$(SUFX).a
 	-$(RM) gen2rand$(SUFX).exe gen2rand.optrpt
 	-$(RM) proba$(SUFX).exe proba.optrpt

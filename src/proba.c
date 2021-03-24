@@ -2,6 +2,7 @@
 #include "dnorme.h"
 #include "dnormx.h"
 #include "ddpscl.h"
+#include "zdpscl.h"
 
 int main(int argc, char *argv[])
 {
