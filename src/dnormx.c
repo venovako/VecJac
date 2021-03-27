@@ -15,6 +15,7 @@ double dnormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
 
 #ifdef _OPENMP
   double y = -HUGE_VAL;
+
 #ifdef NDEBUG
 #pragma omp parallel for default(none) shared(m,n,A,ldA) reduction(max:y)
 #else /* !NDEBUG */

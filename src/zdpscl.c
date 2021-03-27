@@ -1,6 +1,6 @@
 #include "zdpscl.h"
 
-double _Complex zdpscl_(const fnat m[static restrict 1], const double xr[static restrict VDL], const double xi[static restrict VDL], const double yr[static restrict VDL], const double yi[static restrict VDL], const double e[static restrict 2], const double f[static restrict 2])
+double complex zdpscl_(const fnat m[static restrict 1], const double xr[static restrict VDL], const double xi[static restrict VDL], const double yr[static restrict VDL], const double yi[static restrict VDL], const double e[static restrict 2], const double f[static restrict 2])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -40,7 +40,7 @@ double _Complex zdpscl_(const fnat m[static restrict 1], const double xr[static 
     pi = _mm512_fnmadd_pd(_mm512_scalef_pd(_mm512_load_pd(xi + i), xe), _mm512_scalef_pd(_mm512_load_pd(yr + i), ye), pi); VDP(pi);
   }
 
-  alignas(16u) double _Complex z
+  alignas(16u) double complex z
 #ifndef NDEBUG
     = CMPLX(0.0, 0.0)
 #endif /* !NDEBUG */
