@@ -1,8 +1,6 @@
 #ifndef DEFOPS_H
 #define DEFOPS_H
 
-#include "vec.h"
-
 #ifdef VDMANT
 #error VDMANT already defined
 #else /* !VDMANT */
@@ -50,5 +48,21 @@
     VDEFADD(e,f,0x01u,0x02u); \
   }
 #endif /* ?VDEFRED */
+
+#ifdef MDOR
+#error MDOR already defined
+#else /* !MDOR */
+#ifdef __AVX512DQ__
+#define MDOR(a,b) _kor_mask8((a),(b))
+#else /* !__AVX512DQ__ */
+#define MDOR(a,b) (__mmask8)_kor_mask16((a),(b))
+#endif /* ?__AVX512DQ__ */
+#endif /* ?MDOR */
+
+#ifdef VDEFLE
+#error VDEFLE already defined
+#else /* !VDEFLE */
+#define VDEFLE(e0,e1,f0,f1) MDOR(_mm512_cmplt_pd_mask(e0,e1),_mm512_mask_cmple_pd_mask(_mm512_cmpeq_pd_mask(e0,e1),f0,f1))
+#endif /* ?VDEFLE */
 
 #endif /* !DEFOPS_H */

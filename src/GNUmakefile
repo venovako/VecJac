@@ -20,10 +20,10 @@ common$(SUFX).o: common.c common.h $(MKFS)
 ddpscl$(SUFX).o: ddpscl.c ddpscl.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-dnorme$(SUFX).o: dnorme.c dnorme.h dkvsrt.h defops.h vec.h common.h $(MKFS)
+dnorme$(SUFX).o: dnorme.c dnorme.h dkvsrt.h defops.h dznrme.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-dnormx$(SUFX).o: dnormx.c dnormx.h vec.h common.h $(MKFS)
+dnormx$(SUFX).o: dnormx.c dnormx.h dznrmx.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 rnd$(SUFX).o: rnd.c rnd.h common.h $(MKFS)
@@ -38,10 +38,10 @@ vec$(SUFX).o: vec.c vec.h common.h $(MKFS)
 zdpscl$(SUFX).o: zdpscl.c zdpscl.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-znorme$(SUFX).o: znorme.c znorme.h dkvsrt.h defops.h vec.h common.h $(MKFS)
+znorme$(SUFX).o: znorme.c znorme.h dkvsrt.h defops.h dznrme.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-znormx$(SUFX).o: znormx.c znormx.h vec.h common.h $(MKFS)
+znormx$(SUFX).o: znormx.c znormx.h dznrmx.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 gen2rand$(SUFX).exe: gen2rand.c gen2rand.h libvecjac$(SUFX).a $(MKFS)
