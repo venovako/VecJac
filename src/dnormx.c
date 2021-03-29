@@ -13,6 +13,8 @@ double dnormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
     return -3.0;
   if (*ldA < *m)
     return -4.0;
+  if (*ldA & VDL_1)
+    return -4.0;
 #endif /* !NDEBUG */
 
 #ifdef _OPENMP

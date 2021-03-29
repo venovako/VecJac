@@ -13,9 +13,13 @@ double znormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
     return -3.0;
   if (*ldAr < *m)
     return -4.0;
+  if (*ldAr & VDL_1)
+    return -4.0;
   if (IS_NOT_ALIGNED(Ai))
     return -5.0;
   if (*ldAi < *m)
+    return -6.0;
+  if (*ldAi & VDL_1)
     return -6.0;
 #endif /* !NDEBUG */
 

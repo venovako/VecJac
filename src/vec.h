@@ -96,6 +96,20 @@
 #define VSL_1 15u
 #endif /* ?VSL_1 */
 
+/* VSL / 2 */
+#ifdef VSL_2
+#error VSL_2 already defined
+#else /* !VSL_2 */
+#define VSL_2 8u
+#endif /* ?VSL_2 */
+
+/* (VSL - 1) / 2 */
+#ifdef VSL__2
+#error VSL__2 already defined
+#else /* !VSL__2 */
+#define VSL__2 7u
+#endif /* ?VSL__2 */
+
 /* lg(VSL) */
 #ifdef VSLlg
 #error VSLlg already defined
@@ -116,6 +130,20 @@
 #else /* !VDL_1 */
 #define VDL_1 7u
 #endif /* ?VDL_1 */
+
+/* VDL / 2 */
+#ifdef VDL_2
+#error VDL_2 already defined
+#else /* !VDL_2 */
+#define VDL_2 4u
+#endif /* ?VDL_2 */
+
+/* (VDL - 1) / 2 */
+#ifdef VDL__2
+#error VDL__2 already defined
+#else /* !VDL__2 */
+#define VDL__2 3u
+#endif /* ?VDL__2 */
 
 /* lg(VDL) */
 #ifdef VDLlg
