@@ -5,6 +5,7 @@
 #include "znormx.h"
 #include "ddpscl.h"
 #include "zdpscl.h"
+#include "zmerge.h"
 #include "zsplit.h"
 
 int main(int argc, char *argv[])
@@ -41,5 +42,8 @@ int main(int argc, char *argv[])
   alignas(VA) double Ai[VDL];
   const fnat m = VDL, n = 1u, ldA = m, ldAr = m, ldAi = m;
   (void)printf("%d\n", zsplit_(&m, &n, A, &ldA, Ar, &ldAr, Ai, &ldAi));
+  (void)printf("%d\n", zmerge_(&m, &n, Ar, &ldAr, Ai, &ldAi, A, &ldA));
+  for (fnat i = 0u; i < VDL; ++i)
+    (void)printf("%# .17e %# .17e\n", creal(A[i]), cimag(A[i]));
   return EXIT_SUCCESS;
 }

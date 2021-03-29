@@ -27,6 +27,22 @@ fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
     return -8;
 #endif /* !NDEBUG */
 
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(m,n,A,ldA,Ar,ldAr,Ai,ldAi)
+  for (fnat j = 0u; j < *n; ++j) {
+    register const VI idx = _mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0);
+    const double complex *const Aj = A + j * (*ldA);
+    double *const Arj = Ar + j * (*ldAr);
+    double *const Aij = Ai + j * (*ldAi);
+    for (fnat i = 0u; i < *m; i += VDL_2) {
+      register const VD ri = _mm512_permutexvar_pd(idx, _mm512_load_pd(Aj + i));
+      _mm256_store_pd((Arj + i), _mm512_extractf64x4_pd(ri, 0x00u));
+      _mm256_store_pd((Aij + i), _mm512_extractf64x4_pd(ri, 0x01u));
+    }
+  }
+
+  return omp_get_max_threads();
+#else /* !_OPENMP */
   register const VI idx = _mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0);
 
   for (fnat j = 0u; j < *n; ++j) {
@@ -41,4 +57,5 @@ fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
   }
 
   return 0;
+#endif /* ?_OPENMP */
 }
