@@ -7,6 +7,7 @@
 #include "zdpscl.h"
 #include "zmerge.h"
 #include "zsplit.h"
+#include "aalloc.h"
 
 int main(int argc, char *argv[])
 {
