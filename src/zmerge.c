@@ -30,26 +30,24 @@ fint zmerge_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(m,n,A,ldA,Ar,ldAr,Ai,ldAi)
   for (fnat j = 0u; j < *n; ++j) {
-    register const VI ri = _mm512_set_epi64(7, 3, 6, 2, 5, 1, 4, 0);
-    register const VI ii = _mm512_set_epi64(3, 7, 2, 6, 1, 5, 0, 4);
+    register const VI idx = _mm512_set_epi64(7, 3, 6, 2, 5, 1, 4, 0);
     double complex *const Aj = A + j * (*ldA);
     const double *const Arj = Ar + j * (*ldAr);
     const double *const Aij = Ai + j * (*ldAi);
     for (fnat i = 0u; i < *m; i += VDL_2)
-      _mm512_store_pd((Aj + i), _mm512_mask_blend_pd(0xAAu, _mm512_permutexvar_pd(ri, _mm512_zextpd256_pd512(_mm256_load_pd(Arj + i))), _mm512_permutexvar_pd(ii, _mm512_zextpd256_pd512(_mm256_load_pd(Aij + i)))));
+      _mm512_store_pd((Aj + i), _mm512_permutexvar_pd(idx, _mm512_insertf64x4(_mm512_zextpd256_pd512(_mm256_load_pd(Arj + i)), _mm256_load_pd(Aij + i), 0x01u)));
   }
 
   return omp_get_max_threads();
 #else /* !_OPENMP */
-  register const VI ri = _mm512_set_epi64(7, 3, 6, 2, 5, 1, 4, 0);
-  register const VI ii = _mm512_set_epi64(3, 7, 2, 6, 1, 5, 0, 4);
+  register const VI idx = _mm512_set_epi64(7, 3, 6, 2, 5, 1, 4, 0);
 
   for (fnat j = 0u; j < *n; ++j) {
     double complex *const Aj = A + j * (*ldA);
     const double *const Arj = Ar + j * (*ldAr);
     const double *const Aij = Ai + j * (*ldAi);
     for (fnat i = 0u; i < *m; i += VDL_2)
-      _mm512_store_pd((Aj + i), _mm512_mask_blend_pd(0xAAu, _mm512_permutexvar_pd(ri, _mm512_zextpd256_pd512(_mm256_load_pd(Arj + i))), _mm512_permutexvar_pd(ii, _mm512_zextpd256_pd512(_mm256_load_pd(Aij + i)))));
+      _mm512_store_pd((Aj + i), _mm512_permutexvar_pd(idx, _mm512_insertf64x4(_mm512_zextpd256_pd512(_mm256_load_pd(Arj + i)), _mm256_load_pd(Aij + i), 0x01u)));
   }
 
   return 0;
