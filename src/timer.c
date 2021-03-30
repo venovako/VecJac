@@ -1,6 +1,6 @@
 #include "timer.h"
 
-uint64_t tsc_get_freq_hz(unsigned rem_den[static 2])
+uint64_t tsc_get_freq_hz_(unsigned rem_den[static restrict 2])
 {
   const uint64_t hz = (uint64_t)atoz(getenv("TSC_FREQ_HZ"));
   if (hz) {
@@ -22,13 +22,13 @@ uint64_t tsc_get_freq_hz(unsigned rem_den[static 2])
   return UINT64_C(0);
 }
 
-int64_t get_thread_ns()
+int64_t get_thread_ns_()
 {
   struct timespec t;
   return (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &t) ? INT64_C(-1) : t2ns(&t));
 }
 
-int64_t get_sys_us()
+int64_t get_sys_us_()
 {
   struct timeval t;
   return (gettimeofday(&t, NULL) ? INT64_C(-1) : t2us(&t));
