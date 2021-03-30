@@ -1,4 +1,5 @@
 #include "proba.h"
+
 #include "dnorme.h"
 #include "znorme.h"
 #include "dnormx.h"
@@ -8,6 +9,8 @@
 #include "zmerge.h"
 #include "zsplit.h"
 #include "aalloc.h"
+#include "dscale.h"
+#include "zscale.h"
 
 int main(int argc, char *argv[])
 {

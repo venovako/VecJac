@@ -11,8 +11,8 @@ all: libvecjac$(SUFX).a gen2rand$(SUFX).exe proba$(SUFX).exe
 help:
 	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [all|clean|help]"
 
-libvecjac$(SUFX).a: aalloc$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o zdpscl$(SUFX).o znorme$(SUFX).o znormx$(SUFX).o zmerge$(SUFX).o zsplit$(SUFX).o $(MKFS)
-	$(AR) $(ARFLAGS) $@ aalloc$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o zdpscl$(SUFX).o znorme$(SUFX).o znormx$(SUFX).o zmerge$(SUFX).o zsplit$(SUFX).o
+libvecjac$(SUFX).a: aalloc$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o zdpscl$(SUFX).o znorme$(SUFX).o znormx$(SUFX).o zmerge$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o $(MKFS)
+	$(AR) $(ARFLAGS) $@ aalloc$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o zdpscl$(SUFX).o znorme$(SUFX).o znormx$(SUFX).o zmerge$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o
 
 aalloc$(SUFX).o: aalloc.c aalloc.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -27,6 +27,9 @@ dnorme$(SUFX).o: dnorme.c dnorme.h dkvsrt.h defops.h dznrme.h vec.h common.h $(M
 	$(CC) $(CFLAGS) -c $< -o $@
 
 dnormx$(SUFX).o: dnormx.c dnormx.h dznrmx.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+dscale$(SUFX).o: dscale.c dscale.h dzscal.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 rnd$(SUFX).o: rnd.c rnd.h common.h $(MKFS)
@@ -50,6 +53,9 @@ znormx$(SUFX).o: znormx.c znormx.h dznrmx.h vec.h common.h $(MKFS)
 zmerge$(SUFX).o: zmerge.c zmerge.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+zscale$(SUFX).o: zscale.c zscale.h dzscal.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 zsplit$(SUFX).o: zsplit.c zsplit.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -65,6 +71,7 @@ clean:
 	-$(RM) ddpscl$(SUFX).o ddpscl$(SUFX).optrpt
 	-$(RM) dnorme$(SUFX).o dnorme$(SUFX).optrpt
 	-$(RM) dnormx$(SUFX).o dnormx$(SUFX).optrpt
+	-$(RM) dscale$(SUFX).o dscale$(SUFX).optrpt
 	-$(RM) rnd$(SUFX).o rnd$(SUFX).optrpt
 	-$(RM) timer$(SUFX).o timer$(SUFX).optrpt
 	-$(RM) vec$(SUFX).o vec$(SUFX).optrpt
@@ -72,6 +79,7 @@ clean:
 	-$(RM) znorme$(SUFX).o znorme$(SUFX).optrpt
 	-$(RM) znormx$(SUFX).o znormx$(SUFX).optrpt
 	-$(RM) zmerge$(SUFX).o zmerge$(SUFX).optrpt
+	-$(RM) zscale$(SUFX).o zscale$(SUFX).optrpt
 	-$(RM) zsplit$(SUFX).o zsplit$(SUFX).optrpt
 	-$(RM) libvecjac$(SUFX).a
 	-$(RM) gen2rand$(SUFX).exe gen2rand.optrpt
