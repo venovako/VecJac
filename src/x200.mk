@@ -31,7 +31,7 @@ OPTFLAGS=-O0 -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug parallel -debug pubnames -check=stack,uninit
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
-LIBFLAGS=-static-libgcc -D_GNU_SOURCE -I. -DUSE_MKL
+LIBFLAGS=-static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -I. -DUSE_MKL
 ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64

@@ -43,7 +43,7 @@ LDFLAGS=-L. -lvecjac$(SUFX)
 ifeq ($(ARCH),Darwin)
 LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib -lmkl_intel_$(ABI) -lmkl_sequential -lmkl_core
 else # Linux
-LIBFLAGS += -static-libgcc -D_GNU_SOURCE
+LIBFLAGS += -static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
 LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_intel_$(ABI) -lmkl_sequential -lmkl_core
 endif # ?Darwin
 LDFLAGS += -lpthread -lm -ldl

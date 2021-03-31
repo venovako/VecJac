@@ -11,6 +11,7 @@
 #include "aalloc.h"
 #include "dscale.h"
 #include "zscale.h"
+#include "mtxio.h"
 
 int main(int argc, char *argv[])
 {
