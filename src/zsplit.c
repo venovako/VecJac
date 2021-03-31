@@ -1,6 +1,6 @@
 #include "zsplit.h"
 
-fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], const double complex A[static restrict VDL_2], const fnat ldA[static restrict 1], double Ar[static restrict VDL], const fnat ldAr[static restrict 1], double Ai[static restrict VDL], const fnat ldAi[static restrict 1])
+int zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], const double complex A[static restrict VDL_2], const fnat ldA[static restrict 1], double Ar[static restrict VDL], const fnat ldAr[static restrict 1], double Ai[static restrict VDL], const fnat ldAi[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -28,7 +28,9 @@ fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
 #endif /* !NDEBUG */
 
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,A,ldA,Ar,ldAr,Ai,ldAi)
+  int t = 0;
+
+#pragma omp parallel for default(none) shared(m,n,A,ldA,Ar,ldAr,Ai,ldAi) reduction(max:t)
   for (fnat j = 0u; j < *n; ++j) {
     register const VI idx = _mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0);
     const double complex *const Aj = A + j * (*ldA);
@@ -39,9 +41,10 @@ fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
       _mm256_store_pd((Arj + i), _mm512_extractf64x4_pd(ri, 0x00u));
       _mm256_store_pd((Aij + i), _mm512_extractf64x4_pd(ri, 0x01u));
     }
+    t = imax(t, omp_get_thread_num());
   }
 
-  return omp_get_max_threads();
+  return (t + 1);
 #else /* !_OPENMP */
   register const VI idx = _mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0);
 

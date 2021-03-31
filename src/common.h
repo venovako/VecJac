@@ -195,10 +195,15 @@ typedef uint32_t fnat;
 #define LAPACK_Z(name) z##name##_
 #endif /* ?LAPACK_Z */
 
+static inline int imax(const int a, const int b)
+{
+  return ((a >= b) ? a : b);
+}
+
 extern size_t atoz(const char *const s);
 
-extern char *stoa(char s[static 17], const float x);
-extern char *dtoa(char s[static 26], const double x);
-extern char *xtoa(char s[static 31], const long double x);
+extern char *stoa(char s[static restrict 17], const float x);
+extern char *dtoa(char s[static restrict 26], const double x);
+extern char *xtoa(char s[static restrict 31], const long double x);
 
 #endif /* !COMMON_H */

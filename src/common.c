@@ -30,7 +30,7 @@ size_t atoz(const char *const s)
   return ((e && *e) ? (size_t)0u : z);
 }
 
-char *stoa(char s[static 17], const float x)
+char *stoa(char s[static restrict 17], const float x)
 {
   int l = sprintf((char*)memset(s, 0, (size_t)17u), "%# -16.9E", (double)x);
   if (l <= 0)
@@ -57,7 +57,7 @@ char *stoa(char s[static 17], const float x)
   return s;
 }
 
-char *dtoa(char s[static 26], const double x)
+char *dtoa(char s[static restrict 26], const double x)
 {
   int l = sprintf((char*)memset(s, 0, (size_t)26u), "%# -25.17E", x);
   if (l <= 0)
@@ -84,7 +84,7 @@ char *dtoa(char s[static 26], const double x)
   return s;
 }
 
-char *xtoa(char s[static 31], const long double x)
+char *xtoa(char s[static restrict 31], const long double x)
 {
   int l = sprintf((char*)memset(s, 0, (size_t)31u), "%# -30.21LE", x);
   if (l <= 0)
