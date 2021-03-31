@@ -111,9 +111,9 @@ int calloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #endif /* ?_OPENMP */
   }
 
-  if (salloc2_(m, n, Ar, ldAr))
+  if (salloc2_(m, n, Ar, ldAr) < 0)
     return -5;
-  if (salloc2_(m, n, Ai, ldAi))
+  if (salloc2_(m, n, Ai, ldAi) < 0)
     return -7;
 
   return t;
@@ -158,9 +158,9 @@ int zalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #endif /* ?_OPENMP */
   }
 
-  if (dalloc2_(m, n, Ar, ldAr))
+  if (dalloc2_(m, n, Ar, ldAr) < 0)
     return -5;
-  if (dalloc2_(m, n, Ai, ldAi))
+  if (dalloc2_(m, n, Ai, ldAi) < 0)
     return -7;
 
   return t;
