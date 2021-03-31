@@ -21,16 +21,17 @@ int salloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       return -3;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,A,ldA) reduction(max:t)
+#endif /* ?_OPENMP */
     for (fnat j = 0u; j < *n; ++j) {
       register const VS z = _mm512_setzero_ps();
       float *const Aj = *A + j * (*ldA);
       for (fnat i = 0u; i < *ldA; i += VSL)
         _mm512_store_ps((Aj + i), z);
+      Aj[j] = 1.0f;
+#ifdef _OPENMP
       t = imax(t, omp_get_thread_num());
+#endif /* _OPENMP */
     }
-#else /* !_OPENMP */
-    (void)memset(*A, 0, s);
-#endif /* ?_OPENMP */
   }
 
   return t;
@@ -57,16 +58,17 @@ int dalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       return -3;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,A,ldA) reduction(max:t)
+#endif /* ?_OPENMP */
     for (fnat j = 0u; j < *n; ++j) {
       register const VD z = _mm512_setzero_pd();
       double *const Aj = *A + j * (*ldA);
       for (fnat i = 0u; i < *ldA; i += VDL)
         _mm512_store_pd((Aj + i), z);
+      Aj[j] = 1.0;
+#ifdef _OPENMP
       t = imax(t, omp_get_thread_num());
+#endif /* _OPENMP */
     }
-#else /* !_OPENMP */
-    (void)memset(*A, 0, s);
-#endif /* ?_OPENMP */
   }
 
   return t;
@@ -99,22 +101,27 @@ int calloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       return -3;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,A,ldA) reduction(max:t)
+#endif /* ?_OPENMP */
     for (fnat j = 0u; j < *n; ++j) {
       register const VS z = _mm512_setzero_ps();
       float complex *const Aj = *A + j * (*ldA);
       for (fnat i = 0u; i < *ldA; i += VSL_2)
         _mm512_store_ps((Aj + i), z);
+#ifdef _OPENMP
       t = imax(t, omp_get_thread_num());
-    }
-#else /* !_OPENMP */
-    (void)memset(*A, 0, s);
 #endif /* ?_OPENMP */
+    }
   }
 
-  if (salloc2_(m, n, Ar, ldAr) < 0)
+  const int tr = salloc2_(m, n, Ar, ldAr);
+  if (tr < 0)
     return -5;
-  if (salloc2_(m, n, Ai, ldAi) < 0)
+  t = imax(t, tr);
+
+  const int ti = salloc2_(m, n, Ai, ldAi);
+  if (ti < 0)
     return -7;
+  t = imax(t, ti);
 
   return t;
 }
@@ -146,22 +153,27 @@ int zalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       return -3;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,A,ldA) reduction(max:t)
+#endif /* ?_OPENMP */
     for (fnat j = 0u; j < *n; ++j) {
       register const VD z = _mm512_setzero_pd();
       double complex *const Aj = *A + j * (*ldA);
       for (fnat i = 0u; i < *ldA; i += VDL_2)
         _mm512_store_pd((Aj + i), z);
+#ifdef _OPENMP
       t = imax(t, omp_get_thread_num());
+#endif /* _OPENMP */
     }
-#else /* !_OPENMP */
-    (void)memset(*A, 0, s);
-#endif /* ?_OPENMP */
   }
 
-  if (dalloc2_(m, n, Ar, ldAr) < 0)
+  const int tr = dalloc2_(m, n, Ar, ldAr);
+  if (tr < 0)
     return -5;
-  if (dalloc2_(m, n, Ai, ldAi) < 0)
+  t = imax(t, tr);
+
+  const int ti = dalloc2_(m, n, Ai, ldAi);
+  if (ti < 0)
     return -7;
+  t = imax(t, ti);
 
   return t;
 }
