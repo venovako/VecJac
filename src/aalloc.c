@@ -27,7 +27,6 @@ int salloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       float *const Aj = *A + j * (*ldA);
       for (fnat i = 0u; i < *ldA; i += VSL)
         _mm512_store_ps((Aj + i), z);
-      Aj[j] = 1.0f;
 #ifdef _OPENMP
       t = imax(t, omp_get_thread_num());
 #endif /* _OPENMP */
@@ -64,7 +63,6 @@ int dalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       double *const Aj = *A + j * (*ldA);
       for (fnat i = 0u; i < *ldA; i += VDL)
         _mm512_store_pd((Aj + i), z);
-      Aj[j] = 1.0;
 #ifdef _OPENMP
       t = imax(t, omp_get_thread_num());
 #endif /* _OPENMP */
