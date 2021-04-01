@@ -78,18 +78,18 @@
 #ifdef DZNRME_RET
 #error DZNRME_RET already defined
 #else /* !DZNRME_RET */
-#define DZNRME_RET                            \
-  _mm512_mask_storeu_pd((e + 1u), 0x01u, re); \
-  _mm512_mask_storeu_pd((f + 1u), 0x01u, rf); \
-  if ((long)(e[1u]) & 1l) {                   \
-    e[0u] = scalbn((e[1u] - 1.0), -1);        \
-    f[0u] = sqrt(scalbn(f[1u], 1));           \
-  }                                           \
-  else {                                      \
-    e[0u] = scalbn(e[1u], -1);                \
-    f[0u] = sqrt(f[1u]);                      \
-  }                                           \
-  return scalb(f[0u], e[0u])
+#define DZNRME_RET                      \
+  _mm512_mask_storeu_pd(e1, 0x01u, re); \
+  _mm512_mask_storeu_pd(f1, 0x01u, rf); \
+  if ((long)*e1 & 1l) {                 \
+    *e0 = scalbn((*e1 - 1.0), -1);      \
+    *f0 = sqrt(scalbn(*f1, 1));         \
+  }                                     \
+  else {                                \
+    *e0 = scalbn(*e1, -1);              \
+    *f0 = sqrt(*f1);                    \
+  }                                     \
+  return scalb(*f0, *e0)
 #endif /* ?DZNRME_RET */
 
 #endif /* !DZNRME_H */
