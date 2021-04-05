@@ -29,7 +29,7 @@ dnorme$(SUFX).o: dnorme.c dnorme.h dkvsrt.h defops.h dznrme.h vec.h common.h $(M
 dnormx$(SUFX).o: dnormx.c dnormx.h dznrmx.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-dscale$(SUFX).o: dscale.c dscale.h dzscal.h vec.h common.h $(MKFS)
+dscale$(SUFX).o: dscale.c dscale.h dzscal.h dnormx.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 mtxio$(SUFX).o: mtxio.c mtxio.h common.h $(MKFS)
@@ -56,7 +56,7 @@ znormx$(SUFX).o: znormx.c znormx.h dznrmx.h vec.h common.h $(MKFS)
 zmerge$(SUFX).o: zmerge.c zmerge.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-zscale$(SUFX).o: zscale.c zscale.h dzscal.h vec.h common.h $(MKFS)
+zscale$(SUFX).o: zscale.c zscale.h dzscal.h znormx.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 zsplit$(SUFX).o: zsplit.c zsplit.h vec.h common.h $(MKFS)

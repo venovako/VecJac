@@ -27,4 +27,21 @@
 #endif /* ?_OPENMP */
 #endif /* ?DZSCAL_LOOP */
 
+#ifdef EDOMEGA
+#error EDOMEGA already defined
+#else /* !EDOMEGA */
+#define EDOMEGA 1024
+#endif /* ?EDOMEGA */
+
+static inline fint s_k(const double M_k, const fint l)
+{
+  int e_k
+#ifndef NDEBUG
+    = 0
+#endif /* !NDEBUG */
+    ;
+  (void)frexp(M_k, &e_k);
+  return (EDOMEGA - l - e_k);
+}
+
 #endif /* !DZSCAL_H */
