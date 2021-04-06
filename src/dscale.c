@@ -3,7 +3,7 @@
 #include "dnormx.h"
 #include "dzscal.h"
 
-int dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const double e[static restrict 1])
+int dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const fint e[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -18,15 +18,19 @@ int dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
     return -4;
 #endif /* !NDEBUG */
 
+  if (!*e)
+    return 0;
+  const double e_ = (double)*e;
+
 #ifdef _OPENMP
   int t = 0;
 
-#pragma omp parallel for default(none) shared(m,n,A,ldA,e) reduction(max:t)
+#pragma omp parallel for default(none) shared(m,n,A,ldA,e_) reduction(max:t)
   DZSCAL_LOOP(A,ldA);
 
   return (t + 1);
 #else /* !_OPENMP */
-  register const VD s = _mm512_set1_pd(*e);
+  register const VD s = _mm512_set1_pd(e_);
 
   DZSCAL_LOOP(A,ldA);
 
@@ -34,7 +38,24 @@ int dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
 #endif /* ?_OPENMP */
 }
 
-int dlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], fint le[static restrict 1])
+#ifdef EDOMEGA
+#error EDOMEGA already defined
+#else /* !EDOMEGA */
+#define EDOMEGA 1024
+#endif /* ?EDOMEGA */
+
+static inline fint s(const double M, const fint l)
+{
+  int e
+#ifndef NDEBUG
+    = 0
+#endif /* !NDEBUG */
+    ;
+  (void)frexp(M, &e);
+  return (EDOMEGA - l - e);
+}
+
+int dlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const fnat l[static restrict 1], double M[static restrict 1], int e[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -47,12 +68,9 @@ int dlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
     return -4;
   if (*ldA & VDL_1)
     return -4;
-  if (*le <= 0)
-    return -5;
 #endif /* !NDEBUG */
 
-  const double M_k = dnormx_(m, n, A, ldA);
-  *le = s_k(M_k, *le);
-  const double e = (double)*le;
-  return dscale_(m, n, A, ldA, &e);
+  *M = dnormx_(m, n, A, ldA);
+  *e = s(*M, *l);
+  return dscale_(m, n, A, ldA, e);
 }

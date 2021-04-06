@@ -31,7 +31,7 @@ double znormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
 #pragma omp parallel for default(none) shared(m,n,Ai,ldAi) reduction(max:y)
   DZNRMX_LOOP(Ai,ldAi);
 
-  return (M_SQRT2 * y);
+  return y;
 #else /* !_OPENMP */  
   register const VD inf = _mm512_set1_pd(HUGE_VAL);
   register VD x = _mm512_set1_pd(-HUGE_VAL);
@@ -39,6 +39,6 @@ double znormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
   DZNRMX_LOOP(Ar,ldAr);
   DZNRMX_LOOP(Ai,ldAi);
 
-  return (M_SQRT2 * _mm512_reduce_max_pd(x));
+  return _mm512_reduce_max_pd(x);
 #endif /* ?_OPENMP */
 }

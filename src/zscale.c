@@ -3,7 +3,7 @@
 #include "znormx.h"
 #include "dzscal.h"
 
-int zscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], double Ar[static restrict VDL], const fnat ldAr[static restrict 1], double Ai[static restrict VDL], const fnat ldAi[static restrict 1], const double e[static restrict 1])
+int zscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], double Ar[static restrict VDL], const fnat ldAr[static restrict 1], double Ai[static restrict VDL], const fnat ldAi[static restrict 1], const fint e[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -24,17 +24,21 @@ int zscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
     return -6;
 #endif /* !NDEBUG */
 
+  if (!*e)
+    return 0;
+  const double e_ = (double)*e;
+
 #ifdef _OPENMP
   int t = 0;
 
-#pragma omp parallel for default(none) shared(m,n,Ar,ldAr,e) reduction(max:t)
+#pragma omp parallel for default(none) shared(m,n,Ar,ldAr,e_) reduction(max:t)
   DZSCAL_LOOP(Ar,ldAr);
-#pragma omp parallel for default(none) shared(m,n,Ai,ldAi,e) reduction(max:t)
+#pragma omp parallel for default(none) shared(m,n,Ai,ldAi,e_) reduction(max:t)
   DZSCAL_LOOP(Ai,ldAi);
 
   return (t + 1);
 #else /* !_OPENMP */
-  register const VD s = _mm512_set1_pd(*e);
+  register const VD s = _mm512_set1_pd(e_);
 
   DZSCAL_LOOP(Ar,ldAr);
   DZSCAL_LOOP(Ai,ldAi);
@@ -43,7 +47,24 @@ int zscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
 #endif /* ?_OPENMP */
 }
 
-int zlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double Ar[static restrict VDL], const fnat ldAr[static restrict 1], double Ai[static restrict VDL], const fnat ldAi[static restrict 1], fint le[static restrict 1])
+#ifdef EZOMEGA
+#error EZOMEGA already defined
+#else /* !EZOMEGA */
+#define EZOMEGA 1023
+#endif /* ?EZOMEGA */
+
+static inline fint s(const double M, const fint l)
+{
+  int e
+#ifndef NDEBUG
+    = 0
+#endif /* !NDEBUG */
+    ;
+  (void)frexp((M * M_SQRT1_2), &e);
+  return (EZOMEGA - l - e);
+}
+
+int zlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double Ar[static restrict VDL], const fnat ldAr[static restrict 1], double Ai[static restrict VDL], const fnat ldAi[static restrict 1], const fnat l[static restrict 1], double M[static restrict 1], int e[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -62,12 +83,9 @@ int zlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
     return -6;
   if (*ldAi & VDL_1)
     return -6;
-  if (*le <= 0)
-    return -7;
 #endif /* !NDEBUG */
 
-  const double M_k = znormx_(m, n, Ar, ldAr, Ai, ldAi);
-  *le = s_k(M_k, *le);
-  const double e = (double)*le;
-  return zscale_(m, n, Ar, ldAr, Ai, ldAi, &e);
+  *M = znormx_(m, n, Ar, ldAr, Ai, ldAi);
+  *e = s(*M, *l);
+  return zscale_(m, n, Ar, ldAr, Ai, ldAi, e);
 }
