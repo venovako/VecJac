@@ -228,41 +228,41 @@
 #ifdef VSP
 #error VSP already defined
 #else /* !VSP */
-#ifdef NDEBUG
+#ifdef PRINTOUT
+#define VSP(v) (void)VSprintf((PRINTOUT), #v, (v))
+#else /* !PRINTOUT */
 #define VSP(v) (void)0
-#else /* !NDEBUG */
-#define VSP(v) (void)VSprintf(stderr, #v, (v))
-#endif /* ?NDEBUG */
+#endif /* ?PRINTOUT */
 #endif /* ?VSP */
 
 #ifdef VDP
 #error VDP already defined
 #else /* !VDP */
-#ifdef NDEBUG
+#ifdef PRINTOUT
+#define VDP(v) (void)VDprintf((PRINTOUT), #v, (v))
+#else /* !PRINTOUT */
 #define VDP(v) (void)0
-#else /* !NDEBUG */
-#define VDP(v) (void)VDprintf(stderr, #v, (v))
-#endif /* ?NDEBUG */
+#endif /* ?PRINTOUT */
 #endif /* ?VDP */
 
 #ifdef MSP
 #error MSP already defined
 #else /* !MSP */
-#ifdef NDEBUG
+#ifdef PRINTOUT
+#define MSP(m) (void)MSprintf((PRINTOUT), #m, (m))
+#else /* !PRINTOUT */
 #define MSP(m) (void)0
-#else /* !NDEBUG */
-#define MSP(m) (void)MSprintf(stderr, #m, (m))
-#endif /* ?NDEBUG */
+#endif /* ?PRINTOUT */
 #endif /* ?MSP */
 
 #ifdef MDP
 #error MDP already defined
 #else /* !MDP */
-#ifdef NDEBUG
+#ifdef PRINTOUT
+#define MDP(m) (void)MDprintf((PRINTOUT), #m, (m))
+#else /* !PRINTOUT */
 #define MDP(m) (void)0
-#else /* !NDEBUG */
-#define MDP(m) (void)MDprintf(stderr, #m, (m))
-#endif /* ?NDEBUG */
+#endif /* ?PRINTOUT */
 #endif /* ?MDP */
 
 /*** end of vector definitions ***/
