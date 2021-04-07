@@ -28,7 +28,7 @@ OPTFLAGS=-O$(NDEBUG) -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high
 DBGFLAGS += -DNDEBUG -qopt-report=5
 else # DEBUG
 OPTFLAGS=-O0 -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high
-DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug parallel -debug pubnames -check=stack,uninit
+DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug parallel -debug pubnames -check=stack,uninit -DPRINTOUT=stderr
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
 LIBFLAGS=-static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -I. -DUSE_MKL

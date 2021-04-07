@@ -28,7 +28,7 @@ OPTFLAGS=-O$(NDEBUG) -xHost -qopt-multi-version-aggressive
 DBGFLAGS += -DNDEBUG -qopt-report=5
 else # DEBUG
 OPTFLAGS=-O0 -xHost -qopt-multi-version-aggressive
-DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -check=stack,uninit
+DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -check=stack,uninit -DPRINTOUT=stderr
 ifneq ($(ARCH),Darwin) # Linux
 DBGFLAGS += -debug parallel
 endif # ?Linux
