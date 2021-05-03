@@ -228,9 +228,9 @@
 #ifdef VSP
 #error VSP already defined
 #else /* !VSP */
-#ifdef PRINTOUT
+#if (defined(PRINTOUT) && !defined(_OPENMP))
 #define VSP(v) (void)VSprintf((PRINTOUT), #v, (v))
-#else /* !PRINTOUT */
+#else /* !PRINTOUT || _OPENMP */
 #define VSP(v) (void)0
 #endif /* ?PRINTOUT */
 #endif /* ?VSP */
@@ -238,9 +238,9 @@
 #ifdef VDP
 #error VDP already defined
 #else /* !VDP */
-#ifdef PRINTOUT
+#if (defined(PRINTOUT) && !defined(_OPENMP))
 #define VDP(v) (void)VDprintf((PRINTOUT), #v, (v))
-#else /* !PRINTOUT */
+#else /* !PRINTOUT || _OPENMP */
 #define VDP(v) (void)0
 #endif /* ?PRINTOUT */
 #endif /* ?VDP */
@@ -248,9 +248,9 @@
 #ifdef MSP
 #error MSP already defined
 #else /* !MSP */
-#ifdef PRINTOUT
+#if (defined(PRINTOUT) && !defined(_OPENMP))
 #define MSP(m) (void)MSprintf((PRINTOUT), #m, (m))
-#else /* !PRINTOUT */
+#else /* !PRINTOUT || _OPENMP */
 #define MSP(m) (void)0
 #endif /* ?PRINTOUT */
 #endif /* ?MSP */
@@ -258,9 +258,9 @@
 #ifdef MDP
 #error MDP already defined
 #else /* !MDP */
-#ifdef PRINTOUT
+#if (defined(PRINTOUT) && !defined(_OPENMP))
 #define MDP(m) (void)MDprintf((PRINTOUT), #m, (m))
-#else /* !PRINTOUT */
+#else /* !PRINTOUT || _OPENMP */
 #define MDP(m) (void)0
 #endif /* ?PRINTOUT */
 #endif /* ?MDP */

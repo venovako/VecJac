@@ -12,13 +12,15 @@
 #include "dscale.h"
 #include "zscale.h"
 #include "mtxio.h"
+#include "zjac2.h"
+#include "rnd.h"
 
 int main(int argc, char *argv[])
 {
-  static const fnat m = (2u * VDL);
-  alignas(VA) double x[m] = { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 15.0, 14.0, 13.0, 12.0, 11.0, 10.0, 9.0, 8.0 };
-  double e0 = 0.0, f0 = 0.0, e1 = 0.0, f1 = 0.0, d = dnorme_(&m, x, &e0, &f0, &e1, &f1);
-  (void)printf("e=(%#.17e,%#.17e) f=(%#.17e,%#.17e) d=%#.17e\n", e0, e1, f0, f1, d);
+  /* static const fnat m = (2u * VDL); */
+  /* alignas(VA) double x[m] = { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 15.0, 14.0, 13.0, 12.0, 11.0, 10.0, 9.0, 8.0 }; */
+  /* double e0 = 0.0, f0 = 0.0, e1 = 0.0, f1 = 0.0, d = dnorme_(&m, x, &e0, &f0, &e1, &f1); */
+  /* (void)printf("e=(%#.17e,%#.17e) f=(%#.17e,%#.17e) d=%#.17e\n", e0, e1, f0, f1, d); */
 
   /* static const fnat m = VDL, n = VDL, ldA = VDL; */
   /* alignas(VA) double A[VDL][VDL] = { */
@@ -51,5 +53,23 @@ int main(int argc, char *argv[])
   /* for (fnat i = 0u; i < VDL; ++i) */
   /*   (void)printf("%# .17e %# .17e\n", creal(A[i]), cimag(A[i])); */
 
+  alignas(VA) double a11[VDL], a22[VDL], a21r[VDL], a21i[VDL], s[VDL], t[VDL], c[VDL], ca[VDL], sa[VDL], l1[VDL], l2[VDL];
+  fnat n = VDL;
+  for (fnat i = 0u; i < n; ++i) {
+    a11[i] = dfrand(DBL_MAX);
+    a22[i] = dfrand(DBL_MAX);
+    a21r[i] = dfrand(DBL_MAX);
+    a21i[i] = dfrand(DBL_MAX);
+    s[i] = -0.0;
+    t[i] = -0.0;
+    c[i] = -0.0;
+    ca[i] = -0.0;
+    sa[i] = -0.0;
+    l1[i] = -0.0;
+    l2[i] = -0.0;
+  }
+  (void)printf("zjac2=%d\n", zjac2_(&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2));
+  for (fnat i = 0u; i < n; ++i)
+    (void)printf("%# .17e %# .17e %#.17e %#.17e %# .17e %# .17e %# .17e\n", s[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i]);
   return EXIT_SUCCESS;
 }

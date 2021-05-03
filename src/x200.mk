@@ -15,8 +15,9 @@ RM=rm -rfv
 AR=xiar
 ARFLAGS=-qnoipo -lib rsv
 CC=icc
-CPUFLAGS=-DKNL -fPIC -fexceptions -fno-omit-frame-pointer -qopenmp -rdynamic
+CPUFLAGS=-DKNL -fPIC -fexceptions -fno-omit-frame-pointer -rdynamic
 ifdef NDEBUG
+CPUFLAGS += -qopenmp
 SUFX=-$(ABI)_$(NDEBUG)
 else # DEBUG
 SUFX=-$(ABI)_$(DEBUG)
