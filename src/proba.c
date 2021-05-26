@@ -69,7 +69,16 @@ int main(int argc, char *argv[])
     l2[i] = -0.0;
   }
   (void)printf("zjac2=%d\n", zjac2_(&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2));
-  for (fnat i = 0u; i < n; ++i)
-    (void)printf("%# .17e %# .17e %#.17e %#.17e %# .17e %# .17e %# .17e\n", s[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i]);
+  (void)printf("%25s %25s %25s %25s %25s %25s %25s\n", "S", "T", "C", "Ca", "Sa", "L1", "L2");
+  char a[26] = { '\0' };
+  for (fnat i = 0u; i < n; ++i) {
+    (void)printf("%25s ", dtoa(a, s[i]));
+    (void)printf("%25s ", dtoa(a, t[i]));
+    (void)printf("%25s ", dtoa(a, c[i]));
+    (void)printf("%25s ", dtoa(a, ca[i]));
+    (void)printf("%25s ", dtoa(a, sa[i]));
+    (void)printf("%25s ", dtoa(a, l1[i]));
+    (void)printf("%25s\n", dtoa(a, l2[i]));
+  }
   return EXIT_SUCCESS;
 }
