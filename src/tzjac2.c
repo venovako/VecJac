@@ -7,18 +7,36 @@ int main(int argc, char *argv[])
 {
   alignas(VA) double a11[VDL], a22[VDL], a21r[VDL], a21i[VDL], s[VDL], t[VDL], c[VDL], ca[VDL], sa[VDL], l1[VDL], l2[VDL];
   fnat n = VDL;
-  for (fnat i = 0u; i < n; ++i) {
-    a11[i] = dfrand(DBL_MAX);
-    a22[i] = dfrand(DBL_MAX);
-    a21r[i] = dfrand(DBL_MAX);
-    a21i[i] = dfrand(DBL_MAX);
-    s[i] = -0.0;
-    t[i] = -0.0;
-    c[i] = -0.0;
-    ca[i] = -0.0;
-    sa[i] = -0.0;
-    l1[i] = -0.0;
-    l2[i] = -0.0;
+  if (1 == argc) {
+    for (fnat i = 0u; i < n; ++i) {
+      a11[i] = dfrand(DBL_MAX);
+      a22[i] = dfrand(DBL_MAX);
+      a21r[i] = dfrand(DBL_MAX);
+      a21i[i] = dfrand(DBL_MAX);
+      s[i] = -0.0;
+      t[i] = -0.0;
+      c[i] = -0.0;
+      ca[i] = -0.0;
+      sa[i] = -0.0;
+      l1[i] = -0.0;
+      l2[i] = -0.0;
+    }
+  }
+  if (5 == argc) {
+    *a11 = atof(argv[1u]);
+    *a22 = atof(argv[2u]);
+    *a21r = atof(argv[3u]);
+    *a21i = atof(argv[4u]);
+    for (fnat i = 1u; i < n; ++i) {
+      a11[i] = *a11;
+      a22[i] = *a22;
+      a21r[i] = *a21r;
+      a21i[i] = *a21i;
+    }
+  }
+  else {
+    (void)fprintf(stderr, "%s [a11 a22 a21r a21i]\n", *argv);
+    return EXIT_FAILURE;
   }
   (void)printf("zjac2=%d\n", zjac2_(&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2));
   (void)printf("%25s %25s %25s %25s %25s %25s %25s\n", "S", "T", "C", "Ca", "Sa", "L1", "L2");
