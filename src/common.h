@@ -11,6 +11,7 @@ extern __float128 __hypotq(__float128, __float128);
 extern __float128 __scalbq(__float128, __float128);
 extern __float128 __invsqrtq(__float128);
 extern __float128 __sincosq(__float128, __float128*, __float128*);
+extern __float128 __sqrtq(__float128);
 #endif /* !USE_EXTENDED */
 #else /* !__ICC */
 #include <complex.h>
@@ -51,9 +52,16 @@ extern __float128 __sincosq(__float128, __float128*, __float128*);
 #ifdef sincosw
 #error sincosw already defined
 #endif /* sincosw */
+#ifdef sqrtw
+#error sqrtw already defined
+#endif /* sqrtw */
+
 #ifdef W_ONE
 #error W_ONE already defined
 #endif /* W_ONE */
+#ifdef W_TWO
+#error W_TWO already defined
+#endif /* W_TWO */
 #ifdef W_ZERO
 #error W_ZERO already defined
 #endif /* W_ZERO */
@@ -76,7 +84,9 @@ typedef long double wide;
 #define scalbw   scalbl
 #define invsqrtw invsqrtl
 #define sincosw  sincosl
+#define sqrtw    sqrtl
 #define W_ONE     1.0L
+#define W_TWO     2.0L
 #define W_ZERO    0.0L
 #define W_MONE   -1.0L
 #define W_PI      3.1415926535897932384626433832795L
@@ -90,7 +100,9 @@ typedef __float128  wide;
 #define scalbw   __scalbq
 #define invsqrtw __invsqrtq
 #define sincosw  __sincosq
+#define sqrtw    __sqrtq
 #define W_ONE     1.0q
+#define W_TWO     2.0q
 #define W_ZERO    0.0q
 #define W_MONE   -1.0q
 #define W_PI      3.1415926535897932384626433832795q
