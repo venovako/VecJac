@@ -1,0 +1,36 @@
+#include "tzjac2.h"
+
+#include "rnd.h"
+#include "zjac2.h"
+
+int main(int argc, char *argv[])
+{
+  alignas(VA) double a11[VDL], a22[VDL], a21r[VDL], a21i[VDL], s[VDL], t[VDL], c[VDL], ca[VDL], sa[VDL], l1[VDL], l2[VDL];
+  fnat n = VDL;
+  for (fnat i = 0u; i < n; ++i) {
+    a11[i] = dfrand(DBL_MAX);
+    a22[i] = dfrand(DBL_MAX);
+    a21r[i] = dfrand(DBL_MAX);
+    a21i[i] = dfrand(DBL_MAX);
+    s[i] = -0.0;
+    t[i] = -0.0;
+    c[i] = -0.0;
+    ca[i] = -0.0;
+    sa[i] = -0.0;
+    l1[i] = -0.0;
+    l2[i] = -0.0;
+  }
+  (void)printf("zjac2=%d\n", zjac2_(&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2));
+  (void)printf("%25s %25s %25s %25s %25s %25s %25s\n", "S", "T", "C", "Ca", "Sa", "L1", "L2");
+  char a[26] = { '\0' };
+  for (fnat i = 0u; i < n; ++i) {
+    (void)printf("%25s ", dtoa(a, s[i]));
+    (void)printf("%25s ", dtoa(a, t[i]));
+    (void)printf("%25s ", dtoa(a, c[i]));
+    (void)printf("%25s ", dtoa(a, ca[i]));
+    (void)printf("%25s ", dtoa(a, sa[i]));
+    (void)printf("%25s ", dtoa(a, l1[i]));
+    (void)printf("%25s\n", dtoa(a, l2[i]));
+  }
+  return EXIT_SUCCESS;
+}

@@ -55,7 +55,7 @@ static inline fint s(const double M, const fint l)
   return (EDOMEGA - l - e);
 }
 
-int dlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const fnat l[static restrict 1], double M[static restrict 1], int e[static restrict 1])
+int dlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const fnat l[static restrict 1], double M[static restrict 1], fint e[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
