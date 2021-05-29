@@ -1,6 +1,6 @@
 #include "wnrme.h"
 
-// fast Euclidean norms of 2x2 Hermitian matrices in a wider precision (assuming no over/under-flows)
+// fast Euclidean norms of Hermitian matrices of order two in a wider precision (assuming no over/under-flows)
 
 wide wnrmer(const wide a11, const wide a22, const wide a21)
 {
@@ -10,4 +10,38 @@ wide wnrmer(const wide a11, const wide a22, const wide a21)
 wide wnrmec(const wide a11, const wide a22, const wide a21r, const wide a21i)
 {
   return sqrtw(fmaw(a11, a11, fmaw(a22, a22, (W_TWO * fmaw(a21r, a21r, (a21i * a21i))))));
+}
+
+// absolute error checkers
+
+static wide waer(const wide a11, const wide a22, const wide a21, const wide s, const wide t, const wide c, const wide l1, const wide l2)
+{
+  const wide _s = -s;
+  const wide L1 = scalbw(l1, _s);
+  const wide L2 = scalbw(l2, _s);
+  // TODO
+  return W_ZERO;
+}
+
+static wide waec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide s, const wide t, const wide c, const wide ca, const wide sa, const wide l1, const wide l2)
+{
+  const wide _s = -s;
+  const wide L1 = scalbw(l1, _s);
+  const wide L2 = scalbw(l2, _s);
+  // TODO
+  return W_ZERO;
+}
+
+// relative error checkers
+
+wide wrer(const wide a11, const wide a22, const wide a21, const wide s, const wide t, const wide c, const wide l1, const wide l2, wide ae[static restrict 1])
+{
+  *ae = waer(a11, a22, a21, s, t, c, l1, l2);
+  return fmaxw((*ae / wnrmer(a11, a22, a21)), W_ZERO);
+}
+
+wide wrec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide s, const wide t, const wide c, const wide ca, const wide sa, const wide l1, const wide l2, wide ae[static restrict 1])
+{
+  *ae = waec(a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2);
+  return fmaxw((*ae / wnrmec(a11, a22, a21r, a21i)), W_ZERO);
 }
