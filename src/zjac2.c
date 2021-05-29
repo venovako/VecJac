@@ -1,7 +1,7 @@
 #include "zjac2.h"
 
 #include "dzjac2.h"
-#include "zcmplx.h"
+#include "vecdef.h"
 
 #ifdef ZJAC2_PARAMS
 #error ZJAC2_PARAMS already defined

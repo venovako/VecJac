@@ -50,7 +50,7 @@ vec$(SUFX).o: vec.c vec.h common.h $(MKFS)
 zdpscl$(SUFX).o: zdpscl.c zdpscl.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-zjac2$(SUFX).o: zjac2.c zjac2.h dzjac2.h zcmplx.h vecdef.h vec.h $(MKFS)
+zjac2$(SUFX).o: zjac2.c zjac2.h dzjac2.h vecdef.h vec.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 znorme$(SUFX).o: znorme.c znorme.h dkvsrt.h defops.h dznrme.h vec.h common.h $(MKFS)
