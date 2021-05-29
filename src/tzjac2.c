@@ -2,6 +2,7 @@
 
 #include "rnd.h"
 #include "zjac2.h"
+#include "wnrme.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,7 +23,7 @@ int main(int argc, char *argv[])
       l2[i] = -0.0;
     }
   }
-  if (5 == argc) {
+  else if (5 == argc) {
     *a11 = atof(argv[1u]);
     *a22 = atof(argv[2u]);
     *a21r = atof(argv[3u]);
@@ -39,16 +40,20 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
   (void)printf("zjac2=%d\n", zjac2_(&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2));
-  (void)printf("%25s %25s %25s %25s %25s %25s %25s\n", "S", "T", "C", "Ca", "Sa", "L1", "L2");
-  char a[26] = { '\0' };
+  (void)printf("%25s,%25s,%25s,%25s,%25s,%25s,%25s,%30s,%30s\n", "S", "T", "C", "Ca", "Sa", "L1", "L2", "AE", "RE");
+  char a[31] = { '\0' };
+  wide ae, re;
   for (fnat i = 0u; i < n; ++i) {
-    (void)printf("%25s ", dtoa(a, s[i]));
-    (void)printf("%25s ", dtoa(a, t[i]));
-    (void)printf("%25s ", dtoa(a, c[i]));
-    (void)printf("%25s ", dtoa(a, ca[i]));
-    (void)printf("%25s ", dtoa(a, sa[i]));
-    (void)printf("%25s ", dtoa(a, l1[i]));
-    (void)printf("%25s\n", dtoa(a, l2[i]));
+    (void)printf("%25s,", dtoa(a, s[i]));
+    (void)printf("%25s,", dtoa(a, t[i]));
+    (void)printf("%25s,", dtoa(a, c[i]));
+    (void)printf("%25s,", dtoa(a, ca[i]));
+    (void)printf("%25s,", dtoa(a, sa[i]));
+    (void)printf("%25s,", dtoa(a, l1[i]));
+    (void)printf("%25s,", dtoa(a, l2[i]));
+    re = wrec(a11[i], a22[i], a21r[i], a21i[i], s[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], &ae);
+    (void)printf("%30s,", xtoa(a, (long double)ae));
+    (void)printf("%30s\n", xtoa(a, (long double)re));
   }
   return EXIT_SUCCESS;
 }
