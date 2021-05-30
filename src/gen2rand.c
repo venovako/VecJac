@@ -1,5 +1,3 @@
-#include "gen2rand.h"
-
 #include "rnd.h"
 #include "timer.h"
 
