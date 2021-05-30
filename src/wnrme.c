@@ -51,3 +51,37 @@ wide wrec(const wide a11, const wide a22, const wide a21r, const wide a21i, cons
   *ae = waec(a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, L1, L2);
   return fmaxw((*ae / wnrmec(a11, a22, a21r, a21i)), W_ZERO);
 }
+
+// L1, L2: actual computed eigenvalues, from above; l1, l2: eigenvalues generated for testing
+// relmax: relative error on the larger eigenvalue; relmin: relative error on the smaller eigenvalue
+
+wide wlam(const wide L1, const wide L2, const wide l1, const wide l2, wide relmax[static restrict 1], wide relmin[static restrict 1])
+{
+  wide Lmin = W_ZERO, Lmax = W_ZERO;
+  if (L1 <= L2) {
+    Lmin = L1;
+    Lmax = L2;
+  }
+  else {
+    Lmin = L2;
+    Lmax = L1;
+  }
+  wide lmin = W_ZERO, lmax = W_ZERO;
+  if (l1 <= l2) {
+    lmin = l1;
+    lmax = l2;
+  }
+  else {
+    lmin = l2;
+    lmax = l1;
+  }
+  const wide
+    aelmax = ((Lmax <= lmax) ? (lmax - Lmax) : (Lmax - lmax)),
+    aelmin = ((Lmin <= lmin) ? (lmin - Lmin) : (Lmin - lmin));
+  // assume that lmax and lmin are not negative zeros
+  *relmax = ((lmax < W_ZERO) ? -lmax : lmax);
+  *relmin = ((lmin < W_ZERO) ? -lmin : lmin);
+  *relmax = fmaxw((aelmax / *relmax), W_ZERO);
+  *relmin = fmaxw((aelmin / *relmin), W_ZERO);
+  return fmaxw(*relmax, *relmin);
+}
