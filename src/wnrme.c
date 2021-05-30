@@ -17,8 +17,12 @@ wide wnrmec(const wide a11, const wide a22, const wide a21r, const wide a21i)
 static wide waer(const wide a11, const wide a22, const wide a21, const wide s, const wide t, const wide c, const wide l1, const wide l2)
 {
   const wide _s = -s;
-  const wide L1 = scalbw(l1, _s);
-  const wide L2 = scalbw(l2, _s);
+  const wide c2 = c * c;
+  const wide t2 = t * t;
+  const wide L1 = c2 * scalbw(l1, _s);
+  const wide L2 = c2 * scalbw(l2, _s);
+  const wide l = L1 - L2;
+  const wide tl = t * l;
   // TODO
   return W_ZERO;
 }
@@ -26,10 +30,13 @@ static wide waer(const wide a11, const wide a22, const wide a21, const wide s, c
 static wide waec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide s, const wide t, const wide c, const wide ca, const wide sa, const wide l1, const wide l2)
 {
   const wide _s = -s;
-  const wide L1 = scalbw(l1, _s);
-  const wide L2 = scalbw(l2, _s);
-  // TODO
-  return W_ZERO;
+  const wide c2 = c * c;
+  const wide t2 = t * t;
+  const wide L1 = c2 * scalbw(l1, _s);
+  const wide L2 = c2 * scalbw(l2, _s);
+  const wide l = L1 - L2;
+  const wide tl = t * l;
+  return wnrmec(fmaw(c2, fmaw(L2, t2, L1), -a11), fmaw(c2, fmaw(L1, t2, L2), -a22), fmaw(c2, (ca * tl), -a21r), fmaw(c2, (sa * tl), -a21i));
 }
 
 // relative error checkers
