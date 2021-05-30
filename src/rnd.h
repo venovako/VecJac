@@ -114,8 +114,9 @@ extern void gendfrand_(const size_t n[static restrict 1], const double aub[stati
 extern void ssym2rand_(const size_t n[static restrict 1], float l1[static restrict 1], float l2[static restrict 1], float f[static restrict 1], float g[static restrict 1], float h[static restrict 1]);
 extern void dsym2rand_(const size_t n[static restrict 1], double l1[static restrict 1], double l2[static restrict 1], double f[static restrict 1], double g[static restrict 1], double h[static restrict 1]);
 
-/* [          c -exp(-a*I)s ] [ l1 0 ] [           c exp(-a*I)*s ] = [       f h ] */
-/* [ exp(a*I)*s           c ] [ 0 l2 ] [ -exp(a*I)*s           c ]   [ conj(h) g ] */
+/*                                                                       _   */
+/* [          c -exp(-a*I)s ] [ l1 0 ] [           c exp(-a*I)*s ] = [ f h ] */
+/* [ exp(a*I)*s           c ] [ 0 l2 ] [ -exp(a*I)*s           c ]   [ h g ] */
 extern void cher2rand_(const size_t n[static restrict 1], float l1[static restrict 1], float l2[static restrict 1], float f[static restrict 1], float g[static restrict 1], float hr[static restrict 1], float hi[static restrict 1]);
 extern void zher2rand_(const size_t n[static restrict 1], double l1[static restrict 1], double l2[static restrict 1], double f[static restrict 1], double g[static restrict 1], double hr[static restrict 1], double hi[static restrict 1]);
 

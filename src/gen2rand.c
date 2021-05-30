@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
     (void)fprintf(stderr, "l: \\lambda_2\n");
     (void)fprintf(stderr, "f: A_{11}\n");
     (void)fprintf(stderr, "g: A_{22}\n");
-    (void)fprintf(stderr, "r: \\Re{A_{12}}\n");
-    (void)fprintf(stderr, "j: \\Im{A_{12}}\n");
+    (void)fprintf(stderr, "r: \\Re{A_{21}}\n");
+    (void)fprintf(stderr, "j: \\Im{A_{21}}\n");
     return EXIT_FAILURE;
   }
   const size_t n = atoz(argv[2]);

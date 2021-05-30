@@ -159,7 +159,7 @@ void cher2rand_(const size_t n[static restrict 1], float l1[static restrict 1], 
     wu2rand(&t, &c, &r, &j);
     h = (t * (w1 - w2)) / c;
     hr[i] = (float)(r * h);
-    hi[i] = -(float)(j * h);
+    hi[i] = (float)(j * h);
     t *= t;
     f[i] = (float)(fmaw(w2, t, w1) / c);
     g[i] = (float)(fmaw(w1, t, w2) / c);
@@ -178,7 +178,7 @@ void zher2rand_(const size_t n[static restrict 1], double l1[static restrict 1],
     wu2rand(&t, &c, &r, &j);
     h = (t * (w1 - w2)) / c;
     hr[i] = (double)(r * h);
-    hi[i] = -(double)(j * h);
+    hi[i] = (double)(j * h);
     t *= t;
     f[i] = (double)(fmaw(w2, t, w1) / c);
     g[i] = (double)(fmaw(w1, t, w2) / c);
