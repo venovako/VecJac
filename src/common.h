@@ -4,7 +4,6 @@
 #ifdef __ICC
 #include <mathimf.h>
 #ifndef USE_EXTENDED
-extern __float128 __copysignq(__float128, __float128);
 extern __float128 __fmaq(__float128, __float128, __float128);
 extern __float128 __fmaxq(__float128, __float128);
 extern __float128 __fminq(__float128, __float128);
@@ -32,9 +31,6 @@ extern __float128 __sqrtq(__float128);
 #define CMPLXL(r,i) ((long double)(r) + I * (long double)(i))
 #endif /* !CMPLXL */
 
-#ifdef copysignw
-#error copysignw already defined
-#endif /* copysignw */
 #ifdef fmaw
 #error fmaw already defined
 #endif /* fmaw */
@@ -81,37 +77,35 @@ extern __float128 __sqrtq(__float128);
 
 #ifdef USE_EXTENDED
 typedef long double wide;
-#define copysignw  copysignl
-#define fmaw       fmal
-#define fmaxw      fmaxl
-#define fminw      fminl
-#define hypotw     hypotl
-#define scalbw     scalbl
-#define invsqrtw   invsqrtl
-#define sincosw    sincosl
-#define sqrtw      sqrtl
-#define W_ONE       1.0L
-#define W_TWO       2.0L
-#define W_ZERO      0.0L
-#define W_MONE     -1.0L
-#define W_PI        3.1415926535897932384626433832795L
+#define fmaw        fmal
+#define fmaxw       fmaxl
+#define fminw       fminl
+#define hypotw      hypotl
+#define scalbw      scalbl
+#define invsqrtw    invsqrtl
+#define sincosw     sincosl
+#define sqrtw       sqrtl
+#define W_ONE        1.0L
+#define W_TWO        2.0L
+#define W_ZERO       0.0L
+#define W_MONE      -1.0L
+#define W_PI         3.1415926535897932384626433832795L
 #define CMPLXW(r,i) CMPLXL((r),(i))
 #else /* USE_QUAD */
 typedef __float128  wide;
-#define copysignw  __copysignq
-#define fmaw       __fmaq
-#define fmaxw      __fmaxq
-#define fminw      __fminq
-#define hypotw     __hypotq
-#define scalbw     __scalbq
-#define invsqrtw   __invsqrtq
-#define sincosw    __sincosq
-#define sqrtw      __sqrtq
-#define W_ONE       1.0q
-#define W_TWO       2.0q
-#define W_ZERO      0.0q
-#define W_MONE     -1.0q
-#define W_PI        3.1415926535897932384626433832795q
+#define fmaw        __fmaq
+#define fmaxw       __fmaxq
+#define fminw       __fminq
+#define hypotw      __hypotq
+#define scalbw      __scalbq
+#define invsqrtw    __invsqrtq
+#define sincosw     __sincosq
+#define sqrtw       __sqrtq
+#define W_ONE        1.0q
+#define W_TWO        2.0q
+#define W_ZERO       0.0q
+#define W_MONE      -1.0q
+#define W_PI         3.1415926535897932384626433832795q
 #define CMPLXW(r,i) ((wide)(r) + I * (wide)(i))
 #endif /* ?USE_EXTENDED */
 

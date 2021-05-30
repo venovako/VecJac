@@ -22,7 +22,7 @@ static wide waer(const wide a11, const wide a22, const wide a21, const wide s, c
   const wide L1 = c2 * scalbw(l1, _s);
   const wide L2 = c2 * scalbw(l2, _s);
   const wide l = L1 - L2;
-  const wide tl = copysignw(W_ONE, a21) * t * l;
+  const wide tl = t * l;
   return wnrmer(fmaw(c2, fmaw(L2, t2, L1), -a11), fmaw(c2, fmaw(L1, t2, L2), -a22), fmaw(c2, tl, -a21));
 }
 
