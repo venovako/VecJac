@@ -9,7 +9,7 @@ MKFS=GNUmakefile $(COMPILER).mk
 all: libvecjac$(SUFX).a gen2rand$(SUFX).exe tdjac2$(SUFX).exe tzjac2$(SUFX).exe
 
 help:
-	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [all|clean|help]"
+	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [WP=q|l] [all|clean|help]"
 
 libvecjac$(SUFX).a: aalloc$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o djac2$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o mtxio$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o wnrme$(SUFX).o zdpscl$(SUFX).o zjac2$(SUFX).o znorme$(SUFX).o znormx$(SUFX).o zmerge$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o $(MKFS)
 	$(AR) $(ARFLAGS) $@ aalloc$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o djac2$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o mtxio$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o wnrme$(SUFX).o zdpscl$(SUFX).o zjac2$(SUFX).o znorme$(SUFX).o znormx$(SUFX).o zmerge$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o

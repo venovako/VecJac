@@ -38,20 +38,19 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
   (void)printf("zjac2=%d\n", zjac2_(&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2));
-  (void)printf("%25s,%25s,%25s,%25s,%25s,%30s,%30s,%30s,%30s\n", "\"s\"", "\"t\"", "\"c\"", "\"ca\"", "\"sa\"", "\"L1\"", "\"L2\"", "\"AE\"", "\"RE\"");
+  (void)printf("%25s,%25s,%25s,%25s,%25s,%30s,%30s,%30s\n", "\"s\"", "\"t\"", "\"c\"", "\"ca\"", "\"sa\"", "\"L1\"", "\"L2\"", "\"RE\"");
   char a[31] = { '\0' };
-  wide re = W_MONE, ae = W_MONE, L1 = W_ZERO, L2 = W_ZERO;
+  wide RE = W_MONE, ae = W_MONE, an = W_MONE, L1 = W_ZERO, L2 = W_ZERO;
   for (fnat i = 0u; i < n; ++i) {
     (void)printf("%25s,", dtoa(a, s[i]));
     (void)printf("%25s,", dtoa(a, t[i]));
     (void)printf("%25s,", dtoa(a, c[i]));
     (void)printf("%25s,", dtoa(a, ca[i]));
     (void)printf("%25s,", dtoa(a, sa[i]));
-    re = wrec(a11[i], a22[i], a21r[i], a21i[i], s[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], &ae, &L1, &L2);
+    RE = wrec(a11[i], a22[i], a21r[i], a21i[i], s[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], &ae, &an, &L1, &L2);
     (void)printf("%30s,", xtoa(a, (long double)L1));
     (void)printf("%30s,", xtoa(a, (long double)L2));
-    (void)printf("%30s,", xtoa(a, (long double)ae));
-    (void)printf("%30s\n", xtoa(a, (long double)re));
+    (void)printf("%30s\n", xtoa(a, (long double)RE));
   }
   return EXIT_SUCCESS;
 }

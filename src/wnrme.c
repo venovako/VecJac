@@ -40,16 +40,18 @@ static wide waec(const wide a11, const wide a22, const wide a21r, const wide a21
 
 // relative error checkers
 
-wide wrer(const wide a11, const wide a22, const wide a21, const wide s, const wide t, const wide c, const wide l1, const wide l2, wide ae[static restrict 1], wide L1[static restrict 1], wide L2[static restrict 1])
+wide wrer(const wide a11, const wide a22, const wide a21, const wide s, const wide t, const wide c, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1], wide L1[static restrict 1], wide L2[static restrict 1])
 {
   *ae = waer(a11, a22, a21, s, t, c, l1, l2, L1, L2);
-  return fmaxw((*ae / wnrmer(a11, a22, a21)), W_ZERO);
+  *an = wnrmer(a11, a22, a21);
+  return fmaxw((*ae / *an), W_ZERO);
 }
 
-wide wrec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide s, const wide t, const wide c, const wide ca, const wide sa, const wide l1, const wide l2, wide ae[static restrict 1], wide L1[static restrict 1], wide L2[static restrict 1])
+wide wrec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide s, const wide t, const wide c, const wide ca, const wide sa, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1], wide L1[static restrict 1], wide L2[static restrict 1])
 {
   *ae = waec(a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, L1, L2);
-  return fmaxw((*ae / wnrmec(a11, a22, a21r, a21i)), W_ZERO);
+  *an = wnrmec(a11, a22, a21r, a21i);
+  return fmaxw((*ae / *an), W_ZERO);
 }
 
 // L1, L2: actual computed eigenvalues, from above; l1, l2: eigenvalues generated for testing

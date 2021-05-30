@@ -11,6 +11,9 @@ endif # ?NDEBUG
 ifndef FPU
 FPU=precise
 endif # !FPU
+ifndef WP
+WP=q
+endif # !WP
 RM=rm -rfv
 AR=xiar
 ARFLAGS=-qnoipo -lib rsv
@@ -18,12 +21,15 @@ CC=icc
 CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer -rdynamic
 ifdef NDEBUG
 CPUFLAGS += -qopenmp
-SUFX=-$(ABI)_$(NDEBUG)
+SUFX=-$(ABI)_$(NDEBUG)$(WP)
 else # DEBUG
-SUFX=-$(ABI)_$(DEBUG)
+SUFX=-$(ABI)_$(DEBUG)$(WP)
 endif # ?NDEBUG
 DBGFLAGS=-traceback -w3
 FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -fimf-use-svml=true
+ifeq ($(WP),l)
+FPUFLAGS += -DUSE_EXTENDED
+endif # ?WP
 ifdef NDEBUG
 OPTFLAGS=-O$(NDEBUG) -xHost -qopt-multi-version-aggressive
 DBGFLAGS += -DNDEBUG -qopt-report=5

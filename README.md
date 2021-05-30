@@ -1,2 +1,2 @@
 # VecJac
-Vectorization of the Jacobi-type methods for the (G)SVD and the (G)EVD
+Vectorization of the Jacobi-type methods for the SVD and the EVD
