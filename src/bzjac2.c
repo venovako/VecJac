@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     be[0u] = rdtsc_beg(rd);
     th = imax(th, zjac2_((const fnat*)&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2));
     be[1u] = rdtsc_end(rd);
-    (void)fprintf(stdout, "%13.9Lf,", tsc_lap(hz, be[0u], be[1u]));
+    (void)fprintf(stdout, "%14.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
     wide r = W_ZERO;
 #pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,s,t,c,ca,sa,l1,l2,AE,AN,L1,L2,RE) reduction(max:r)

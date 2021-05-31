@@ -10,8 +10,8 @@
 #ifdef BIG_EXP
 #error BIG_EXP already defined
 #else /* !BIG_EXP */
-// (double)(DBL_MAX_EXP - 3)
-#define BIG_EXP 1021.0
+// (double)(DBL_MAX_EXP - 4)
+#define BIG_EXP 1020.0
 #endif /* ?BIG_EXP */
 
 #ifdef DZJAC2_PARAMS
