@@ -57,9 +57,19 @@ wide wrec(const wide a11, const wide a22, const wide a21r, const wide a21i, cons
 // L1, L2: actual computed eigenvalues, from above; l1, l2: eigenvalues generated for testing
 // relmax: relative error on the larger eigenvalue; relmin: relative error on the smaller eigenvalue
 
-wide wlam(const wide L1, const wide L2, const wide l1, const wide l2, wide relmax[static restrict 1], wide relmin[static restrict 1])
+wide wlam(wide L1, wide L2, wide l1, wide l2, wide relmax[static restrict 1], wide relmin[static restrict 1])
 {
-  wide Lmin = W_ZERO, Lmax = W_ZERO;
+  // assume that there are no negative zeros
+  if (L1 < W_ZERO)
+    L1 = -L1;
+  if (L2 < W_ZERO)
+    L2 = -L2;
+  if (l1 < W_ZERO)
+    l1 = -l1;
+  if (l2 < W_ZERO)
+    l2 = -l2;
+
+  wide Lmin, Lmax;
   if (L1 <= L2) {
     Lmin = L1;
     Lmax = L2;
@@ -68,7 +78,8 @@ wide wlam(const wide L1, const wide L2, const wide l1, const wide l2, wide relma
     Lmin = L2;
     Lmax = L1;
   }
-  wide lmin = W_ZERO, lmax = W_ZERO;
+
+  wide lmin, lmax;
   if (l1 <= l2) {
     lmin = l1;
     lmax = l2;
@@ -77,13 +88,12 @@ wide wlam(const wide L1, const wide L2, const wide l1, const wide l2, wide relma
     lmin = l2;
     lmax = l1;
   }
+
   const wide
     aelmax = ((Lmax <= lmax) ? (lmax - Lmax) : (Lmax - lmax)),
     aelmin = ((Lmin <= lmin) ? (lmin - Lmin) : (Lmin - lmin));
-  // assume that lmax and lmin are not negative zeros
-  *relmax = ((lmax < W_ZERO) ? -lmax : lmax);
-  *relmin = ((lmin < W_ZERO) ? -lmin : lmin);
-  *relmax = fmaxw((aelmax / *relmax), W_ZERO);
-  *relmin = fmaxw((aelmin / *relmin), W_ZERO);
+
+  *relmax = fmaxw((aelmax / lmax), W_ZERO);
+  *relmin = fmaxw((aelmin / lmin), W_ZERO);
   return fmaxw(*relmax, *relmin);
 }

@@ -6,7 +6,7 @@ MKFS=GNUmakefile $(COMPILER).mk
 
 .PHONY: all help clean
 
-all: libvecjac$(SUFX).a gen2rand$(SUFX).exe tdjac2$(SUFX).exe tzjac2$(SUFX).exe
+all: libvecjac$(SUFX).a bzjac2$(SUFX).exe gen2rand$(SUFX).exe tdjac2$(SUFX).exe tzjac2$(SUFX).exe
 
 help:
 	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [WP=q|l] [all|clean|help]"
@@ -71,6 +71,9 @@ zscale$(SUFX).o: zscale.c zscale.h dzscal.h znormx.h vec.h common.h $(MKFS)
 zsplit$(SUFX).o: zsplit.c zsplit.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+bzjac2$(SUFX).exe: bzjac2.c libvecjac$(SUFX).a $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
 gen2rand$(SUFX).exe: gen2rand.c libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
@@ -100,6 +103,7 @@ clean:
 	-$(RM) zscale$(SUFX).o zscale$(SUFX).optrpt
 	-$(RM) zsplit$(SUFX).o zsplit$(SUFX).optrpt
 	-$(RM) libvecjac$(SUFX).a
+	-$(RM) bzjac2$(SUFX).exe bzjac2.optrpt
 	-$(RM) gen2rand$(SUFX).exe gen2rand.optrpt
 	-$(RM) tdjac2$(SUFX).exe tdjac2.optrpt
 	-$(RM) tzjac2$(SUFX).exe tzjac2.optrpt

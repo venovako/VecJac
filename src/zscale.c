@@ -64,7 +64,7 @@ static inline fint s(const double M, const fint l)
   return (EZOMEGA - l - e);
 }
 
-int zlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double Ar[static restrict VDL], const fnat ldAr[static restrict 1], double Ai[static restrict VDL], const fnat ldAi[static restrict 1], const fnat l[static restrict 1], double M[static restrict 1], int e[static restrict 1])
+int zlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double Ar[static restrict VDL], const fnat ldAr[static restrict 1], double Ai[static restrict VDL], const fnat ldAi[static restrict 1], const fnat l[static restrict 1], double M[static restrict 1], fint e[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
