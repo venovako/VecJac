@@ -59,9 +59,6 @@ extern __float128 __sqrtq(__float128);
 #ifdef W_ONE
 #error W_ONE already defined
 #endif /* W_ONE */
-#ifdef W_TWO
-#error W_TWO already defined
-#endif /* W_TWO */
 #ifdef W_ZERO
 #error W_ZERO already defined
 #endif /* W_ZERO */
@@ -71,6 +68,9 @@ extern __float128 __sqrtq(__float128);
 #ifdef W_PI
 #error W_PI already defined
 #endif /* W_PI */
+#ifdef W_SQRT2
+#error W_SQRT2 already defined
+#endif /* W_SQRT2 */
 #ifdef CMPLXW
 #error CMPLXW already defined
 #endif /* CMPLXW */
@@ -86,10 +86,10 @@ typedef long double wide;
 #define sincosw     sincosl
 #define sqrtw       sqrtl
 #define W_ONE        1.0L
-#define W_TWO        2.0L
 #define W_ZERO       0.0L
 #define W_MONE      -1.0L
 #define W_PI         3.1415926535897932384626433832795L
+#define W_SQRT2      1.4142135623730950488016887242097L
 #define CMPLXW(r,i) CMPLXL((r),(i))
 #else /* USE_QUAD */
 typedef __float128  wide;
@@ -102,10 +102,10 @@ typedef __float128  wide;
 #define sincosw     __sincosq
 #define sqrtw       __sqrtq
 #define W_ONE        1.0q
-#define W_TWO        2.0q
 #define W_ZERO       0.0q
 #define W_MONE      -1.0q
 #define W_PI         3.1415926535897932384626433832795q
+#define W_SQRT2      1.4142135623730950488016887242097q
 #define CMPLXW(r,i) ((wide)(r) + I * (wide)(i))
 #endif /* ?USE_EXTENDED */
 

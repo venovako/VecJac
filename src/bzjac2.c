@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
       RE[i] = wrec(a11[i], a22[i], a21r[i], a21i[i], s[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], (AE + i), (AN + i), (L1 + i), (L2 + i));
       r = fmaxw(r, RE[i]);
     }
-    (void)fprintf(stdout, "%30s", xtoa(a, r));
+    (void)fprintf(stdout, "%30s", xtoa(a, (long double)r));
     (void)fflush(stdout);
     if (n != fread(l1, sizeof(double), n, fk))
       return EXIT_FAILURE;
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
       RE[i] = wlam(L1[i], L2[i], l1[i], l2[i], (AE + i), (AN + i));
       r = fmaxw(r, RE[i]);
     }
-    (void)fprintf(stdout, "%30s\n", xtoa(a, r));
+    (void)fprintf(stdout, "%30s\n", xtoa(a, (long double)r));
     (void)fflush(stdout);
   }
   (void)fprintf(stderr, "max(#threads) = %u\n", (unsigned)th);
