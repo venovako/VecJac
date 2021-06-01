@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
   uint64_t hz = tsc_get_freq_hz_(rd), be[2u] = { UINT64_C(0), UINT64_C(0) };
   (void)fprintf(stderr, "TSC frequency: %lu+(%u/%u) Hz.\n", hz, rd[0u], rd[1u]);
 
-  (void)fprintf(stdout, "\"B\",\"Ts\",\"REN\",\"RLM\"\n");
+  (void)fprintf(stdout, "\"B\",\"Ts\",\"REN\",\"RLN\",\"RLX\",\"RLM\"\n");
   const char *bf = (const char*)NULL;
   if (b <= 10u)
     bf = "%zu";
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     be[0u] = rdtsc_beg(rd);
     th = imax(th, zjac2_((const fnat*)&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2));
     be[1u] = rdtsc_end(rd);
-    (void)fprintf(stdout, "%14.9Lf,", tsc_lap(hz, be[0u], be[1u]));
+    (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
     wide r = W_ZERO;
 #pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,s,t,c,ca,sa,l1,l2,AE,AN,L1,L2,RE) reduction(max:r)
@@ -156,13 +156,18 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
+    wide x = W_ZERO, m = W_ZERO;
     r = W_ZERO;
-#pragma omp parallel for default(none) shared(n,L1,L2,l1,l2,AE,AN) reduction(max:r)
+#pragma omp parallel for default(none) shared(n,L1,L2,l1,l2,AE,AN) reduction(max:r,x,m)
     for (size_t i = 0u; i < n; ++i) {
       RE[i] = wlam(L1[i], L2[i], l1[i], l2[i], (AE + i), (AN + i));
       r = fmaxw(r, RE[i]);
+      x = fmaxw(x, AE[i]);
+      m = fmaxw(m, AN[i]);
     }
-    (void)fprintf(stdout, "%30s\n", xtoa(a, (long double)r));
+    (void)fprintf(stdout, "%30s,", xtoa(a, (long double)r));
+    (void)fprintf(stdout, "%30s,", xtoa(a, (long double)x));
+    (void)fprintf(stdout, "%30s\n", xtoa(a, (long double)m));
     (void)fflush(stdout);
   }
   (void)fprintf(stderr, "max(#threads) = %u\n", (unsigned)th);

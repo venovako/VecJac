@@ -93,5 +93,6 @@ wide wlam(wide L1, wide L2, wide l1, wide l2, wide relmax[static restrict 1], wi
 
   *relmax = fmaxw((aelmax / lmax), W_ZERO);
   *relmin = fmaxw((aelmin / lmin), W_ZERO);
-  return fmaxw(*relmax, *relmin);
+
+  return fmaxw((hypotw(aelmax, aelmin) / hypotw(lmax, lmin)), W_ZERO);
 }
