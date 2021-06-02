@@ -92,15 +92,22 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     be[0u] = rdtsc_beg(rd);
+#ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,a11,a22,a21,l1,l2,cs1,sn1) reduction(max:th)
+#endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       dlevd2(a11[i], a22[i], a21[i], (l1 + i), (l2 + i), (cs1 + i), (sn1 + i));
-      th = imax(th, omp_get_num_threads());
+#ifdef _OPENMP
+      th = imax(th, omp_get_thread_num());
+#endif /* _OPENMP */
     }
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf\n", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
   }
+#ifdef _OPENMP
+  ++th;
+#endif /* _OPENMP */
   (void)fprintf(stderr, "max(#threads) = %u\n", (unsigned)th);
 
   (void)fclose(fr);

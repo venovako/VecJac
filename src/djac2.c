@@ -1,7 +1,6 @@
 #include "djac2.h"
 
 #include "dzjac2.h"
-#include "vecdef.h"
 
 #ifdef DJAC2_LOOP
 #error DJAC2_LOOP already defined

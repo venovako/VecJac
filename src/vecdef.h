@@ -1,6 +1,8 @@
 #ifndef VECDEF_H
 #define VECDEF_H
 
+#include "vec.h"
+
 // assumes m0 = _mm512_set1_ps(-0.0f)
 #ifdef VSABS
 #error VSABS already defined

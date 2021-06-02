@@ -1,6 +1,8 @@
 #ifndef DZJAC2_H
 #define DZJAC2_H
 
+#include "vecdef.h"
+
 #ifdef SQRT_HUGE
 #error SQRT_HUGE already defined
 #else /* !SQRT_HUGE */
@@ -25,5 +27,7 @@
   register const VD sh = _mm512_set1_pd(SQRT_HUGE); \
   register const VD be = _mm512_set1_pd(BIG_EXP)
 #endif /* ?DZJAC2_PARAMS */
+
+extern int dzjac2_pp(const fnat n, const double *const restrict s, const double *const restrict c, const double l1[static restrict 1], const double l2[static restrict 1], int p[static restrict 1], double *const restrict L1, double *const restrict L2);
 
 #endif /* !DZJAC2_H */

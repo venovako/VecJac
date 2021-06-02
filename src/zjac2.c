@@ -1,7 +1,6 @@
 #include "zjac2.h"
 
 #include "dzjac2.h"
-#include "vecdef.h"
 
 #ifdef ZJAC2_PARAMS
 #error ZJAC2_PARAMS already defined
@@ -42,7 +41,7 @@ _mm512_store_pd((l1 + i), _mm512_fmadd_pd(t1, _mm512_fmadd_pd(a2, t1, ab), a1));
 _mm512_store_pd((l2 + i), _mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2))
 #endif /* ?ZJAC2_LOOP */
 
-extern int zjac2_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21r[static restrict VDL], const double a21i[static restrict VDL], double s[static restrict VDL], double t[static restrict VDL], double c[static restrict VDL], double ca[static restrict VDL], double sa[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL])
+int zjac2_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21r[static restrict VDL], const double a21i[static restrict VDL], double s[static restrict VDL], double t[static restrict VDL], double c[static restrict VDL], double ca[static restrict VDL], double sa[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL])
 {
 #ifdef _OPENMP
   int th = 0;

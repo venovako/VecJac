@@ -1,7 +1,8 @@
+#include "djac2.h"
+#include "dzjac2.h"
+#include "wnrme.h"
 #include "rnd.h"
 #include "timer.h"
-#include "djac2.h"
-#include "wnrme.h"
 
 int main(int argc, char *argv[])
 {
@@ -125,11 +126,14 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
     be[0u] = rdtsc_beg(rd);
     th = imax(th, djac2_((const fnat*)&n, a11, a22, a21, s, t, c, l1, l2));
+    th = imax(th, dzjac2_pp((fnat)n, s, c, l1, l2, (int*)RE, (double*)L1, (double*)L2));
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
     wide r = W_ZERO;
+#ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,a11,a22,a21,s,t,c,l1,l2,AE,AN,L1,L2,RE) reduction(max:r)
+#endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       RE[i] = wrer(a11[i], a22[i], a21[i], s[i], t[i], c[i], l1[i], l2[i], (AE + i), (AN + i), (L1 + i), (L2 + i));
       r = fmaxw(r, RE[i]);
@@ -144,7 +148,9 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
     wide x = W_ZERO, m = W_ZERO;
     r = W_ZERO;
+#ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,L1,L2,l1,l2,AE,AN) reduction(max:r,x,m)
+#endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       RE[i] = wlam(L1[i], L2[i], l1[i], l2[i], (AE + i), (AN + i));
       r = fmaxw(r, RE[i]);
