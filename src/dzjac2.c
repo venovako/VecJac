@@ -7,12 +7,7 @@ int dzjac2_pp(const fnat n, const double *const restrict s, const double *const 
 #pragma omp parallel for default(none) shared(n,l1,l2,p) reduction(max:t)
 #endif /* _OPENMP */
   for (fnat i = 0u; i < n; ++i) {
-    if (l1[i] > l2[i])
-      p[i] = 1;
-    else if (l1[i] < l2[i])
-      p[i] = -1;
-    else // l1[i] == l2[i]
-      p[i] = 0;
+    p[i] = (l1[i] < l2[i]);
 #ifdef _OPENMP
     t = imax(t, omp_get_thread_num());
 #endif /* _OPENMP */
@@ -25,7 +20,7 @@ int dzjac2_pp(const fnat n, const double *const restrict s, const double *const 
     for (fnat i = 0u; i < n; ++i) {
       const double c2 = c[i] * c[i];
       const int _s = -(int)(s[i]);
-      if (p[i] < 0) {
+      if (p[i]) {
         L2[i] = scalbn((c2 * l1[i]), _s);
         L1[i] = scalbn((c2 * l2[i]), _s);
       }
