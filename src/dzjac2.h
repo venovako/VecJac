@@ -9,13 +9,6 @@
 #define SQRT_HUGE 1.34078079299425956E+154
 #endif /* ?SQRT_HUGE */
 
-#ifdef BIG_EXP
-#error BIG_EXP already defined
-#else /* !BIG_EXP */
-// (double)(DBL_MAX_EXP - 4)
-#define BIG_EXP 1020.0
-#endif /* ?BIG_EXP */
-
 #ifdef DZJAC2_PARAMS
 #error DZJAC2_PARAMS already defined
 #else /* !DZJAC2_PARAMS */
@@ -24,8 +17,7 @@
   register const VD m0 = _mm512_set1_pd(-0.0);      \
   register const VD one = _mm512_set1_pd(1.0);      \
   register const VD huge = _mm512_set1_pd(DBL_MAX); \
-  register const VD sh = _mm512_set1_pd(SQRT_HUGE); \
-  register const VD be = _mm512_set1_pd(BIG_EXP)
+  register const VD sh = _mm512_set1_pd(SQRT_HUGE)
 #endif /* ?DZJAC2_PARAMS */
 
 extern int dzjac2_pp(const fnat n, const double *const restrict s, const double *const restrict c, const double l1[static restrict 1], const double l2[static restrict 1], int p[static restrict 1], double *const restrict L1, double *const restrict L2);

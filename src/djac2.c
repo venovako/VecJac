@@ -2,6 +2,21 @@
 
 #include "dzjac2.h"
 
+#ifdef BIG_EXP
+#error BIG_EXP already defined
+#else /* !BIG_EXP */
+// (double)(DBL_MAX_EXP - 3)
+#define BIG_EXP 1021.0
+#endif /* ?BIG_EXP */
+
+#ifdef DJAC2_PARAMS
+#error DJAC2_PARAMS already defined
+#else /* !DJAC2_PARAMS */
+#define DJAC2_PARAMS                                   \
+  DZJAC2_PARAMS;                                       \
+  register const VD be = _mm512_set1_pd(BIG_EXP)
+#endif /* ?DJAC2_PARAMS */
+
 #ifdef DJAC2_LOOP
 #error DJAC2_LOOP already defined
 #else /* !DJAC2_LOOP */
@@ -36,14 +51,14 @@ int djac2_(const fnat n[static restrict 1], const double a11[static restrict VDL
 
 #pragma omp parallel for default(none) shared(n,a11,a22,a21,s,t,c,l1,l2) reduction(max:th)
   for (fnat i = 0u; i < *n; i += VDL) {
-    DZJAC2_PARAMS;
+    DJAC2_PARAMS;
     DJAC2_LOOP;
     th = imax(th, omp_get_thread_num());
   }
 
   return (th + 1);
 #else /* !_OPENMP */
-  DZJAC2_PARAMS;
+  DJAC2_PARAMS;
 
   for (fnat i = 0u; i < *n; i += VDL) {
     DJAC2_LOOP;

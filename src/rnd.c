@@ -1,7 +1,9 @@
 #include "rnd.h"
 
-static const float  saub = FLT_MAX / 4;
 static const double daub = DBL_MAX / 4;
+static const double zaub = DBL_MAX / 8;
+static const float  saub = FLT_MAX / 4;
+static const float  caub = FLT_MAX / 8;
 
 static void gen_rand8(const size_t n, uint8_t r[static restrict 1])
 {
@@ -150,12 +152,12 @@ void dsym2rand_(const size_t n[static restrict 1], double l1[static restrict 1],
 void cher2rand_(const size_t n[static restrict 1], float l1[static restrict 1], float l2[static restrict 1], float f[static restrict 1], float g[static restrict 1], float hr[static restrict 1], float hi[static restrict 1])
 {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,saub,l1,l2,f,g,hr,hi)
+#pragma omp parallel for default(none) shared(n,caub,l1,l2,f,g,hr,hi)
 #endif /* _OPENMP */
   for (size_t i = (size_t)0u; i < *n; ++i) {
     wide w1, w2, t, c, r, j, h;
-    w1 = l1[i] = sfrand(saub);
-    w2 = l2[i] = sfrand(saub);
+    w1 = l1[i] = sfrand(caub);
+    w2 = l2[i] = sfrand(caub);
     wu2rand(&t, &c, &r, &j);
     h = (t * (w1 - w2)) / c;
     hr[i] = (float)(r * h);
@@ -169,12 +171,12 @@ void cher2rand_(const size_t n[static restrict 1], float l1[static restrict 1], 
 void zher2rand_(const size_t n[static restrict 1], double l1[static restrict 1], double l2[static restrict 1], double f[static restrict 1], double g[static restrict 1], double hr[static restrict 1], double hi[static restrict 1])
 {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,daub,l1,l2,f,g,hr,hi)
+#pragma omp parallel for default(none) shared(n,zaub,l1,l2,f,g,hr,hi)
 #endif /* _OPENMP */
   for (size_t i = (size_t)0u; i < *n; ++i) {
     wide w1, w2, t, c, r, j, h;
-    w1 = l1[i] = dfrand(daub);
-    w2 = l2[i] = dfrand(daub);
+    w1 = l1[i] = dfrand(zaub);
+    w2 = l2[i] = dfrand(zaub);
     wu2rand(&t, &c, &r, &j);
     h = (t * (w1 - w2)) / c;
     hr[i] = (double)(r * h);

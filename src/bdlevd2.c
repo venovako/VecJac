@@ -1,7 +1,7 @@
-#include "rnd.h"
-#include "timer.h"
 #include "laev2.h"
 #include "wnrme.h"
+#include "rnd.h"
+#include "timer.h"
 
 int main(int argc, char *argv[])
 {
