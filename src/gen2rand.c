@@ -1,7 +1,7 @@
 #include "rnd.h"
 #include "timer.h"
 
-static const char fm[3] = { 'w', 'b', '\0' };
+static const char fm[3] = { 'a', 'b', '\0' };
 
 int main(int argc, char *argv[])
 {
