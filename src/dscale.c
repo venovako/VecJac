@@ -38,23 +38,6 @@ int dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
 #endif /* ?_OPENMP */
 }
 
-#ifdef EDOMEGA
-#error EDOMEGA already defined
-#else /* !EDOMEGA */
-#define EDOMEGA 1024
-#endif /* ?EDOMEGA */
-
-static inline fint s(const double M, const fint l)
-{
-  int e
-#ifndef NDEBUG
-    = 0
-#endif /* !NDEBUG */
-    ;
-  (void)frexp(M, &e);
-  return (EDOMEGA - l - e);
-}
-
 int dlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const fnat l[static restrict 1], double M[static restrict 1], fint e[static restrict 1])
 {
 #ifndef NDEBUG
