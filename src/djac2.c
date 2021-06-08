@@ -39,17 +39,22 @@ register const VD ad = _mm512_sub_pd(a1, a2); VDP(ad);                          
 register const VD t2 = VDOR(_mm512_min_pd(_mm512_max_pd(_mm512_div_pd(ab, VDABS(ad)), zero), sh), VDSGN(ad)); VDP(t2); \
 register const VD t1 = _mm512_div_pd(t2, _mm512_add_pd(one, _mm512_sqrt_pd(_mm512_fmadd_pd(t2, t2, one)))); VDP(t1);   \
 _mm512_store_pd((t + i), VDXOR(t1, as));                                                                               \
-_mm512_store_pd((c + i), _mm512_invsqrt_pd(_mm512_fmadd_pd(t1, t1, one)));                                             \
-_mm512_store_pd((l1 + i), _mm512_fmadd_pd(t1, _mm512_fmadd_pd(a2, t1, ab), a1));                                       \
-_mm512_store_pd((l2 + i), _mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2))
+register const VD C = _mm512_invsqrt_pd(_mm512_fmadd_pd(t1, t1, one)); VDP(C);                                         \
+_mm512_store_pd((c + i), C);                                                                                           \
+register const VD L1 = _mm512_fmadd_pd(t1, _mm512_fmadd_pd(a2, t1, ab), a1); VDP(L1);                                  \
+_mm512_store_pd((l1 + i), L1);                                                                                         \
+register const VD L2 = _mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2); VDP(L2);                                  \
+_mm512_store_pd((l2 + i), L2);                                                                                         \
+register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                                                            \
+p[i >> VDLlg] = MD2U(P)
 #endif /* ?DJAC2_LOOP */
 
-int djac2_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21[static restrict VDL], double s[static restrict VDL], double t[static restrict VDL], double c[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL])
+int djac2_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21[static restrict VDL], double s[static restrict VDL], double t[static restrict VDL], double c[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
 {
 #ifdef _OPENMP
   int th = 0;
 
-#pragma omp parallel for default(none) shared(n,a11,a22,a21,s,t,c,l1,l2) reduction(max:th)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21,s,t,c,l1,l2,p) reduction(max:th)
   for (fnat i = 0u; i < *n; i += VDL) {
     DJAC2_PARAMS;
     DJAC2_LOOP;

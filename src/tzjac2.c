@@ -6,6 +6,8 @@ int main(int argc, char *argv[])
 {
   alignas(VA) double a11[VDL], a22[VDL], a21r[VDL], a21i[VDL], s[VDL], t[VDL], c[VDL], ca[VDL], sa[VDL], l1[VDL], l2[VDL];
   fnat n = VDL;
+  unsigned p = 0u;
+
   if (1 == argc) {
     for (fnat i = 0u; i < n; ++i) {
       a11[i] = dfrand(DBL_MAX);
@@ -37,7 +39,8 @@ int main(int argc, char *argv[])
     (void)fprintf(stderr, "%s [a11 a22 a21r a21i]\n", *argv);
     return EXIT_FAILURE;
   }
-  (void)printf("zjac2=%d\n", zjac2_(&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2));
+
+  (void)printf("zjac2=%d\n", zjac2_(&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, &p));
   (void)printf("%25s,%25s,%25s,%25s,%25s,%30s,%30s,%30s\n", "\"s\"", "\"t\"", "\"c\"", "\"ca\"", "\"sa\"", "\"L1\"", "\"L2\"", "\"RE\"");
   char a[31] = { '\0' };
   wide RE = W_MONE, ae = W_MONE, an = W_MONE, L1 = W_ZERO, L2 = W_ZERO;

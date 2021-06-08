@@ -95,6 +95,9 @@ int main(int argc, char *argv[])
   assert(l1);
   assert(l2);
 
+  unsigned *const p = (unsigned*)malloc((n >> VDLlg) * sizeof(unsigned));
+  assert(p);
+
   const size_t nw = n * sizeof(wide);
   wide
     *const RE = (wide*)aligned_alloc(sizeof(wide), nw),
@@ -139,8 +142,8 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     be[0u] = rdtsc_beg(rd);
-    th = imax(th, zjac2_((const fnat*)&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2));
-    th = imax(th, dzjac2_pp((fnat)n, s, c, l1, l2, (int*)RE, (double*)L1, (double*)L2));
+    th = imax(th, zjac2_((const fnat*)&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, p));
+    th = imax(th, dzjac2_pp((fnat)n, s, c, l1, l2, p, (double*)L1, (double*)L2));
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
@@ -190,6 +193,8 @@ int main(int argc, char *argv[])
   free(AN);
   free(AE);
   free(RE);
+
+  free(p);
 
   free(l2);
   free(l1);
