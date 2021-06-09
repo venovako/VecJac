@@ -15,3 +15,18 @@ void zlevd2(const double a11, const double a22, const double a21r, const double 
   *snr = creal(sn1);
   *sni = cimag(sn1);
 }
+
+double dlevd2_pp(const wide cs1, const wide sn1)
+{
+  return (double)(sn1 / cs1);
+}
+
+double zlevd2_pp(const wide cs1, double snr[static restrict 1], double sni[static restrict 1])
+{
+  const wide sn1 = hypotw(*snr, *sni);
+  if (sn1) {
+    *snr = (double)(*snr / sn1);
+    *sni = (double)(*sni / sn1);
+  }
+  return (double)(sn1 / cs1);
+}

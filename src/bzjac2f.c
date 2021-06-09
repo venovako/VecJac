@@ -1,4 +1,4 @@
-#include "djac2.h"
+#include "zjac2f.h"
 #include "dzjac2.h"
 #include "wnrme.h"
 #include "rnd.h"
@@ -63,23 +63,33 @@ int main(int argc, char *argv[])
     (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
     return EXIT_FAILURE;
   }
+  fn[nl1] = 'j';
+  FILE *const fj = fopen(fn, fm);
+  if (!fj) {
+    (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
+    return EXIT_FAILURE;
+  }
 
   const size_t nt = n * sizeof(double);
   double
     *const a11 = (double*)aligned_alloc(VA, nt),
     *const a22 = (double*)aligned_alloc(VA, nt),
-    *const a21 = (double*)aligned_alloc(VA, nt),
-    *const s = (double*)aligned_alloc(VA, nt),
+    *const a21r = (double*)aligned_alloc(VA, nt),
+    *const a21i = (double*)aligned_alloc(VA, nt),
     *const t = (double*)aligned_alloc(VA, nt),
     *const c = (double*)aligned_alloc(VA, nt),
+    *const ca = (double*)aligned_alloc(VA, nt),
+    *const sa = (double*)aligned_alloc(VA, nt),
     *const l1 = (double*)aligned_alloc(VA, nt),
     *const l2 = (double*)aligned_alloc(VA, nt);
   assert(a11);
   assert(a22);
-  assert(a21);
-  assert(s);
+  assert(a21r);
+  assert(a21i);
   assert(t);
   assert(c);
+  assert(ca);
+  assert(sa);
   assert(l1);
   assert(l2);
 
@@ -90,14 +100,10 @@ int main(int argc, char *argv[])
   wide
     *const RE = (wide*)aligned_alloc(sizeof(wide), nw),
     *const AE = (wide*)aligned_alloc(sizeof(wide), nw),
-    *const AN = (wide*)aligned_alloc(sizeof(wide), nw),
-    *const L1 = (wide*)aligned_alloc(sizeof(wide), nw),
-    *const L2 = (wide*)aligned_alloc(sizeof(wide), nw);
+    *const AN = (wide*)aligned_alloc(sizeof(wide), nw);
   assert(RE);
   assert(AE);
   assert(AN);
-  assert(L1);
-  assert(L2);
 
   unsigned rd[2u] = { 0u, 0u };
   uint64_t hz = tsc_get_freq_hz_(rd), be[2u] = { UINT64_C(0), UINT64_C(0) };
@@ -123,39 +129,40 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     if (n != fread(a22, sizeof(double), n, fg))
       return EXIT_FAILURE;
-    if (n != fread(a21, sizeof(double), n, fr))
+    if (n != fread(a21r, sizeof(double), n, fr))
+      return EXIT_FAILURE;
+    if (n != fread(a21i, sizeof(double), n, fj))
       return EXIT_FAILURE;
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     be[0u] = rdtsc_beg(rd);
-    th = imax(th, djac2_((const fnat*)&n, a11, a22, a21, s, t, c, l1, l2, p));
-    th = imax(th, dzjac2_pp((fnat)n, s, c, l1, l2, p, (double*)L1, (double*)L2));
+    th = imax(th, zjac2f_((const fnat*)&n, a11, a22, a21r, a21i, t, c, ca, sa, l1, l2, p));
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
     wide r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,a11,a22,a21,s,t,c,l1,l2,AE,AN,L1,L2,RE) reduction(max:r)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,t,c,ca,sa,l1,l2,AE,AN,RE) reduction(max:r)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
-      RE[i] = wrer(a11[i], a22[i], a21[i], s[i], t[i], c[i], l1[i], l2[i], (AE + i), (AN + i), (L1 + i), (L2 + i));
+      RE[i] = wrecf(a11[i], a22[i], a21r[i], a21i[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], (AE + i), (AN + i));
       r = fmaxw(r, RE[i]);
     }
     (void)fprintf(stdout, "%30s", xtoa(a, (long double)r));
     (void)fflush(stdout);
-    if (n != fread(l1, sizeof(double), n, fk))
+    if (n != fread(t, sizeof(double), n, fk))
       return EXIT_FAILURE;
-    if (n != fread(l2, sizeof(double), n, fl))
+    if (n != fread(c, sizeof(double), n, fl))
       return EXIT_FAILURE;
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     wide x = W_ZERO, m = W_ZERO;
     r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,L1,L2,l1,l2,AE,AN,RE) reduction(max:r,x,m)
+#pragma omp parallel for default(none) shared(n,l1,l2,t,c,AE,AN,RE) reduction(max:r,x,m)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
-      RE[i] = wlam(L1[i], L2[i], l1[i], l2[i], (AE + i), (AN + i));
+      RE[i] = wlam(l1[i], l2[i], t[i], c[i], (AE + i), (AN + i));
       r = fmaxw(r, RE[i]);
       x = fmaxw(x, AE[i]);
       m = fmaxw(m, AN[i]);
@@ -167,14 +174,13 @@ int main(int argc, char *argv[])
   }
   (void)fprintf(stderr, "max(#threads) = %u\n", (unsigned)th);
 
+  (void)fclose(fj);
   (void)fclose(fr);
   (void)fclose(fg);
   (void)fclose(ff);
   (void)fclose(fl);
   (void)fclose(fk);
 
-  free(L2);
-  free(L1);
   free(AN);
   free(AE);
   free(RE);
@@ -183,10 +189,12 @@ int main(int argc, char *argv[])
 
   free(l2);
   free(l1);
+  free(sa);
+  free(ca);
   free(c);
   free(t);
-  free(s);
-  free(a21);
+  free(a21i);
+  free(a21r);
   free(a22);
   free(a11);
 

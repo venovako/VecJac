@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     wide x = W_ZERO, m = W_ZERO;
     r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,L1,L2,l1,l2,AE,AN) reduction(max:r,x,m)
+#pragma omp parallel for default(none) shared(n,L1,L2,l1,l2,AE,AN,RE) reduction(max:r,x,m)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       RE[i] = wlam(L1[i], L2[i], l1[i], l2[i], (AE + i), (AN + i));

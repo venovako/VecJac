@@ -28,6 +28,18 @@ int main(int argc, char *argv[])
   strcpy(fn, argv[1u])[nl] = '.';
   const char fm[3u] = { 'r', 'b', '\0' };
 
+  fn[nl1] = 'k';
+  FILE *const fk = fopen(fn, fm);
+  if (!fk) {
+    (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
+    return EXIT_FAILURE;
+  }
+  fn[nl1] = 'l';
+  FILE *const fl = fopen(fn, fm);
+  if (!fl) {
+    (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
+    return EXIT_FAILURE;
+  }
   fn[nl1] = 'f';
   FILE *const ff = fopen(fn, fm);
   if (!ff) {
@@ -63,7 +75,8 @@ int main(int argc, char *argv[])
     *const snr = (double*)aligned_alloc(sizeof(double), nt),
     *const sni = (double*)aligned_alloc(sizeof(double), nt),
     *const l1 = (double*)aligned_alloc(sizeof(double), nt),
-    *const l2 = (double*)aligned_alloc(sizeof(double), nt);
+    *const l2 = (double*)aligned_alloc(sizeof(double), nt),
+    *const t = (double*)aligned_alloc(sizeof(double), nt);
   assert(a11);
   assert(a22);
   assert(a21r);
@@ -73,12 +86,22 @@ int main(int argc, char *argv[])
   assert(sni);
   assert(l1);
   assert(l2);
+  assert(t);
+
+  const size_t nw = n * sizeof(wide);
+  wide
+    *const RE = (wide*)aligned_alloc(sizeof(wide), nw),
+    *const AE = (wide*)aligned_alloc(sizeof(wide), nw),
+    *const AN = (wide*)aligned_alloc(sizeof(wide), nw);
+  assert(RE);
+  assert(AE);
+  assert(AN);
 
   unsigned rd[2u] = { 0u, 0u };
   uint64_t hz = tsc_get_freq_hz_(rd), be[2u] = { UINT64_C(0), UINT64_C(0) };
   (void)fprintf(stderr, "TSC frequency: %lu+(%u/%u) Hz.\n", hz, rd[0u], rd[1u]);
 
-  (void)fprintf(stdout, "\"B\",\"Ts\"\n");
+  (void)fprintf(stdout, "\"B\",\"Ts\",\"REN\",\"RLN\",\"RLX\",\"RLM\"\n");
   const char *bf = (const char*)NULL;
   if (b <= 10u)
     bf = "%zu";
@@ -89,6 +112,7 @@ int main(int argc, char *argv[])
   else // b > 1000
     bf = "%4zu";
   int th = 0;
+  char a[31u] = { '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0' };
 
   for (size_t j = 0u; j < b; ++j) {
     (void)fprintf(stdout, bf, j);
@@ -110,23 +134,65 @@ int main(int argc, char *argv[])
     for (size_t i = 0u; i < n; ++i) {
       zlevd2(a11[i], a22[i], a21r[i], a21i[i], (l1 + i), (l2 + i), (cs1 + i), (snr + i), (sni + i));
 #ifdef _OPENMP
-      th = imax(th, omp_get_thread_num());
+      th = imax(th, (omp_get_thread_num() + 1));
 #endif /* _OPENMP */
     }
     be[1u] = rdtsc_end(rd);
-    (void)fprintf(stdout, "%15.9Lf\n", tsc_lap(hz, be[0u], be[1u]));
+    (void)fprintf(stdout, "%15.9Lf", tsc_lap(hz, be[0u], be[1u]));
+    (void)fflush(stdout);
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,cs1,snr,sni,t)
+#endif /* _OPENMP */
+    for (size_t i = 0u; i < n; ++i)
+      t[i] = zlevd2_pp(cs1[i], (snr + i), (sni + i));
+    (void)fprintf(stdout, ",");
+    (void)fflush(stdout);
+    wide r = W_ZERO;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,t,cs1,snr,sni,l1,l2,AE,AN,RE) reduction(max:r)
+#endif /* _OPENMP */
+    for (size_t i = 0u; i < n; ++i) {
+      RE[i] = wrecf(a11[i], a22[i], a21r[i], a21i[i], t[i], cs1[i], snr[i], sni[i], l1[i], l2[i], (AE + i), (AN + i));
+      r = fmaxw(r, RE[i]);
+    }
+    (void)fprintf(stdout, "%30s", xtoa(a, (long double)r));
+    (void)fflush(stdout);
+    if (n != fread(t, sizeof(double), n, fk))
+      return EXIT_FAILURE;
+    if (n != fread(cs1, sizeof(double), n, fl))
+      return EXIT_FAILURE;
+    (void)fprintf(stdout, ",");
+    (void)fflush(stdout);
+    wide x = W_ZERO, m = W_ZERO;
+    r = W_ZERO;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,l1,l2,t,cs1,AE,AN,RE) reduction(max:r,x,m)
+#endif /* _OPENMP */
+    for (size_t i = 0u; i < n; ++i) {
+      RE[i] = wlam(l1[i], l2[i], t[i], cs1[i], (AE + i), (AN + i));
+      r = fmaxw(r, RE[i]);
+      x = fmaxw(x, AE[i]);
+      m = fmaxw(m, AN[i]);
+    }
+    (void)fprintf(stdout, "%30s,", xtoa(a, (long double)r));
+    (void)fprintf(stdout, "%30s,", xtoa(a, (long double)x));
+    (void)fprintf(stdout, "%30s\n", xtoa(a, (long double)m));
     (void)fflush(stdout);
   }
-#ifdef _OPENMP
-  ++th;
-#endif /* _OPENMP */
   (void)fprintf(stderr, "max(#threads) = %u\n", (unsigned)th);
 
   (void)fclose(fj);
   (void)fclose(fr);
   (void)fclose(fg);
   (void)fclose(ff);
+  (void)fclose(fl);
+  (void)fclose(fk);
 
+  free(AN);
+  free(AE);
+  free(RE);
+
+  free(t);
   free(l2);
   free(l1);
   free(sni);
