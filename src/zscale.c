@@ -69,6 +69,6 @@ int zlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
 #endif /* !NDEBUG */
 
   *M = znormx_(m, n, Ar, ldAr, Ai, ldAi);
-  *e = s(*M, *l);
+  *e = (isfinite(*M) ? s(*M, *l) : (fint)0);
   return zscale_(m, n, Ar, ldAr, Ai, ldAi, e);
 }

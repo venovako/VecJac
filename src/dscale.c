@@ -54,6 +54,6 @@ int dlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
 #endif /* !NDEBUG */
 
   *M = dnormx_(m, n, A, ldA);
-  *e = s(*M, *l);
+  *e = (isfinite(*M) ? s(*M, *l) : (fint)0);
   return dscale_(m, n, A, ldA, e);
 }
