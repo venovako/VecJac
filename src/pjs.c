@@ -36,6 +36,9 @@ unsigned *pjs(const long id, const unsigned n, unsigned stp[static restrict 1])
     if (labs(jstrat_next(&js, arr)) != n_2)
       goto theEnd;
     unsigned *const r = st + n * (size_t)s;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,r,arr)
+#endif /* _OPENMP */
     for (unsigned i = 0u; i < n; ++i)
       r[i] = (unsigned)(arr[i]);
   }
