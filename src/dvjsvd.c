@@ -10,6 +10,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     return 0;
   if (*m < *n)
     return -1;
+  if (*m & VDL_1)
+    return -1;
   if (*n & VDL_1)
     return -2;
   if (IS_NOT_ALIGNED(G))
@@ -26,6 +28,17 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     return -6;
   if (IS_NOT_ALIGNED(work))
     return -12;
+
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,V,ldV)
+#endif /* _OPENMP */
+  for (fnat j = 0u; j < *n; ++j) {
+    register const VD z = _mm512_setzero_pd();
+    double *const Vj = V + j * (size_t)(*ldV);
+    for (fnat i = 0u; i < *n; i += VDL)
+      _mm512_store_pd((Vj + i), z);
+    Vj[j] = 1.0;
+  }
 
   const fnat l = 2;
   double M = 0.0;

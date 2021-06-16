@@ -33,9 +33,9 @@ int zmerge_(const fnat m[static restrict 1], const fnat n[static restrict 1], co
 #pragma omp parallel for default(none) shared(m,n,A,ldA,Ar,ldAr,Ai,ldAi) reduction(max:t)
   for (fnat j = 0u; j < *n; ++j) {
     register const VI idx = _mm512_set_epi64(7, 3, 6, 2, 5, 1, 4, 0);
-    double complex *const Aj = A + j * (*ldA);
-    const double *const Arj = Ar + j * (*ldAr);
-    const double *const Aij = Ai + j * (*ldAi);
+    double complex *const Aj = A + j * (size_t)(*ldA);
+    const double *const Arj = Ar + j * (size_t)(*ldAr);
+    const double *const Aij = Ai + j * (size_t)(*ldAi);
     for (fnat i = 0u; i < *m; i += VDL_2)
       _mm512_store_pd((Aj + i), _mm512_permutexvar_pd(idx, _mm512_insertf64x4(_mm512_zextpd256_pd512(_mm256_load_pd(Arj + i)), _mm256_load_pd(Aij + i), 0x01u)));
     t = imax(t, omp_get_thread_num());
@@ -46,9 +46,9 @@ int zmerge_(const fnat m[static restrict 1], const fnat n[static restrict 1], co
   register const VI idx = _mm512_set_epi64(7, 3, 6, 2, 5, 1, 4, 0);
 
   for (fnat j = 0u; j < *n; ++j) {
-    double complex *const Aj = A + j * (*ldA);
-    const double *const Arj = Ar + j * (*ldAr);
-    const double *const Aij = Ai + j * (*ldAi);
+    double complex *const Aj = A + j * (size_t)(*ldA);
+    const double *const Arj = Ar + j * (size_t)(*ldAr);
+    const double *const Aij = Ai + j * (size_t)(*ldAi);
     for (fnat i = 0u; i < *m; i += VDL_2)
       _mm512_store_pd((Aj + i), _mm512_permutexvar_pd(idx, _mm512_insertf64x4(_mm512_zextpd256_pd512(_mm256_load_pd(Arj + i)), _mm256_load_pd(Aij + i), 0x01u)));
   }

@@ -30,7 +30,7 @@ int resizef_(const int fd[static restrict 1], const size_t sz[static restrict 1]
 #else /* !READ_LOOP */
 #define READ_LOOP(T)                              \
   for (fnat j = 0u; j < *n; ++j) {                \
-    T *const Aj = A + j * (*ldA);                 \
+    T *const Aj = A + j * (size_t)(*ldA);         \
     const size_t sz = *m * sizeof(T);             \
     const size_t of = j * sz;                     \
     r += ((ssize_t)sz != pread(*fd, Aj, sz, of)); \
@@ -126,7 +126,7 @@ int zread2_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
 #else /* !WRITE_LOOP */
 #define WRITE_LOOP(T)                              \
   for (fnat j = 0u; j < *n; ++j) {                 \
-    const T *const Aj = A + j * (*ldA);            \
+    const T *const Aj = A + j * (size_t)(*ldA);    \
     const size_t sz = *m * sizeof(T);              \
     const size_t of = j * sz;                      \
     r += ((ssize_t)sz != pwrite(*fd, Aj, sz, of)); \

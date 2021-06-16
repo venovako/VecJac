@@ -8,7 +8,7 @@
 #define DZSCAL_LOOP(A,ldA)                                            \
   for (fnat j = 0u; j < *n; ++j) {                                    \
     register const VD s = _mm512_set1_pd(e_);                         \
-    double *const Aj = (A) + j * (*(ldA));                            \
+    double *const Aj = (A) + j * (size_t)(*(ldA));                    \
     for (fnat i = 0u; i < *m; i += VDL) {                             \
       double *const Aij = Aj + i;                                     \
       _mm512_store_pd(Aij, _mm512_scalef_pd(_mm512_load_pd(Aij), s)); \
@@ -18,7 +18,7 @@
 #else /* !_OPENMP */
 #define DZSCAL_LOOP(A,ldA)                                            \
   for (fnat j = 0u; j < *n; ++j) {                                    \
-    double *const Aj = (A) + j * (*(ldA));                            \
+    double *const Aj = (A) + j * (size_t)(*(ldA));                    \
     for (fnat i = 0u; i < *m; i += VDL) {                             \
       double *const Aij = Aj + i;                                     \
       _mm512_store_pd(Aij, _mm512_scalef_pd(_mm512_load_pd(Aij), s)); \
