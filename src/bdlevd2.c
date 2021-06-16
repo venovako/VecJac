@@ -13,6 +13,14 @@ int main(int argc, char *argv[])
   const size_t n = atoz(argv[2u]);
   if (!n)
     return EXIT_SUCCESS;
+  int th = 0;
+#ifdef _OPENMP
+  th = omp_get_max_threads();
+  if (n % th) {
+    (void)fprintf(stderr, "batch_size has to be a multiple of %d.\n", th);
+    return EXIT_FAILURE;
+  }
+#endif /* _OPENMP */
   const size_t b = atoz(argv[3u]);
   if (!b)
     return EXIT_SUCCESS;
@@ -26,35 +34,35 @@ int main(int argc, char *argv[])
   char *const fn = calloc((nl + 3u), sizeof(char));
   assert(fn);
   strcpy(fn, argv[1u])[nl] = '.';
-  const char fm[3u] = { 'r', 'b', '\0' };
+  const int fm = O_RDONLY | O_LARGEFILE;
 
   fn[nl1] = 'k';
-  FILE *const fk = fopen(fn, fm);
-  if (!fk) {
+  const int fk = open(fn, fm);
+  if (-1 >= fk) {
     (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
     return EXIT_FAILURE;
   }
   fn[nl1] = 'l';
-  FILE *const fl = fopen(fn, fm);
-  if (!fl) {
+  const int fl = open(fn, fm);
+  if (-1 >= fl) {
     (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
     return EXIT_FAILURE;
   }
   fn[nl1] = 'f';
-  FILE *const ff = fopen(fn, fm);
-  if (!ff) {
+  const int ff = open(fn, fm);
+  if (-1 >= ff) {
     (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
     return EXIT_FAILURE;
   }
   fn[nl1] = 'g';
-  FILE *const fg = fopen(fn, fm);
-  if (!fg) {
+  const int fg = open(fn, fm);
+  if (-1 >= fg) {
     (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
     return EXIT_FAILURE;
   }
   fn[nl1] = 'r';
-  FILE *const fr = fopen(fn, fm);
-  if (!fr) {
+  const int fr = open(fn, fm);
+  if (-1 >= fr) {
     (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
     return EXIT_FAILURE;
   }
@@ -101,18 +109,35 @@ int main(int argc, char *argv[])
     bf = "%3zu";
   else // b > 1000
     bf = "%4zu";
-  int th = 0;
+  const size_t n_t = n / imax(th, 1);
+  const size_t cnt = n_t * sizeof(double);
   char a[31u] = { '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0' };
+  th = 0;
 
   for (size_t j = 0u; j < b; ++j) {
     (void)fprintf(stdout, bf, j);
     (void)fflush(stdout);
-    if (n != fread(a11, sizeof(double), n, ff))
-      return EXIT_FAILURE;
-    if (n != fread(a22, sizeof(double), n, fg))
-      return EXIT_FAILURE;
-    if (n != fread(a21, sizeof(double), n, fr))
-      return EXIT_FAILURE;
+    const size_t jn = j * n;
+#ifdef _OPENMP
+#pragma omp parallel default(none) shared(ff,fg,fr,a11,a22,a21,n,n_t,cnt,jn)
+#endif /* _OPENMP */
+    {
+      const int mt =
+#ifdef _OPENMP
+        omp_get_thread_num()
+#else /* !_OPENMP */
+        0
+#endif /* ?_OPENMP */
+        ;
+      const size_t tnt = mt * n_t;
+      const off_t off = (jn + tnt) * sizeof(double);
+      if ((ssize_t)cnt != pread(ff, (a11 + tnt), cnt, off))
+        exit(EXIT_FAILURE);
+      if ((ssize_t)cnt != pread(fg, (a22 + tnt), cnt, off))
+        exit(EXIT_FAILURE);
+      if ((ssize_t)cnt != pread(fr, (a21 + tnt), cnt, off))
+        exit(EXIT_FAILURE);
+    }
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     be[0u] = rdtsc_beg(rd);
@@ -145,10 +170,24 @@ int main(int argc, char *argv[])
     }
     (void)fprintf(stdout, "%30s", xtoa(a, (long double)r));
     (void)fflush(stdout);
-    if (n != fread(t, sizeof(double), n, fk))
-      return EXIT_FAILURE;
-    if (n != fread(cs1, sizeof(double), n, fl))
-      return EXIT_FAILURE;
+#ifdef _OPENMP
+#pragma omp parallel default(none) shared(fk,fl,t,cs1,n,n_t,cnt,jn)
+#endif /* _OPENMP */
+    {
+      const int mt =
+#ifdef _OPENMP
+        omp_get_thread_num()
+#else /* !_OPENMP */
+        0
+#endif /* ?_OPENMP */
+        ;
+      const size_t tnt = mt * n_t;
+      const off_t off = (jn + tnt) * sizeof(double);
+      if ((ssize_t)cnt != pread(fk, (t + tnt), cnt, off))
+        exit(EXIT_FAILURE);
+      if ((ssize_t)cnt != pread(fl, (cs1 + tnt), cnt, off))
+        exit(EXIT_FAILURE);
+    }
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     wide x = W_ZERO, m = W_ZERO;
@@ -169,11 +208,11 @@ int main(int argc, char *argv[])
   }
   (void)fprintf(stderr, "max(#threads) = %u\n", (unsigned)th);
 
-  (void)fclose(fr);
-  (void)fclose(fg);
-  (void)fclose(ff);
-  (void)fclose(fl);
-  (void)fclose(fk);
+  (void)close(fr);
+  (void)close(fg);
+  (void)close(ff);
+  (void)close(fl);
+  (void)close(fk);
 
   free(AN);
   free(AE);
