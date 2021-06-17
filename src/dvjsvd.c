@@ -53,9 +53,11 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   double *const l2 = l1 + n_2;
   unsigned *const p = iwork;
 
+  // see LAPACK's DGESVJ
+  const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
   const fnat l = 2;
-  double M = 0.0;
   fint e = 0;
+  double M = 0.0;
   unsigned sw = 0u;
 
   while (sw < *swp) {
@@ -66,7 +68,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       const unsigned *const r = js + st * (size_t)(*n);
       size_t stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,s,c) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,a21,s,t,c,l1,l2,p,tol) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat pq_ = pq + 1u;
@@ -84,6 +86,10 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         s[pq_] = eS[_q];
         c[pq_] = fS[_q];
         const double d = ddpscl_(m, Gp, Gq, (s + pq), (c + pq));
+        if (fabs(d) > tol) {
+          // do not increment if the rotation turns out to be identity
+          ++stt;
+        }
       }
       swt += stt;
     }
