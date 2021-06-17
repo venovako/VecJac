@@ -70,7 +70,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       const unsigned *const r = js + st * (size_t)(*n);
       size_t stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,a21,s,t,c,l1,l2,p,tol) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,a21,s,c,l1,l2,tol) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat pq_ = pq + 1u;
@@ -97,8 +97,12 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           ++stt;
       }
       if (stt) {
-        stt = 0u;
-        // TODO
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n_2)
+#endif /* _OPENMP */
+        for (fnat i = 0u; i < n_2; i += VDL) {
+          // TODO
+        }
         swt += stt;
       }
     }
