@@ -15,6 +15,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     return -1;
   if (*m & VDL_1)
     return -1;
+  if (*n & 1u)
+    return -2;
   if (n_2 & VDL_1)
     return -2;
   if (IS_NOT_ALIGNED(G))
@@ -77,28 +79,32 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const size_t _q = r[pq_];
         double *const Gp = G + _p * (*ldG);
         double *const Gq = G + _q * (*ldG);
-        if ((a11[_p] = dnorme_(m, Gp, (eS + _p), (fS + _p), (s + _p), (c + _p))) < 0.0)
+        if (dnorme_(m, Gp, (eS + _p), (fS + _p), (s + _p), (c + _p)) < 0.0)
           exit(EXIT_FAILURE);
-        if ((a11[_q] = dnorme_(m, Gq, (eS + _q), (fS + _q), (s + _q), (c + _q))) < 0.0)
+        if (dnorme_(m, Gq, (eS + _q), (fS + _q), (s + _q), (c + _q)) < 0.0)
           exit(EXIT_FAILURE);
         s[pq] = eS[_p];
         c[pq] = fS[_p];
         s[pq_] = eS[_q];
         c[pq_] = fS[_q];
-        const double d = ddpscl_(m, Gp, Gq, (s + pq), (c + pq));
-        if (fabs(d) > tol) {
-          // do not increment if the rotation turns out to be identity
+        a21[_pq] = ddpscl_(m, Gp, Gq, (s + pq), (c + pq));
+        if (fabs(a21[_pq]) > tol) {
+          // TODO: do not increment if the rotation turns out to be identity
           ++stt;
         }
+        else // no transf.
+          a21[_pq] = a22[_pq] = a11[_pq] = 0.0;
       }
-      swt += stt;
+      if (stt) {
+        swt += stt;
+      }
     }
     if (!swt)
       break;
     ++sw;
   }
 
-  // TODO
+  // TODO: normalize U
 
   return (fint)sw;
 }
