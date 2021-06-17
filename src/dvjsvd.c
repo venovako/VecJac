@@ -88,14 +88,17 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         s[pq_] = eS[_q];
         c[pq_] = fS[_q];
         a21[_pq] = ddpscl_(m, Gp, Gq, (s + pq), (c + pq));
-        if (fabs(a21[_pq]) > tol) {
-          // TODO: do not increment if the rotation turns out to be identity
+        // repack data
+        a11[_pq] = fS[_p];
+        a22[_pq] = fS[_q];
+        l1[_pq] = eS[_p];
+        l2[_pq] = eS[_q];
+        if (fabs(a21[_pq]) > tol)
           ++stt;
-        }
-        else // no transf.
-          a21[_pq] = a22[_pq] = a11[_pq] = 0.0;
       }
       if (stt) {
+        stt = 0u;
+        // TODO
         swt += stt;
       }
     }

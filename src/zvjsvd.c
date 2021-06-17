@@ -108,28 +108,19 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         s[pq_] = eS[_q];
         c[pq_] = fS[_q];
         const double complex z = zdpscl_(m, Grp, Gip, Grq, Giq, (s + pq), (c + pq));
+        // repack data
         a21r[_pq] = creal(z);
         a21i[_pq] = cimag(z);
-        if (hypot(a21r[_pq], a21i[_pq]) > tol) {
-          /* _mm_store_pd((s + pq), _mm_div_pd(_mm_set_pd(fS[_q], fS[_p]), _mm_set_pd(fS[_p], fS[_q]))); */
-          /* _mm_store_pd((c + pq), _mm_sub_pd(_mm_set_pd(eS[_q], eS[_p]), _mm_set_pd(eS[_p], eS[_q]))); */
-          /* a11[_pq] = scalb(s[pq], c[pq]); */
-          /* if (!isfinite(a11[_pq])) { */
-          /*   a11[_pq] = DBL_MAX; */
-          /*   a21i[_pq] = a21r[_pq] = 0.0; */
-          /* } */
-          /* a22[_pq] = scalb(s[pq_], c[pq_]); */
-          /* if (!isfinite(a22[_pq])) { */
-          /*   a22[_pq] = DBL_MAX; */
-          /*   a21i[_pq] = a21r[_pq] = 0.0; */
-          /* } */
-          // TODO: do not increment if the rotation turns out to be identity
+        a11[_pq] = fS[_p];
+        a22[_pq] = fS[_q];
+        l1[_pq] = eS[_p];
+        l2[_pq] = eS[_q];
+        if (hypot(a21r[_pq], a21i[_pq]) > tol)
           ++stt;
-        }
-        else // no transf.
-          a21i[_pq] = a21r[_pq] = a22[_pq] = a11[_pq] = 0.0;
       }
       if (stt) {
+        stt = 0u;
+        // TODO
         swt += stt;
       }
     }
