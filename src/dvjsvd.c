@@ -1,9 +1,12 @@
 #include "dvjsvd.h"
 
 #include "dscale.h"
+#include "dnorme.h"
+#include "ddpscl.h"
 
 fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], double G[static restrict VDL], const fnat ldG[static restrict 1], double V[static restrict VDL], const fnat ldV[static restrict 1], double eS[static restrict 1], double fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], double work[static restrict VDL], unsigned iwork[static restrict 1])
 {
+  const fnat n_2 = (*n >> 1u);
   if (IS_NOT_VFPENV)
     return -14;
   if (!*n)
@@ -12,7 +15,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     return -1;
   if (*m & VDL_1)
     return -1;
-  if (*n & VDL_1)
+  if (n_2 & VDL_1)
     return -2;
   if (IS_NOT_ALIGNED(G))
     return -3;
@@ -40,36 +43,47 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     Vj[j] = 1.0;
   }
 
+  double *const a11 = work;
+  double *const a22 = a11 + n_2;
+  double *const a21 = a22 + n_2;
+  double *const s = a21 + n_2;
+  double *const t = s + n_2;
+  double *const c = t + n_2;
+  double *const l1 = c + n_2;
+  double *const l2 = l1 + n_2;
+  unsigned *const p = iwork;
+
   const fnat l = 2;
   double M = 0.0;
   fint e = 0;
-
-  double *const a11 = work;
-  double *const a22 = a11 + *n;
-  double *const a21 = a22 + *n;
-  double *const s = a21 + *n;
-  double *const t = s + *n;
-  double *const c = t + *n;
-  double *const l1 = c + *n;
-  double *const l2 = l1 + *n;
-  unsigned *const p = iwork;
-
   unsigned sw = 0u;
+
   while (sw < *swp) {
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
-      if (dlscal_(m, n, G, ldG, &l, &M, &e) < 0)
+      if ((dlscal_(m, n, G, ldG, &l, &M, &e) < 0) || !isfinite(M))
         return -15;
-      if (!isfinite(M))
-        return -3;
       const unsigned *const r = js + st * (size_t)(*n);
       size_t stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,l) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,s,c) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
-        const unsigned _p = r[pq];
-        const unsigned _q = r[pq + 1u];
+        const fnat pq_ = pq + 1u;
+        const fnat _pq = (pq >> 1u);
+        const size_t _p = r[pq];
+        const size_t _q = r[pq_];
+        double *const Gp = G + _p * (*ldG);
+        double *const Gq = G + _q * (*ldG);
+        if ((a11[_p] = dnorme_(m, Gp, (eS + _p), (fS + _p), (s + _p), (c + _p))) < 0.0)
+          exit(EXIT_FAILURE);
+        if ((a11[_q] = dnorme_(m, Gq, (eS + _q), (fS + _q), (s + _q), (c + _q))) < 0.0)
+          exit(EXIT_FAILURE);
+        s[pq] = eS[_p];
+        c[pq] = fS[_p];
+        s[pq_] = eS[_q];
+        c[pq_] = fS[_q];
+        const double d = ddpscl_(m, Gp, Gq, (s + pq), (c + pq));
       }
       swt += stt;
     }
