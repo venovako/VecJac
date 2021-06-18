@@ -68,9 +68,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       if ((dlscal_(m, n, G, ldG, &l, &M, &e) < 0) || !isfinite(M))
         return -15;
       const unsigned *const r = js + st * (size_t)(*n);
-      size_t stt = 0u;
+      double pe = 0.0, qe = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,a21,s,c,l1,l2,tol) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,a21,s,c,l1,l2,tol) reduction(min:pe,qe)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat pq_ = pq + 1u;
@@ -79,10 +79,10 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const size_t _q = r[pq_];
         double *const Gp = G + _p * (*ldG);
         double *const Gq = G + _q * (*ldG);
-        if (dnorme_(m, Gp, (eS + _p), (fS + _p), (s + _p), (c + _p)) < 0.0)
-          exit(EXIT_FAILURE);
-        if (dnorme_(m, Gq, (eS + _q), (fS + _q), (s + _q), (c + _q)) < 0.0)
-          exit(EXIT_FAILURE);
+        if ((pe = fmin(pe, dnorme_(m, Gp, (eS + _p), (fS + _p), (s + _p), (c + _p)))) < 0.0)
+          continue;
+        if ((qe = fmin(qe, dnorme_(m, Gq, (eS + _q), (fS + _q), (s + _q), (c + _q)))) < 0.0)
+          continue;
         s[pq] = eS[_p];
         c[pq] = fS[_p];
         s[pq_] = eS[_q];
@@ -93,18 +93,21 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         a22[_pq] = fS[_q];
         l1[_pq] = eS[_p];
         l2[_pq] = eS[_q];
-        if (fabs(a21[_pq]) > tol)
-          ++stt;
       }
-      if (stt) {
+      if (pe < 0.0)
+        return -16;
+      if (qe < 0.0)
+        return -17;
+      size_t stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2)
+#pragma omp parallel for default(none) shared(n_2) reduction(+:stt)
 #endif /* _OPENMP */
-        for (fnat i = 0u; i < n_2; i += VDL) {
-          // TODO
-        }
-        swt += stt;
+      for (fnat i = 0u; i < n_2; i += VDL) {
+        // TODO
+        /* if (fabs(a21[_pq]) > tol) */
+        /*   ++stt; */
       }
+      swt += stt;
     }
     if (!swt)
       break;

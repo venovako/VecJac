@@ -86,9 +86,9 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       if ((zlscal_(m, n, Gr, ldGr, Gi, ldGi, &l, &M, &e) < 0) || !isfinite(M))
         return -19;
       const unsigned *const r = js + st * (size_t)(*n);
-      size_t stt = 0u;
+      double pe = 0.0, qe = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,Gr,ldGr,Gi,ldGi,eS,fS,a11,a22,a21r,a21i,s,c,l1,l2,tol) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n,r,m,Gr,ldGr,Gi,ldGi,eS,fS,a11,a22,a21r,a21i,s,c,l1,l2,tol) reduction(min:pe,qe)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat pq_ = pq + 1u;
@@ -97,12 +97,12 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const size_t _q = r[pq_];
         double *const Grp = Gr + _p * (*ldGr);
         double *const Gip = Gi + _p * (*ldGi);
-        if (znorme_(m, Grp, Gip, (eS + _p), (fS + _p), (s + _p), (c + _p)) < 0.0)
-          exit(EXIT_FAILURE);
+        if ((pe = fmin(pe, znorme_(m, Grp, Gip, (eS + _p), (fS + _p), (s + _p), (c + _p)))) < 0.0)
+          continue;
         double *const Grq = Gr + _q * (*ldGr);
         double *const Giq = Gi + _q * (*ldGi);
-        if (znorme_(m, Grq, Giq, (eS + _q), (fS + _q), (s + _q), (c + _q)) < 0.0)
-          exit(EXIT_FAILURE);
+        if ((qe = fmin(qe, znorme_(m, Grq, Giq, (eS + _q), (fS + _q), (s + _q), (c + _q)))) < 0.0)
+          continue;
         s[pq] = eS[_p];
         c[pq] = fS[_p];
         s[pq_] = eS[_q];
@@ -115,18 +115,21 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         a22[_pq] = fS[_q];
         l1[_pq] = eS[_p];
         l2[_pq] = eS[_q];
-        if (hypot(a21r[_pq], a21i[_pq]) > tol)
-          ++stt;
       }
-      if (stt) {
+      if (pe < 0.0)
+        return -20;
+      if (qe < 0.0)
+        return -21;
+      size_t stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2)
+#pragma omp parallel for default(none) shared(n_2) reduction(+:stt)
 #endif /* _OPENMP */
-        for (fnat i = 0u; i < n_2; i += VDL) {
-          // TODO
-        }
-        swt += stt;
+      for (fnat i = 0u; i < n_2; i += VDL) {
+        // TODO
+        /* if (hypot(a21r[_pq], a21i[_pq]) > tol) */
+        /*   ++stt; */
       }
+      swt += stt;
     }
     if (!swt)
       break;
