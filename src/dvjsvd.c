@@ -3,6 +3,7 @@
 #include "dscale.h"
 #include "dnorme.h"
 #include "ddpscl.h"
+#include "vecdef.h"
 
 fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], double G[static restrict VDL], const fnat ldG[static restrict 1], double V[static restrict VDL], const fnat ldV[static restrict 1], double eS[static restrict 1], double fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], double work[static restrict VDL], unsigned iwork[static restrict 1])
 {
@@ -100,12 +101,12 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         return -17;
       size_t stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,l1,l2,tol) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
-        // TODO
-        /* if (fabs(a21[_pq]) > tol) */
-        /*   ++stt; */
+        register const VD _a21 = _mm512_load_pd(a21 + i);
+        register const VD m0 = _mm512_set1_pd(-0.0);
+        stt += _mm_popcnt_u32(MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), VDABS(_a21))));
       }
       swt += stt;
     }

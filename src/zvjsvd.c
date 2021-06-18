@@ -3,6 +3,7 @@
 #include "zscale.h"
 #include "znorme.h"
 #include "zdpscl.h"
+#include "vecdef.h"
 
 fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], double Gr[static restrict VDL], const fnat ldGr[static restrict 1], double Gi[static restrict VDL], const fnat ldGi[static restrict 1], double Vr[static restrict VDL], const fnat ldVr[static restrict 1], double Vi[static restrict VDL], const fnat ldVi[static restrict 1], double eS[static restrict 1], double fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], double work[static restrict VDL], unsigned iwork[static restrict 1])
 {
@@ -122,12 +123,13 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         return -21;
       size_t stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,l1,l2,tol) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
-        // TODO
-        /* if (hypot(a21r[_pq], a21i[_pq]) > tol) */
-        /*   ++stt; */
+        register const VD _a21r = _mm512_load_pd(a21r + i);
+        register const VD _a21i = _mm512_load_pd(a21i + i);
+        register const VD _a21 = _mm512_hypot_pd(_a21r, _a21i);
+        stt += _mm_popcnt_u32(MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), _a21)));
       }
       swt += stt;
     }
