@@ -3,6 +3,7 @@
 #include "zscale.h"
 #include "znorme.h"
 #include "zdpscl.h"
+#include "zjac2.h"
 #include "vecdef.h"
 #include "defops.h"
 
@@ -126,7 +127,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         return -21;
       size_t stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a21r,a21i,pc,tol) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a21r,a21i,p,tol) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         // convergence check
@@ -134,17 +135,18 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         register VD _a21i = _mm512_load_pd(a21i + i);
         register const VD _a21 = _mm512_hypot_pd(_a21r, _a21i);
         const fnat j = (i >> VDLlg);
-        stt += (pc[j] = _mm_popcnt_u32(MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), _a21))));
+        stt += (p[j] = _mm_popcnt_u32(MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), _a21))));
       }
       if (!stt)
         continue;
       swt += stt;
+      fnat k = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,l1,l2,pc,Me)
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,l1,l2,p,pc,Me,k)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
-        if (pc[j]) {
+        if (p[j]) {
           register const VD f1 = _mm512_load_pd(a11 + i);
           register const VD f2 = _mm512_load_pd(a22 + i);
           register const VD e1 = _mm512_load_pd(l1 + i);
@@ -166,19 +168,21 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           register const VD _a22 = _mm512_scalef_pd(f21, e21);
           register const VD _a21r = _mm512_scalef_pd(_mm512_load_pd(a21r + i), d);
           register const VD _a21i = _mm512_scalef_pd(_mm512_load_pd(a21i + i), d);
-          _mm512_store_pd((a11 + i), _a11);
-          _mm512_store_pd((a22 + i), _a22);
-          _mm512_store_pd((a21r + i), _a21r);
-          _mm512_store_pd((a21i + i), _a21i);
-        }
-        else { // not needed if pc is consulted again
-          register const VD z = _mm512_setzero_pd();
-          _mm512_store_pd((a11 + i), z);
-          _mm512_store_pd((a22 + i), z);
-          _mm512_store_pd((a21r + i), z);
-          _mm512_store_pd((a21i + i), z);
+          // pack the data and record the translation in pc
+          fnat kk;
+#pragma omp atomic capture seq_cst
+          kk = k++;
+          pc[kk] = j;
+          kk <<= VDLlg;
+          _mm512_store_pd((a11 + kk), _a11);
+          _mm512_store_pd((a22 + kk), _a22);
+          _mm512_store_pd((a21r + kk), _a21r);
+          _mm512_store_pd((a21i + kk), _a21i);
         }
       }
+      const fnat kk = (k << VDLlg);
+      if (zjac2_(&kk, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, p) < 0)
+        return -22;
     }
     if (!swt)
       break;
