@@ -79,7 +79,6 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
   // see LAPACK's ZGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
-  const double Me = (double)(DBL_MAX_EXP - 1);
   const fnat l = 2;
   fint e = 0;
   double M = 0.0;
@@ -108,16 +107,19 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         double *const Giq = Gi + _q * (*ldGi);
         if ((qe = fmin(qe, znorme_(m, Grq, Giq, (eS + _q), (fS + _q), (s + _q), (c + _q)))) < 0.0)
           continue;
+        // pack the norms
         s[pq] = eS[_p];
         c[pq] = fS[_p];
         s[pq_] = eS[_q];
         c[pq_] = fS[_q];
         const double complex z = zdpscl_(m, Grp, Gip, Grq, Giq, (s + pq), (c + pq));
+        // ensure that the compiler does not rearrange accesses to t and ca
+        _mm_mfence();
         // repack data
-        a21r[_pq] = creal(z);
-        a21i[_pq] = cimag(z);
-        a11[_pq] = fS[_p];
-        a22[_pq] = fS[_q];
+        sa[_pq] = creal(z);
+        ca[_pq] = cimag(z);
+        t[_pq] = fS[_p];
+        c[_pq] = fS[_q];
         l1[_pq] = eS[_p];
         l2[_pq] = eS[_q];
       }
@@ -125,61 +127,55 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         return -20;
       if (qe < 0.0)
         return -21;
-      size_t stt = 0u;
+      fnat stt = 0u, k = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a21r,a21i,p,tol) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,t,c,sa,ca,l1,l2,p,pc,tol,k) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
-        // convergence check
-        register VD _a21r = _mm512_load_pd(a21r + i);
-        register VD _a21i = _mm512_load_pd(a21i + i);
-        register const VD _a21 = _mm512_hypot_pd(_a21r, _a21i);
         const fnat j = (i >> VDLlg);
-        stt += (p[j] = _mm_popcnt_u32(MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), _a21))));
+        // convergence check
+        register VD _a21r = _mm512_load_pd(sa + i);
+        register VD _a21i = _mm512_load_pd(ca + i);
+        register const VD _a21_ = _mm512_hypot_pd(_a21r, _a21i);
+        if (!(p[j] = _mm_popcnt_u32(MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), _a21_)))))
+          continue;
+        stt += p[j];
+        // Grammian pre-scaling into the double precision range
+        register const VD f1 = _mm512_load_pd(t + i);
+        register const VD f2 = _mm512_load_pd(c + i);
+        register const VD e1 = _mm512_load_pd(l1 + i);
+        register const VD e2 = _mm512_load_pd(l2 + i);
+        register VD f12 = _mm512_div_pd(f1, f2);
+        register VD e12 = _mm512_sub_pd(e1, e2);
+        register VD f21 = _mm512_div_pd(f2, f1);
+        register VD e21 = _mm512_sub_pd(e2, e1);
+        e12 = _mm512_add_pd(e12, _mm512_getexp_pd(f12));
+        f12 = VDMANT(f12);
+        e21 = _mm512_add_pd(e21, _mm512_getexp_pd(f21));
+        f21 = VDMANT(f21);
+        register const MD c12 = VDEFLE(e12,e21,f12,f21);
+        register const VD E = _mm512_mask_blend_pd(c12, e12, e21);
+        register const VD d = _mm512_min_pd(_mm512_sub_pd(_mm512_set1_pd(1023.0), E), _mm512_setzero_pd());
+        e12 = _mm512_add_pd(e12, d);
+        e21 = _mm512_add_pd(e21, d);
+        register const VD _a11 = _mm512_scalef_pd(f12, e12);
+        register const VD _a22 = _mm512_scalef_pd(f21, e21);
+        _a21r = _mm512_scalef_pd(_a21r, d);
+        _a21i = _mm512_scalef_pd(_a21i, d);
+        // pack the data and record the translation in pc
+        fnat kk;
+#pragma omp atomic capture seq_cst
+        kk = k++;
+        pc[kk] = j;
+        kk <<= VDLlg;
+        _mm512_store_pd((a11 + kk), _a11);
+        _mm512_store_pd((a22 + kk), _a22);
+        _mm512_store_pd((a21r + kk), _a21r);
+        _mm512_store_pd((a21i + kk), _a21i);
       }
       if (!stt)
         continue;
       swt += stt;
-      fnat k = 0u;
-#ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,l1,l2,p,pc,Me,k)
-#endif /* _OPENMP */
-      for (fnat i = 0u; i < n_2; i += VDL) {
-        const fnat j = (i >> VDLlg);
-        if (p[j]) {
-          register const VD f1 = _mm512_load_pd(a11 + i);
-          register const VD f2 = _mm512_load_pd(a22 + i);
-          register const VD e1 = _mm512_load_pd(l1 + i);
-          register const VD e2 = _mm512_load_pd(l2 + i);
-          register VD f12 = _mm512_div_pd(f1, f2);
-          register VD e12 = _mm512_sub_pd(e1, e2);
-          register VD f21 = _mm512_div_pd(f2, f1);
-          register VD e21 = _mm512_sub_pd(e2, e1);
-          e12 = _mm512_add_pd(e12, _mm512_getexp_pd(f12));
-          f12 = VDMANT(f12);
-          e21 = _mm512_add_pd(e21, _mm512_getexp_pd(f21));
-          f21 = VDMANT(f21);
-          register const MD c12 = VDEFLE(e12,e21,f12,f21);
-          register const VD Me12 = _mm512_mask_blend_pd(c12, e12, e21);
-          register const VD d = _mm512_min_pd(_mm512_sub_pd(_mm512_set1_pd(Me), Me12), _mm512_setzero_pd());
-          e12 = _mm512_add_pd(e12, d);
-          e21 = _mm512_add_pd(e21, d);
-          register const VD _a11 = _mm512_scalef_pd(f12, e12);
-          register const VD _a22 = _mm512_scalef_pd(f21, e21);
-          register const VD _a21r = _mm512_scalef_pd(_mm512_load_pd(a21r + i), d);
-          register const VD _a21i = _mm512_scalef_pd(_mm512_load_pd(a21i + i), d);
-          // pack the data and record the translation in pc
-          fnat kk;
-#pragma omp atomic capture seq_cst
-          kk = k++;
-          pc[kk] = j;
-          kk <<= VDLlg;
-          _mm512_store_pd((a11 + kk), _a11);
-          _mm512_store_pd((a22 + kk), _a22);
-          _mm512_store_pd((a21r + kk), _a21r);
-          _mm512_store_pd((a21i + kk), _a21i);
-        }
-      }
       const fnat kk = (k << VDLlg);
       if (zjac2_(&kk, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, p) < 0)
         return -22;
