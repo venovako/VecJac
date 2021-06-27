@@ -4,6 +4,7 @@
 #include "dnorme.h"
 #include "ddpscl.h"
 #include "vecdef.h"
+#include "defops.h"
 
 fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], double G[static restrict VDL], const fnat ldG[static restrict 1], double V[static restrict VDL], const fnat ldV[static restrict 1], double eS[static restrict 1], double fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], double work[static restrict VDL], unsigned iwork[static restrict 1])
 {
@@ -55,9 +56,11 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   double *const l1 = c + n_2;
   double *const l2 = l1 + n_2;
   unsigned *const p = iwork;
+  unsigned *const pc = p + (n_2 >> VDLlg);
 
   // see LAPACK's DGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
+  const double Me = (double)(DBL_MAX_EXP - 1);
   const fnat l = 2;
   fint e = 0;
   double M = 0.0;
@@ -101,14 +104,55 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         return -17;
       size_t stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,l1,l2,tol) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a21,pc,tol) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
-        register const VD _a21 = _mm512_load_pd(a21 + i);
+        // convergence check
+        register VD _a21 = _mm512_load_pd(a21 + i);
         register const VD m0 = _mm512_set1_pd(-0.0);
-        stt += _mm_popcnt_u32(MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), VDABS(_a21))));
+        const fnat j = (i >> VDLlg);
+        stt += (pc[j] = _mm_popcnt_u32(MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), VDABS(_a21)))));
       }
+      if (!stt)
+        continue;
       swt += stt;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,l1,l2,pc,Me)
+#endif /* _OPENMP */
+      for (fnat i = 0u; i < n_2; i += VDL) {
+        const fnat j = (i >> VDLlg);
+        if (pc[j]) {
+          register const VD f1 = _mm512_load_pd(a11 + i);
+          register const VD f2 = _mm512_load_pd(a22 + i);
+          register const VD e1 = _mm512_load_pd(l1 + i);
+          register const VD e2 = _mm512_load_pd(l2 + i);
+          register VD f12 = _mm512_div_pd(f1, f2);
+          register VD e12 = _mm512_sub_pd(e1, e2);
+          register VD f21 = _mm512_div_pd(f2, f1);
+          register VD e21 = _mm512_sub_pd(e2, e1);
+          e12 = _mm512_add_pd(e12, _mm512_getexp_pd(f12));
+          f12 = VDMANT(f12);
+          e21 = _mm512_add_pd(e21, _mm512_getexp_pd(f21));
+          f21 = VDMANT(f21);
+          register const MD c12 = VDEFLE(e12,e21,f12,f21);
+          register const VD Me12 = _mm512_mask_blend_pd(c12, e12, e21);
+          register const VD d = _mm512_min_pd(_mm512_sub_pd(_mm512_set1_pd(Me), Me12), _mm512_setzero_pd());
+          e12 = _mm512_add_pd(e12, d);
+          e21 = _mm512_add_pd(e21, d);
+          register const VD _a11 = _mm512_scalef_pd(f12, e12);
+          register const VD _a22 = _mm512_scalef_pd(f21, e21);
+          register const VD _a21 = _mm512_scalef_pd(_mm512_load_pd(a21 + i), d);
+          _mm512_store_pd((a11 + i), _a11);
+          _mm512_store_pd((a22 + i), _a22);
+          _mm512_store_pd((a21 + i), _a21);
+        }
+        else { // not needed if pc is consulted again
+          register const VD z = _mm512_setzero_pd();
+          _mm512_store_pd((a11 + i), z);
+          _mm512_store_pd((a22 + i), z);
+          _mm512_store_pd((a21 + i), z);
+        }
+      }
     }
     if (!swt)
       break;

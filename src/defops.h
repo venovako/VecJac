@@ -7,12 +7,14 @@
 #define VDMANT(x) _mm512_getmant_pd((x),_MM_MANT_NORM_1_2,_MM_MANT_SIGN_zero)
 #endif /* ?VDMANT */
 
+// _inf has to be defined to -\inftys
 #ifdef VDSUBE
 #error VDSUBE already defined
 #else /* !VDSUBE */
 #define VDSUBE(x,y) _mm512_max_pd(_mm512_sub_pd((x),(y)),_inf)
 #endif /* ?VDSUBE */
 
+// ione has to be defined to integer ones
 #ifdef VDLSB
 #error VDLSB already defined
 #else /* !VDLSB */
