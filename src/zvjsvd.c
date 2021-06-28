@@ -181,9 +181,37 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       const fnat kk = (k << VDLlg);
       if (zjac2_(&kk, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, p) < 0)
         return -22;
+      fnat np = 0u; // number of swaps
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(a11,a22,s,p,pc,r,k) reduction(+:np)
+#endif /* _OPENMP */
       for (fnat i = 0u; i < k; ++i) {
+        const fnat i_ = (i << VDLlg);
+        const fnat _pq = ((pc[i] >> VDL) << VDLlg);
+        for (unsigned b = (pc[i] & 0xFFu), x = p[i], l_ = 0u; b; (b >>= 1u), (x >>= 1u), ++l_) {
+          const fnat k_ = (i_ + l_);
+          const fnat pq = ((_pq + l_) << 1u);
+          const size_t _p = r[pq];
+          const size_t _q = r[pq + 1u];
+          *(size_t*)(a11 + k_) = _p;
+          *(size_t*)(a22 + k_) = _q;
+          if (x & 1u) {
+            s[k_] = ((b & 1u) ? -2.0 : -1.0);
+            ++np;
+          }
+          else
+            s[k_] = ((b & 1u) ? 2.0 : 1.0);
+        }
       }
-      // TODO: apply the transformations
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,s,t,c,ca,sa,kk)
+#endif /* _OPENMP */
+      for (fnat i = 0u; i < kk; ++i) {
+        const size_t _p = *(const size_t*)(a11 + i);
+        const size_t _q = *(const size_t*)(a22 + i);
+        const double _s = s[i];
+        // TODO: apply the (_p,_q) transformations
+      }
     }
     if (!swt)
       break;
