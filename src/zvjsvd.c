@@ -137,7 +137,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         register VD _a21r = _mm512_load_pd(sa + i);
         register VD _a21i = _mm512_load_pd(ca + i);
         register const VD _a21_ = _mm512_hypot_pd(_a21r, _a21i);
-        if (!(p[j] = _mm_popcnt_u32(MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), _a21_)))))
+        pc[j] = MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), _a21_));
+        if (!(p[j] = _mm_popcnt_u32(pc[j])))
           continue;
         stt += p[j];
         // Grammian pre-scaling into the double precision range
@@ -166,7 +167,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         fnat kk;
 #pragma omp atomic capture seq_cst
         kk = k++;
-        pc[kk] = j;
+        // lower 8 bits: mask, upper 24 bits: j (assumes n < 2^28)
+        pc[kk] |= (j << VDL);
         kk <<= VDLlg;
         _mm512_store_pd((a11 + kk), _a11);
         _mm512_store_pd((a22 + kk), _a22);
@@ -179,6 +181,9 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       const fnat kk = (k << VDLlg);
       if (zjac2_(&kk, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, p) < 0)
         return -22;
+      for (fnat i = 0u; i < k; ++i) {
+      }
+      // TODO: apply the transformations
     }
     if (!swt)
       break;
