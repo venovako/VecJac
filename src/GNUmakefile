@@ -11,8 +11,8 @@ all: libvecjac$(SUFX).a bdjac2$(SUFX).exe bdjac2f$(SUFX).exe bdlevd2$(SUFX).exe 
 help:
 	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [WP=q|l] [all|clean|help]"
 
-libvecjac$(SUFX).a: aalloc$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o djac2$(SUFX).o djac2f$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dvjsvd$(SUFX).o dzjac2$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o wnrme$(SUFX).o zdpscl$(SUFX).o zjac2$(SUFX).o zjac2f$(SUFX).o znorme$(SUFX).o znormx$(SUFX).o zmerge$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o $(MKFS)
-	$(AR) $(ARFLAGS) $@ aalloc$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o djac2$(SUFX).o djac2f$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dvjsvd$(SUFX).o dzjac2$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o wnrme$(SUFX).o zdpscl$(SUFX).o zjac2$(SUFX).o zjac2f$(SUFX).o znorme$(SUFX).o znormx$(SUFX).o zmerge$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
+libvecjac$(SUFX).a: aalloc$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o djac2$(SUFX).o djac2f$(SUFX).o djrot$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dvjsvd$(SUFX).o dzjac2$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o wnrme$(SUFX).o zdpscl$(SUFX).o zjac2$(SUFX).o zjac2f$(SUFX).o zjrot$(SUFX).o znorme$(SUFX).o znormx$(SUFX).o zmerge$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o $(MKFS)
+	$(AR) $(ARFLAGS) $@ aalloc$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o djac2$(SUFX).o djac2f$(SUFX).o djrot$(SUFX).o dnorme$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dvjsvd$(SUFX).o dzjac2$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o wnrme$(SUFX).o zdpscl$(SUFX).o zjac2$(SUFX).o zjac2f$(SUFX).o zjrot$(SUFX).o znorme$(SUFX).o znormx$(SUFX).o zmerge$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
 
 aalloc$(SUFX).o: aalloc.c aalloc.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -29,6 +29,9 @@ djac2$(SUFX).o: djac2.c djac2.h dzjac2.h vecdef.h vec.h common.h $(MKFS)
 djac2f$(SUFX).o: djac2f.c djac2f.h dzjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+djrot$(SUFX).o: djrot.c djrot.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 dnorme$(SUFX).o: dnorme.c dnorme.h dkvsrt.h defops.h dznrme.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -38,7 +41,7 @@ dnormx$(SUFX).o: dnormx.c dnormx.h dznrmx.h vec.h common.h $(MKFS)
 dscale$(SUFX).o: dscale.c dscale.h dzscal.h dnormx.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-dvjsvd$(SUFX).o: dvjsvd.c dvjsvd.h dscale.h dnorme.h ddpscl.h djac2.h vecdef.h defops.h vec.h common.h $(MKFS)
+dvjsvd$(SUFX).o: dvjsvd.c dvjsvd.h dscale.h dnorme.h ddpscl.h djac2.h djrot.h vecdef.h defops.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 dzjac2$(SUFX).o: dzjac2.c dzjac2.h vecdef.h vec.h common.h $(MKFS)
@@ -74,6 +77,9 @@ zjac2$(SUFX).o: zjac2.c zjac2.h dzjac2.h vecdef.h vec.h common.h $(MKFS)
 zjac2f$(SUFX).o: zjac2f.c zjac2f.h dzjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+zjrot$(SUFX).o: zjrot.c zjrot.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 znorme$(SUFX).o: znorme.c znorme.h dkvsrt.h defops.h dznrme.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -89,7 +95,7 @@ zscale$(SUFX).o: zscale.c zscale.h dzscal.h znormx.h vec.h common.h $(MKFS)
 zsplit$(SUFX).o: zsplit.c zsplit.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-zvjsvd$(SUFX).o: zvjsvd.c zvjsvd.h zscale.h znorme.h zdpscl.h zjac2.h vecdef.h defops.h vec.h common.h $(MKFS)
+zvjsvd$(SUFX).o: zvjsvd.c zvjsvd.h zscale.h znorme.h zdpscl.h zjac2.h zjrot.h vecdef.h defops.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 bdjac2$(SUFX).exe: bdjac2.c libvecjac$(SUFX).a $(MKFS)
@@ -128,6 +134,7 @@ clean:
 	-$(RM) ddpscl$(SUFX).o ddpscl$(SUFX).optrpt
 	-$(RM) djac2$(SUFX).o djac2$(SUFX).optrpt
 	-$(RM) djac2f$(SUFX).o djac2f$(SUFX).optrpt
+	-$(RM) djrot$(SUFX).o djrot$(SUFX).optrpt
 	-$(RM) dnorme$(SUFX).o dnorme$(SUFX).optrpt
 	-$(RM) dnormx$(SUFX).o dnormx$(SUFX).optrpt
 	-$(RM) dscale$(SUFX).o dscale$(SUFX).optrpt
@@ -142,6 +149,7 @@ clean:
 	-$(RM) zdpscl$(SUFX).o zdpscl$(SUFX).optrpt
 	-$(RM) zjac2$(SUFX).o zjac2$(SUFX).optrpt
 	-$(RM) zjac2f$(SUFX).o zjac2f$(SUFX).optrpt
+	-$(RM) zjrot$(SUFX).o zjrot$(SUFX).optrpt
 	-$(RM) znorme$(SUFX).o znorme$(SUFX).optrpt
 	-$(RM) znormx$(SUFX).o znormx$(SUFX).optrpt
 	-$(RM) zmerge$(SUFX).o zmerge$(SUFX).optrpt

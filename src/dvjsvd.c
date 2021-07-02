@@ -4,6 +4,7 @@
 #include "dnorme.h"
 #include "ddpscl.h"
 #include "djac2.h"
+#include "djrot.h"
 #include "vecdef.h"
 #include "defops.h"
 

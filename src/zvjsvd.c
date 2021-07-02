@@ -4,6 +4,7 @@
 #include "znorme.h"
 #include "zdpscl.h"
 #include "zjac2.h"
+#include "zjrot.h"
 #include "vecdef.h"
 #include "defops.h"
 
