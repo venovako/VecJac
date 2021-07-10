@@ -1,6 +1,7 @@
 #include "zjrot.h"
 
 #include "djrot.h"
+#include "vecdef.h"
 
 int zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], double xi[static restrict VDL], double yr[static restrict VDL], double yi[static restrict VDL], const double t[static restrict 1], const double c[static restrict 1], const double ca[static restrict 1], const double sa[static restrict 1])
 {
@@ -38,11 +39,74 @@ int zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], doub
     }
   }
 
+  alignas(16) double cstc[4];
+  _mm_store_pd(cstc, _mm_mul_pd(_mm_set_pd(*sa, *ca), _mm_set1_pd(*t)));
+  cstc[2] = -(cstc[0]);
+  cstc[3] = *c;
+
   if (*n < 0) { // permute
-    const fint n_ = -*n;
+    const fnat n_ = (fnat)-*n;
+#ifdef _OPENMP
+#pragma omp parallel default(none) shared(n_,cstc,xr,xi,yr,yi)
+#endif /* _OPENMP */
+    {
+      register const VD c_a = _mm512_set1_pd(cstc[0]);
+      register const VD s_a = _mm512_set1_pd(cstc[1]);
+      register const VD cna = _mm512_set1_pd(cstc[2]);
+      register const VD c_ = _mm512_set1_pd(cstc[3]);
+#ifdef _OPENMP
+#pragma omp for
+#endif /* _OPENMP */
+      for (fnat i = 0u; i < n_; i += VDL) {
+        double *const xri = xr + i;
+        double *const xii = xi + i;
+        double *const yri = yr + i;
+        double *const yii = yi + i;
+        register const VD x_r = _mm512_load_pd(xri);
+        register const VD x_i = _mm512_load_pd(xii);
+        register const VD y_r = _mm512_load_pd(yri);
+        register const VD y_i = _mm512_load_pd(yii);
+        register VD _r, _i;
+        VZFMA(_r,_i,y_r,y_i,c_a,s_a,x_r,x_i);
+        _mm512_store_pd(yri, _mm512_mul_pd(_r, c_));
+        _mm512_store_pd(yii, _mm512_mul_pd(_i, c_));
+        VZFMA(_r,_i,x_r,x_i,cna,s_a,y_r,y_i);
+        _mm512_store_pd(xri, _mm512_mul_pd(_r, c_));
+        _mm512_store_pd(xii, _mm512_mul_pd(_i, c_));
+      }
+    }
   }
   else { // no permute
-    const fint n_ = *n;
+    const fnat n_ = (fnat)*n;
+#ifdef _OPENMP
+#pragma omp parallel default(none) shared(n_,cstc,xr,xi,yr,yi)
+#endif /* _OPENMP */
+    {
+      register const VD c_a = _mm512_set1_pd(cstc[0]);
+      register const VD s_a = _mm512_set1_pd(cstc[1]);
+      register const VD cna = _mm512_set1_pd(cstc[2]);
+      register const VD c_ = _mm512_set1_pd(cstc[3]);
+#ifdef _OPENMP
+#pragma omp for
+#endif /* _OPENMP */
+      for (fnat i = 0u; i < n_; i += VDL) {
+        double *const xri = xr + i;
+        double *const xii = xi + i;
+        double *const yri = yr + i;
+        double *const yii = yi + i;
+        register const VD x_r = _mm512_load_pd(xri);
+        register const VD x_i = _mm512_load_pd(xii);
+        register const VD y_r = _mm512_load_pd(yri);
+        register const VD y_i = _mm512_load_pd(yii);
+        register VD _r, _i;
+        VZFMA(_r,_i,y_r,y_i,c_a,s_a,x_r,x_i);
+        _mm512_store_pd(xri, _mm512_mul_pd(_r, c_));
+        _mm512_store_pd(xii, _mm512_mul_pd(_i, c_));
+        VZFMA(_r,_i,x_r,x_i,cna,s_a,y_r,y_i);
+        _mm512_store_pd(yri, _mm512_mul_pd(_r, c_));
+        _mm512_store_pd(yii, _mm512_mul_pd(_i, c_));
+      }
+    }
   }
 
   return 0;
