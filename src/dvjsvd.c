@@ -181,22 +181,53 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             s[k_] = ((b & 1u) ? 2.0 : 1.0);
         }
       }
+      int rte = 0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,s,t,c,kk)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,s,t,c,kk) reduction(min:rte)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < kk; ++i) {
         const size_t _p = *(const size_t*)(a11 + i);
         const size_t _q = *(const size_t*)(a22 + i);
-        const double _s = s[i];
-        // TODO: apply the (_p,_q) transformations
+        double _t, _c;
+        fint _m, _n;
+        bool triv = false;
+        if (s[i] == -2.0) {
+          _m = -(fint)*m;
+          _n = -(fint)*n;
+          _t = t[i];
+          _c = c[i];
+        }
+        else if (s[i] == -1.0) {
+          _m = -(fint)*m;
+          _n = -(fint)*n;
+          _t = 0.0;
+          _c = 1.0;
+        }
+        else if (s[i] == 2.0) {
+          _m = (fint)*m;
+          _n = (fint)*n;
+          _t = t[i];
+          _c = c[i];
+        }
+        else // no-op
+          triv = true;
+        if (!triv && !rte) {
+          const int _g = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_t, &_c);
+          if (!(rte = ((rte <= _g) ? rte : _g))) {
+            const int _v = djrot_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_t, &_c);
+            rte = ((rte <= _v) ? rte : _v);
+          }
+        }
       }
+      if (rte)
+        return -19;
     }
     if (!swt)
       break;
     ++sw;
   }
 
-  // TODO: normalize U
+  // TODO: normalize U and extract S
 
   return (fint)sw;
 }

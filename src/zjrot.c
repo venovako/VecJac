@@ -23,9 +23,11 @@ int zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], doub
   if ((*sa == 0.0) && (fabs(*ca) == 1.0)) {
     // real rotation
     const double t_ = ((*ca == 1.0) ? *t : -*t);
-    const fint r = djrot_(n, xr, yr, &t_, c);
-    const fint i = djrot_(n, xi, yi, &t_, c);
-    return ((r <= i) ? r : i);
+    if (djrot_(n, xr, yr, &t_, c))
+      return -11;
+    if (djrot_(n, xi, yi, &t_, c))
+      return -12;
+    return 0;
   }
   if (*t == 0.0) {
     if (*c == 1.0)

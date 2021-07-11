@@ -204,22 +204,59 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             s[k_] = ((b & 1u) ? 2.0 : 1.0);
         }
       }
+      int rte = 0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,s,t,c,ca,sa,kk)
+#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,s,t,c,ca,sa,kk) reduction(min:rte)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < kk; ++i) {
         const size_t _p = *(const size_t*)(a11 + i);
         const size_t _q = *(const size_t*)(a22 + i);
-        const double _s = s[i];
-        // TODO: apply the (_p,_q) transformations
+        double _t, _c, _ca, _sa;
+        fint _m, _n;
+        bool triv = false;
+        if (s[i] == -2.0) {
+          _m = -(fint)*m;
+          _n = -(fint)*n;
+          _t = t[i];
+          _c = c[i];
+          _ca = ca[i];
+          _sa = sa[i];
+        }
+        else if (s[i] == -1.0) {
+          _m = -(fint)*m;
+          _n = -(fint)*n;
+          _t = 0.0;
+          _c = 1.0;
+          _ca = 1.0;
+          _sa = 0.0;
+        }
+        else if (s[i] == 2.0) {
+          _m = (fint)*m;
+          _n = (fint)*n;
+          _t = t[i];
+          _c = c[i];
+          _ca = ca[i];
+          _sa = sa[i];
+        }
+        else // no-op
+          triv = true;
+        if (!triv && !rte) {
+          const int _g = zjrot_(&_m, (Gr + _p * (*ldGr)), (Gi + _p * (*ldGi)), (Gr + _q * (*ldGr)), (Gi + _q * (*ldGi)), &_t, &_c, &_ca, &_sa);
+          if (!(rte = ((rte <= _g) ? rte : _g))) {
+            const int _v = zjrot_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_t, &_c, &_ca, &_sa);
+            rte = ((rte <= _v) ? rte : _v);
+          }
+        }
       }
+      if (rte)
+        return -23;
     }
     if (!swt)
       break;
     ++sw;
   }
 
-  // TODO: normalize U
+  // TODO: normalize U and extract S
 
   return (fint)sw;
 }
