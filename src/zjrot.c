@@ -20,23 +20,18 @@ int zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], doub
 
   if (!*n)
     return 0;
+  if ((*sa == 0.0) && (fabs(*ca) == 1.0)) {
+    // real rotation
+    const double t_ = ((*ca == 1.0) ? *t : -*t);
+    const fint r = djrot_(n, xr, yr, &t_, c);
+    const fint i = djrot_(n, xi, yi, &t_, c);
+    return ((r <= i) ? r : i);
+  }
   if (*t == 0.0) {
     if (*c == 1.0)
       return 0;
     // should never happen
     return -7;
-  }
-
-  if (*sa == 0.0) {
-    // real rotation
-    if (*ca == 1.0) {
-      const double t_ = *t;
-      return imax(djrot_(n, xr, yr, &t_, c), djrot_(n, xi, yi, &t_, c));
-    }
-    if (*ca == -1.0) {
-      const double t_ = -*t;
-      return imax(djrot_(n, xr, yr, &t_, c), djrot_(n, xi, yi, &t_, c));
-    }
   }
 
   alignas(16) double cstc[4];
@@ -50,8 +45,8 @@ int zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], doub
 #pragma omp parallel default(none) shared(n_,cstc,xr,xi,yr,yi)
 #endif /* _OPENMP */
     {
-      register const VD c_a = _mm512_set1_pd(cstc[0]);
-      register const VD s_a = _mm512_set1_pd(cstc[1]);
+      register const VD cta = _mm512_set1_pd(cstc[0]);
+      register const VD sta = _mm512_set1_pd(cstc[1]);
       register const VD cna = _mm512_set1_pd(cstc[2]);
       register const VD c_ = _mm512_set1_pd(cstc[3]);
 #ifdef _OPENMP
@@ -67,10 +62,10 @@ int zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], doub
         register const VD y_r = _mm512_load_pd(yri);
         register const VD y_i = _mm512_load_pd(yii);
         register VD _r, _i;
-        VZFMA(_r,_i,y_r,y_i,c_a,s_a,x_r,x_i);
+        VZFMA(_r,_i,y_r,y_i,cta,sta,x_r,x_i);
         _mm512_store_pd(yri, _mm512_mul_pd(_r, c_));
         _mm512_store_pd(yii, _mm512_mul_pd(_i, c_));
-        VZFMA(_r,_i,x_r,x_i,cna,s_a,y_r,y_i);
+        VZFMA(_r,_i,x_r,x_i,cna,sta,y_r,y_i);
         _mm512_store_pd(xri, _mm512_mul_pd(_r, c_));
         _mm512_store_pd(xii, _mm512_mul_pd(_i, c_));
       }
@@ -82,8 +77,8 @@ int zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], doub
 #pragma omp parallel default(none) shared(n_,cstc,xr,xi,yr,yi)
 #endif /* _OPENMP */
     {
-      register const VD c_a = _mm512_set1_pd(cstc[0]);
-      register const VD s_a = _mm512_set1_pd(cstc[1]);
+      register const VD cta = _mm512_set1_pd(cstc[0]);
+      register const VD sta = _mm512_set1_pd(cstc[1]);
       register const VD cna = _mm512_set1_pd(cstc[2]);
       register const VD c_ = _mm512_set1_pd(cstc[3]);
 #ifdef _OPENMP
@@ -99,10 +94,10 @@ int zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], doub
         register const VD y_r = _mm512_load_pd(yri);
         register const VD y_i = _mm512_load_pd(yii);
         register VD _r, _i;
-        VZFMA(_r,_i,y_r,y_i,c_a,s_a,x_r,x_i);
+        VZFMA(_r,_i,y_r,y_i,cta,sta,x_r,x_i);
         _mm512_store_pd(xri, _mm512_mul_pd(_r, c_));
         _mm512_store_pd(xii, _mm512_mul_pd(_i, c_));
-        VZFMA(_r,_i,x_r,x_i,cna,s_a,y_r,y_i);
+        VZFMA(_r,_i,x_r,x_i,cna,sta,y_r,y_i);
         _mm512_store_pd(yri, _mm512_mul_pd(_r, c_));
         _mm512_store_pd(yii, _mm512_mul_pd(_i, c_));
       }

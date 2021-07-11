@@ -13,17 +13,29 @@ int djrot_(const fint n[static restrict 1], double x[static restrict VDL], doubl
 
   if (!*n)
     return 0;
-  if (*t == 0.0) {
-    if (*c == 1.0)
-      return 0;
-    // should never happen
-    return -5;
-  }
 
   const double tc[2] = { *t, *c };
 
   if (*n < 0) { // permute
     const fnat n_ = (fnat)-*n;
+    if (*t == 0.0) {
+      if (*c == 1.0) {
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n_,x,y)
+#endif /* _OPENMP */
+        for (fnat i = 0u; i < n_; i += VDL) {
+          double *const xi = x + i;
+          double *const yi = y + i;
+          register const VD x_ = _mm512_load_pd(xi);
+          register const VD y_ = _mm512_load_pd(yi);
+          _mm512_store_pd(yi, x_);
+          _mm512_store_pd(xi, y_);
+        }
+        return 0;
+      }
+      // should never happen
+      return -5;
+    }
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(n_,tc,x,y)
 #endif /* _OPENMP */
@@ -44,6 +56,12 @@ int djrot_(const fint n[static restrict 1], double x[static restrict VDL], doubl
     }
   }
   else { // no permute
+    if (*t == 0.0) {
+      if (*c == 1.0)
+        return 0;
+      // should never happen
+      return -5;
+    }
     const fnat n_ = (fnat)*n;
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(n_,tc,x,y)
