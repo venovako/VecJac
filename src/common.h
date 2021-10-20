@@ -4,6 +4,7 @@
 #ifdef __ICC
 #include <mathimf.h>
 #ifndef USE_EXTENDED
+extern __float128 __fabsq(__float128);
 extern __float128 __fmaq(__float128, __float128, __float128);
 extern __float128 __fmaxq(__float128, __float128);
 extern __float128 __fminq(__float128, __float128);
@@ -31,6 +32,9 @@ extern __float128 __sqrtq(__float128);
 #define CMPLXL(r,i) ((long double)(r) + I * (long double)(i))
 #endif /* !CMPLXL */
 
+#ifdef fabsw
+#error fabsw already defined
+#endif /* fabsw */
 #ifdef fmaw
 #error fmaw already defined
 #endif /* fmaw */
@@ -77,6 +81,7 @@ extern __float128 __sqrtq(__float128);
 
 #ifdef USE_EXTENDED
 typedef long double wide;
+#define fabsw       fabsl
 #define fmaw        fmal
 #define fmaxw       fmaxl
 #define fminw       fminl
@@ -93,6 +98,7 @@ typedef long double wide;
 #define CMPLXW(r,i) CMPLXL((r),(i))
 #else /* USE_QUAD */
 typedef __float128  wide;
+#define fabsw       __fabsq
 #define fmaw        __fmaq
 #define fmaxw       __fmaxq
 #define fminw       __fminq
