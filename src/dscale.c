@@ -3,7 +3,7 @@
 #include "dnormx.h"
 #include "dzscal.h"
 
-int dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const fint e[static restrict 1])
+fint dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const fint e[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -23,7 +23,7 @@ int dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
   const double e_ = (double)*e;
 
 #ifdef _OPENMP
-  int t = 0;
+  fint t = 0;
 
 #pragma omp parallel for default(none) shared(m,n,A,ldA,e_) reduction(max:t)
   DZSCAL_LOOP(A,ldA);
@@ -38,7 +38,7 @@ int dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
 #endif /* ?_OPENMP */
 }
 
-int dlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const fnat l[static restrict 1], double M[static restrict 1], fint e[static restrict 1])
+fint dlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const fnat l[static restrict 1], double M[static restrict 1], fint e[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)

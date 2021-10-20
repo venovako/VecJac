@@ -1,9 +1,9 @@
 #include "dzjac2.h"
 
-int dzjac2_pp(const fnat n, const double *const restrict s, const double *const restrict c, const double l1[static restrict 1], const double l2[static restrict 1], const unsigned p[static restrict 1], double *const restrict L1, double *const restrict L2)
+fint dzjac2_pp(const fnat n, const double *const restrict s, const double *const restrict c, const double l1[static restrict 1], const double l2[static restrict 1], const unsigned p[static restrict 1], double *const restrict L1, double *const restrict L2)
 {
 #ifdef _OPENMP
-  int t = 0;
+  fint t = 0;
 #endif /* _OPENMP */
 
   if (s && c && L1 && L2) {

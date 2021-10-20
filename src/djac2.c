@@ -49,10 +49,10 @@ register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                     
 p[i >> VDLlg] = MD2U(P)
 #endif /* ?DJAC2_LOOP */
 
-int djac2_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21[static restrict VDL], double s[static restrict VDL], double t[static restrict VDL], double c[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
+fint djac2_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21[static restrict VDL], double s[static restrict VDL], double t[static restrict VDL], double c[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
 {
 #ifdef _OPENMP
-  int th = 0;
+  fint th = 0;
 
 #pragma omp parallel for default(none) shared(n,a11,a22,a21,s,t,c,l1,l2,p) reduction(max:th)
   for (fnat i = 0u; i < *n; i += VDL) {

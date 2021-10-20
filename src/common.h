@@ -207,7 +207,7 @@ typedef uint32_t fnat;
 #define LAPACK_Z(name) z##name##_
 #endif /* ?LAPACK_Z */
 
-static inline int imax(const int a, const int b)
+static inline fint imax(const fint a, const fint b)
 {
   return ((a >= b) ? a : b);
 }

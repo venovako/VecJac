@@ -1,6 +1,6 @@
 #include "aalloc.h"
 
-int salloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], float **const restrict A, fnat ldA[static restrict 1])
+fint salloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], float **const restrict A, fnat ldA[static restrict 1])
 {
   if (A)
     *A = (float*)NULL;
@@ -12,7 +12,7 @@ int salloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 
   const fnat k = *m & VSL_1;
   *ldA = (k ? (*m + (VSL - k)) : *m);
-  int t = 0;
+  fint t = 0;
 
   if (A) {
     const size_t s = (*n) * ((*ldA) * sizeof(float));
@@ -36,7 +36,7 @@ int salloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   return t;
 }
 
-int dalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], double **const restrict A, fnat ldA[static restrict 1])
+fint dalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], double **const restrict A, fnat ldA[static restrict 1])
 {
   if (A)
     *A = (double*)NULL;
@@ -48,7 +48,7 @@ int dalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
   const fnat k = *m & VDL_1;
   *ldA = (k ? (*m + (VDL - k)) : *m);
-  int t = 0;
+  fint t = 0;
 
   if (A) {
     const size_t s = (*n) * ((*ldA) * sizeof(double));
@@ -72,7 +72,7 @@ int dalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   return t;
 }
 
-int calloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], float complex **const restrict A, fnat ldA[static restrict 1], float **const restrict Ar, fnat ldAr[static restrict 1], float **const restrict Ai, fnat ldAi[static restrict 1])
+fint calloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], float complex **const restrict A, fnat ldA[static restrict 1], float **const restrict Ar, fnat ldAr[static restrict 1], float **const restrict Ai, fnat ldAi[static restrict 1])
 {
   if (A)
     *A = (float complex*)NULL;
@@ -90,7 +90,7 @@ int calloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 
   const fnat k = *m & VSL__2;
   *ldA = (k ? (*m + (VSL_2 - k)) : *m);
-  int t = 0;
+  fint t = 0;
 
   if (A) {
     const size_t s = (*n) * ((*ldA) * sizeof(float complex));
@@ -111,12 +111,12 @@ int calloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
     }
   }
 
-  const int tr = salloc2_(m, n, Ar, ldAr);
+  const fint tr = salloc2_(m, n, Ar, ldAr);
   if (tr < 0)
     return -5;
   t = imax(t, tr);
 
-  const int ti = salloc2_(m, n, Ai, ldAi);
+  const fint ti = salloc2_(m, n, Ai, ldAi);
   if (ti < 0)
     return -7;
   t = imax(t, ti);
@@ -124,7 +124,7 @@ int calloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   return t;
 }
 
-int zalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], double complex **const restrict A, fnat ldA[static restrict 1], double **const restrict Ar, fnat ldAr[static restrict 1], double **const restrict Ai, fnat ldAi[static restrict 1])
+fint zalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], double complex **const restrict A, fnat ldA[static restrict 1], double **const restrict Ar, fnat ldAr[static restrict 1], double **const restrict Ai, fnat ldAi[static restrict 1])
 {
   if (A)
     *A = (double complex*)NULL;
@@ -142,7 +142,7 @@ int zalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
   const fnat k = *m & VDL__2;
   *ldA = (k ? (*m + (VDL_2 - k)) : *m);
-  int t = 0;
+  fint t = 0;
 
   if (A) {
     const size_t s = (*n) * ((*ldA) * sizeof(double complex));
@@ -163,12 +163,12 @@ int zalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     }
   }
 
-  const int tr = dalloc2_(m, n, Ar, ldAr);
+  const fint tr = dalloc2_(m, n, Ar, ldAr);
   if (tr < 0)
     return -5;
   t = imax(t, tr);
 
-  const int ti = dalloc2_(m, n, Ai, ldAi);
+  const fint ti = dalloc2_(m, n, Ai, ldAi);
   if (ti < 0)
     return -7;
   t = imax(t, ti);

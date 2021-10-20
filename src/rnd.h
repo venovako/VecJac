@@ -104,7 +104,7 @@ static inline void wu2rand(wide t[static restrict 1], wide c[static restrict 1],
   sincosw((w2rand() * W_PI), j, r);
 }
 
-extern int gen_rand_(const size_t n[static restrict 1], const size_t s[static restrict 1], void *restrict r);
+extern fint gen_rand_(const size_t n[static restrict 1], const size_t s[static restrict 1], void *restrict r);
 
 extern void gensfrand_(const size_t n[static restrict 1], const float aub[static restrict 1], float r[static restrict 1]);
 extern void gendfrand_(const size_t n[static restrict 1], const double aub[static restrict 1], double r[static restrict 1]);

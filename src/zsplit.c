@@ -1,6 +1,6 @@
 #include "zsplit.h"
 
-int zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], const double complex A[static restrict VDL_2], const fnat ldA[static restrict 1], double Ar[static restrict VDL], const fnat ldAr[static restrict 1], double Ai[static restrict VDL], const fnat ldAi[static restrict 1])
+fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], const double complex A[static restrict VDL_2], const fnat ldA[static restrict 1], double Ar[static restrict VDL], const fnat ldAr[static restrict 1], double Ai[static restrict VDL], const fnat ldAi[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -28,7 +28,7 @@ int zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], co
 #endif /* !NDEBUG */
 
 #ifdef _OPENMP
-  int t = 0;
+  fint t = 0;
 
 #pragma omp parallel for default(none) shared(m,n,A,ldA,Ar,ldAr,Ai,ldAi) reduction(max:t)
   for (fnat j = 0u; j < *n; ++j) {

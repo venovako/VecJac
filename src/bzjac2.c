@@ -18,11 +18,11 @@ int main(int argc, char *argv[])
     (void)fprintf(stderr, "batch_size has to be a multiple of %u.\n", VDL);
     return EXIT_FAILURE;
   }
-  int th = 0;
+  fint th = 0;
 #ifdef _OPENMP
   th = omp_get_max_threads();
   if (n % th) {
-    (void)fprintf(stderr, "batch_size has to be a multiple of %d.\n", th);
+    (void)fprintf(stderr, "batch_size has to be a multiple of %d.\n", (int)th);
     return EXIT_FAILURE;
   }
 #endif /* _OPENMP */
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 #pragma omp parallel default(none) shared(ff,fg,fr,fj,a11,a22,a21r,a21i,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
-      const int mt =
+      const fint mt =
 #ifdef _OPENMP
         omp_get_thread_num()
 #else /* !_OPENMP */
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 #pragma omp parallel default(none) shared(fk,fl,l1,l2,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
-      const int mt =
+      const fint mt =
 #ifdef _OPENMP
         omp_get_thread_num()
 #else /* !_OPENMP */

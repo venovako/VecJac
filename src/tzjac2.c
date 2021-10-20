@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  (void)printf("zjac2=%d\n", zjac2_(&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, &p));
+  (void)printf("zjac2=%d\n", (int)zjac2_(&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, &p));
   (void)printf("%25s,%25s,%25s,%25s,%25s,%30s,%30s,%30s\n", "\"s\"", "\"t\"", "\"c\"", "\"ca\"", "\"sa\"", "\"L1\"", "\"L2\"", "\"RE\"");
   char a[31] = { '\0' };
   wide RE = W_MONE, ae = W_MONE, an = W_MONE, L1 = W_ZERO, L2 = W_ZERO;

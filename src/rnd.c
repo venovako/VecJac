@@ -46,7 +46,7 @@ static void gen_rand64(const size_t n, uint64_t r[static restrict 1])
     r[i] = uqrand();
 }
 
-int gen_rand_(const size_t n[static restrict 1], const size_t s[static restrict 1], void *restrict r)
+fint gen_rand_(const size_t n[static restrict 1], const size_t s[static restrict 1], void *restrict r)
 {
   if (!*n)
     return 0;

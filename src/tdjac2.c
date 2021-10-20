@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  (void)printf("djac2=%d\n", djac2_(&n, a11, a22, a21, s, t, c, l1, l2, &p));
+  (void)printf("djac2=%d\n", (int)djac2_(&n, a11, a22, a21, s, t, c, l1, l2, &p));
   (void)printf("%25s,%25s,%25s,%30s,%30s,%30s\n", "\"s\"", "\"t\"", "\"c\"", "\"L1\"", "\"L2\"", "\"RE\"");
   char a[31] = { '\0' };
   wide RE = W_MONE, ae = W_MONE, an = W_MONE, L1 = W_ZERO, L2 = W_ZERO;

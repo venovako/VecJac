@@ -13,11 +13,11 @@ int main(int argc, char *argv[])
   const size_t n = atoz(argv[2u]);
   if (!n)
     return EXIT_SUCCESS;
-  int th = 0;
+  fint th = 0;
 #ifdef _OPENMP
   th = omp_get_max_threads();
   if (n % th) {
-    (void)fprintf(stderr, "batch_size has to be a multiple of %d.\n", th);
+    (void)fprintf(stderr, "batch_size has to be a multiple of %d.\n", (int)th);
     return EXIT_FAILURE;
   }
 #endif /* _OPENMP */
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 #pragma omp parallel default(none) shared(ff,fg,fr,fj,a11,a22,a21r,a21i,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
-      const int mt =
+      const fint mt =
 #ifdef _OPENMP
         omp_get_thread_num()
 #else /* !_OPENMP */
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 #pragma omp parallel default(none) shared(fk,fl,t,cs1,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
-      const int mt =
+      const fint mt =
 #ifdef _OPENMP
         omp_get_thread_num()
 #else /* !_OPENMP */

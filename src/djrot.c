@@ -1,6 +1,6 @@
 #include "djrot.h"
 
-int djrot_(const fint n[static restrict 1], double x[static restrict VDL], double y[static restrict VDL], const double t[static restrict 1], const double c[static restrict 1])
+fint djrot_(const fint n[static restrict 1], double x[static restrict VDL], double y[static restrict VDL], const double t[static restrict 1], const double c[static restrict 1])
 {
   if (IS_NOT_VFPENV)
     return -6;
