@@ -54,3 +54,6 @@
 .svn/
 out/
 var/
+
+# AUX
+mac.mk

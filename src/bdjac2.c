@@ -39,7 +39,10 @@ int main(int argc, char *argv[])
   char *const fn = calloc((nl + 3u), sizeof(char));
   assert(fn);
   strcpy(fn, argv[1u])[nl] = '.';
-  const int fm = O_RDONLY | O_LARGEFILE;
+  int fm = O_RDONLY;
+#ifdef _LARGEFILE64_SOURCE
+  fm |= O_LARGEFILE;
+#endif /* _LARGEFILE64_SOURCE */
 
   fn[nl1] = 'k';
   const int fk = open(fn, fm);

@@ -11,13 +11,21 @@
 int open_ro_(const char bn[static restrict 1], const char ex[static restrict 1])
 {
   FNCAT(fn, bn, ex);
-  return open(fn, (O_RDONLY | O_LARGEFILE));
+  int oflag = O_RDONLY;
+#ifdef _LARGEFILE64_SOURCE
+  oflag |= O_LARGEFILE;
+#endif /* _LARGEFILE64_SOURCE */
+  return open(fn, oflag);
 }
 
 int open_wo_(const char bn[static restrict 1], const char ex[static restrict 1])
 {
   FNCAT(fn, bn, ex);
-  return open(fn, (O_WRONLY | O_CREAT | O_LARGEFILE), (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
+  int oflag = (O_WRONLY | O_CREAT);
+#ifdef _LARGEFILE64_SOURCE
+  oflag |= O_LARGEFILE;
+#endif /* _LARGEFILE64_SOURCE */
+  return open(fn, oflag, (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH));
 }
 
 int resizef_(const int fd[static restrict 1], const size_t sz[static restrict 1])
