@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 #endif /* !NDEBUG */
   uint64_t b = 0u, e = 0u;
   char s[31u] = { '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0' };
-  (void)fprintf(stdout, "\"IT\",\"DPs\",\"N2sd\",\"NEsd\",\"WDP\",\"DPre\",\"N2re\",\"NEre\"\n");
+  (void)fprintf(stdout, "\"IT\",\"DPs\",\"N2sd\",\"XPsd\",\"NEsd\",\"WDP\",\"DPre\",\"N2re\",\"XPre\",\"NEre\"\n");
   (void)fflush(stdout);
 
   for (size_t it = 0u; it < nit; ++it) {
@@ -72,6 +72,13 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
 
     b = rdtsc_beg(rd);
+    const wide xp = wdxp(n, x);
+    e = rdtsc_end(rd);
+    const long double xpl = tsc_lap(hz, b, e);
+    (void)fprintf(stdout, "%s,", xtoa(s, (xpl / dpl)));
+    (void)fflush(stdout);
+
+    b = rdtsc_beg(rd);
     const wide ne = wdne(n, x);
     e = rdtsc_end(rd);
     const long double nel = tsc_lap(hz, b, e);
@@ -81,9 +88,10 @@ int main(int argc, char *argv[])
     qsort(x, n, sizeof(double), (int (*)(const void*, const void*))dcmp);
     const wide sq = wdsq(n, x);
     (void)fprintf(stdout, "%s,", xtoa(s, (long double)sq));
-    (void)fprintf(stdout, "%s,", xtoa(s, qdnre(dp, sq)));
-    (void)fprintf(stdout, "%s,", xtoa(s, qdnre(n2, sq)));
-    (void)fprintf(stdout, "%s\n", xtoa(s, qdnre(ne, sq)));
+    (void)fprintf(stdout, "%s,", xtoa(s, xdnre(dp, sq)));
+    (void)fprintf(stdout, "%s,", xtoa(s, xdnre(n2, sq)));
+    (void)fprintf(stdout, "%s,", xtoa(s, xdnre(xp, sq)));
+    (void)fprintf(stdout, "%s\n", xtoa(s, xdnre(ne, sq)));
     (void)fflush(stdout);
   }
 

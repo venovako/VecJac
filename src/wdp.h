@@ -6,8 +6,8 @@
 extern wide wdsq(const fnat n, const double x[static restrict 1]);
 extern wide wdn2(const fnat n, const double x[static restrict 1]);
 extern wide wddp(const fnat n, const double x[static restrict 1]);
-
+extern wide wdxp(const fnat n, const double x[static restrict 1]);
 extern wide wdne(const fnat n, const double x[static restrict VDL]);
-extern long double qdnre(const wide c, const wide e);
+extern long double xdnre(const wide c, const wide e);
 
 #endif /* !WDP_H */
