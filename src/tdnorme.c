@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   (void)fflush(stderr);
 #endif /* !NDEBUG */
   uint64_t b = 0u, e = 0u;
-  char s[31u] = { '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0' };
+  char s[26u] = { '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0' };
   (void)fprintf(stdout, "\"IT\",\"DPs\",\"N2sd\",\"XPsd\",\"NEsd\",\"WDP\",\"DPre\",\"N2re\",\"XPre\",\"NEre\"\n");
   (void)fflush(stdout);
 
@@ -60,29 +60,29 @@ int main(int argc, char *argv[])
     b = rdtsc_beg(rd);
     const double dp = ddp(n, x);
     e = rdtsc_end(rd);
-    const long double dpl = tsc_lap(hz, b, e);
-    (void)fprintf(stdout, "%s,", xtoa(s, dpl));
+    const double dpl = (double)tsc_lap(hz, b, e);
+    (void)fprintf(stdout, "%s,", dtoa(s, dpl));
     (void)fflush(stdout);
 
     b = rdtsc_beg(rd);
     const double n2 = dn2(n, x);
     e = rdtsc_end(rd);
-    const long double n2l = tsc_lap(hz, b, e);
-    (void)fprintf(stdout, "%s,", xtoa(s, (n2l / dpl)));
+    const double n2l = (double)tsc_lap(hz, b, e);
+    (void)fprintf(stdout, "%s,", dtoa(s, (n2l / dpl)));
     (void)fflush(stdout);
 
     b = rdtsc_beg(rd);
     const double xp = xdp(n, x);
     e = rdtsc_end(rd);
-    const long double xpl = tsc_lap(hz, b, e);
-    (void)fprintf(stdout, "%s,", xtoa(s, (xpl / dpl)));
+    const double xpl = (double)tsc_lap(hz, b, e);
+    (void)fprintf(stdout, "%s,", dtoa(s, (xpl / dpl)));
     (void)fflush(stdout);
 
     b = rdtsc_beg(rd);
     const double ne = dne(n, x);
     e = rdtsc_end(rd);
-    const long double nel = tsc_lap(hz, b, e);
-    (void)fprintf(stdout, "%s,", xtoa(s, (nel / dpl)));
+    const double nel = (double)tsc_lap(hz, b, e);
+    (void)fprintf(stdout, "%s,", dtoa(s, (nel / dpl)));
     (void)fflush(stdout);
 
     qsort(x, n, sizeof(double), (int (*)(const void*, const void*))dcmp);
