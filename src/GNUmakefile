@@ -125,8 +125,14 @@ gen2rand$(SUFX).exe: gen2rand.c libvecjac$(SUFX).a $(MKFS)
 tdjac2$(SUFX).exe: tdjac2.c libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
-tdnorme$(SUFX).exe: tdnorme.c libvecjac$(SUFX).a $(MKFS)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+psort$(SUFX).o: psort.cpp psort.h $(MKFS)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+tdnorme$(SUFX).o: tdnorme.c libvecjac$(SUFX).a $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+tdnorme$(SUFX).exe: tdnorme$(SUFX).o psort$(SUFX).o libvecjac$(SUFX).a $(MKFS)
+	$(CXX) $(CXXFLAGS) tdnorme$(SUFX).o psort$(SUFX).o -o $@ $(LDFLAGS)
 
 tpjs$(SUFX).exe: tpjs.c libvecjac$(SUFX).a ../../JACSD/libjstrat$(DEBUG).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
@@ -173,6 +179,7 @@ clean:
 	-$(RM) bzlevd2$(SUFX).exe bzlevd2.optrpt
 	-$(RM) gen2rand$(SUFX).exe gen2rand.optrpt
 	-$(RM) tdjac2$(SUFX).exe tdjac2.optrpt
-	-$(RM) tdnorme$(SUFX).exe tdnorme.optrpt
+	-$(RM) psort$(SUFX).o psort$(SUFX).optrpt psort$(SUFX).opt.yaml
+	-$(RM) tdnorme$(SUFX).exe tdnorme$(SUFX).o tdnorme$(SUFX).optrpt
 	-$(RM) tpjs$(SUFX).exe tpjs.optrpt
 	-$(RM) tzjac2$(SUFX).exe tzjac2.optrpt

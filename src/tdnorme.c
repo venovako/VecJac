@@ -2,10 +2,12 @@
 #include "rnd.h"
 #include "timer.h"
 
-static int dcmp(const double x[static 1], const double y[static 1])
-{
-  return ((*x < *y) ? -1 : ((*y < *x) ? 1 : 0));
-}
+#include "psort.h"
+
+/* static int dcmp(const double x[static 1], const double y[static 1]) */
+/* { */
+/*   return ((*x < *y) ? -1 : ((*y < *x) ? 1 : 0)); */
+/* } */
 
 int main(int argc, char *argv[])
 {
@@ -53,8 +55,9 @@ int main(int argc, char *argv[])
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,x)
 #endif /* _OPENMP */
-    for (size_t i = 0u; i < n; ++i) {
-      x[i] = fabs(x[i]);
+    for (size_t i = 0u; i < n; i += VDL) {
+      double *const xi = x + i;
+      _mm512_store_pd(xi, _mm512_abs_pd(_mm512_load_pd(xi)));
     }
 
     b = rdtsc_beg(rd);
@@ -85,7 +88,8 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, "%s,", dtoa(s, (nel / dpl)));
     (void)fflush(stdout);
 
-    qsort(x, n, sizeof(double), (int (*)(const void*, const void*))dcmp);
+    /* qsort(x, n, sizeof(double), (int (*)(const void*, const void*))dcmp); */
+    dpsort(n, x);
     const double sq = wsq(n, x);
     (void)fprintf(stdout, "%s,", dtoa(s, sq));
     (void)fprintf(stdout, "%s,", dtoa(s, dre(dp, sq)));
