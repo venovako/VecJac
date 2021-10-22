@@ -1,6 +1,5 @@
 #include "znorme.h"
 
-#include "dkvsrt.h"
 #include "dznrme.h"
 
 double znorme_(const fnat m[static restrict 1], const double zr[static restrict VDL], const double zi[static restrict VDL], double e0[static restrict 1], double f0[static restrict 1], double e1[static restrict 1], double f1[static restrict 1])
@@ -19,7 +18,6 @@ double znorme_(const fnat m[static restrict 1], const double zr[static restrict 
   DZNRME_VARS;
   DZNRME_LOOP(zr,-4.0);
   DZNRME_LOOP(zi,-4.0);
-  VDKVSORT(re,rf);
   VDEFRED(re,rf);
   DZNRME_RET;
 }

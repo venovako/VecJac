@@ -58,40 +58,40 @@ int main(int argc, char *argv[])
     }
 
     b = rdtsc_beg(rd);
-    const wide dp = wddp(n, x);
+    const double dp = ddp(n, x);
     e = rdtsc_end(rd);
     const long double dpl = tsc_lap(hz, b, e);
     (void)fprintf(stdout, "%s,", xtoa(s, dpl));
     (void)fflush(stdout);
 
     b = rdtsc_beg(rd);
-    const wide n2 = wdn2(n, x);
+    const double n2 = dn2(n, x);
     e = rdtsc_end(rd);
     const long double n2l = tsc_lap(hz, b, e);
     (void)fprintf(stdout, "%s,", xtoa(s, (n2l / dpl)));
     (void)fflush(stdout);
 
     b = rdtsc_beg(rd);
-    const wide xp = wdxp(n, x);
+    const double xp = xdp(n, x);
     e = rdtsc_end(rd);
     const long double xpl = tsc_lap(hz, b, e);
     (void)fprintf(stdout, "%s,", xtoa(s, (xpl / dpl)));
     (void)fflush(stdout);
 
     b = rdtsc_beg(rd);
-    const wide ne = wdne(n, x);
+    const double ne = dne(n, x);
     e = rdtsc_end(rd);
     const long double nel = tsc_lap(hz, b, e);
     (void)fprintf(stdout, "%s,", xtoa(s, (nel / dpl)));
     (void)fflush(stdout);
 
     qsort(x, n, sizeof(double), (int (*)(const void*, const void*))dcmp);
-    const wide sq = wdsq(n, x);
-    (void)fprintf(stdout, "%s,", xtoa(s, (long double)sq));
-    (void)fprintf(stdout, "%s,", xtoa(s, xdnre(dp, sq)));
-    (void)fprintf(stdout, "%s,", xtoa(s, xdnre(n2, sq)));
-    (void)fprintf(stdout, "%s,", xtoa(s, xdnre(xp, sq)));
-    (void)fprintf(stdout, "%s\n", xtoa(s, xdnre(ne, sq)));
+    const double sq = wsq(n, x);
+    (void)fprintf(stdout, "%s,", dtoa(s, sq));
+    (void)fprintf(stdout, "%s,", dtoa(s, dre(dp, sq)));
+    (void)fprintf(stdout, "%s,", dtoa(s, dre(n2, sq)));
+    (void)fprintf(stdout, "%s,", dtoa(s, dre(xp, sq)));
+    (void)fprintf(stdout, "%s\n", dtoa(s, dre(ne, sq)));
     (void)fflush(stdout);
   }
 

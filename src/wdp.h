@@ -3,11 +3,11 @@
 
 #include "vec.h"
 
-extern wide wdsq(const fnat n, const double x[static restrict 1]);
-extern wide wdn2(const fnat n, const double x[static restrict 1]);
-extern wide wddp(const fnat n, const double x[static restrict 1]);
-extern wide wdxp(const fnat n, const double x[static restrict 1]);
-extern wide wdne(const fnat n, const double x[static restrict VDL]);
-extern long double xdnre(const wide c, const wide e);
+extern double wsq(const fnat n, const double x[static restrict 1]);
+extern double dn2(const fnat n, const double x[static restrict 1]);
+extern double ddp(const fnat n, const double x[static restrict 1]);
+extern double xdp(const fnat n, const double x[static restrict 1]);
+extern double dne(const fnat n, const double x[static restrict VDL]);
+extern double dre(const double c, const double e);
 
 #endif /* !WDP_H */
