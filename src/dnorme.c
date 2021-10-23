@@ -1,6 +1,7 @@
 #include "dnorme.h"
 
 #include "dznrme.h"
+#include "dkvsrt.h"
 
 double dnorme_(const fnat m[static restrict 1], const double x[static restrict VDL], double e0[static restrict 1], double f0[static restrict 1], double e1[static restrict 1], double f1[static restrict 1])
 {
@@ -15,6 +16,7 @@ double dnorme_(const fnat m[static restrict 1], const double x[static restrict V
 
   DZNRME_VARS;
   DZNRME_LOOP(x,-3.0);
+  VDKVSORT(re,rf);
   VDEFRED(re,rf);
   DZNRME_RET;
 }

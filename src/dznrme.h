@@ -1,15 +1,15 @@
 #ifndef DZNRME_H
 #define DZNRME_H
 
-#include "vecdef.h"
-#include "d8sort.h"
+//#include "vecdef.h"
+//#include "d8sort.h"
 #include "defops.h"
 
 #ifdef DZNRME_VARS0
 #error DZNRME_VARS0 already defined
 #else /* !DZNRME_VARS0 */
+// register const VD m0 = _mm512_set1_pd(-0.0);
 #define DZNRME_VARS0                                  \
-  register const VD m0 = _mm512_set1_pd(-0.0);        \
   register const VD _inf = _mm512_set1_pd(-HUGE_VAL); \
   register const VD _one = _mm512_set1_pd(-1.0);      \
   register const VD  one = _mm512_set1_pd( 1.0);      \
@@ -58,14 +58,14 @@
 #ifdef DZNRME_LOOP
 #error DZNRME_LOOP already defined
 #else /* !DZNRME_LOOP */
+// xi = VDABS(xi); VDP(xi);
+// VDSORT(xi); VDP(xi);
 #define DZNRME_LOOP(x,ec)                                             \
   for (fnat i = 0u; i < *m; i += VDL) {                               \
     register VD xi = _mm512_load_pd((x) + i); VDP(xi);                \
     register const VD reh = VDLSB(re); VDP(reh);                      \
-    xi = VDABS(xi); VDP(xi);                                          \
     register const VD rep = _mm512_sub_pd(re, reh); VDP(rep);         \
     register const VD rfp = _mm512_scalef_pd(rf, reh); VDP(rfp);      \
-    VDSORT(xi); VDP(xi);                                              \
     register const VD fi = VDMANT(xi); VDP(fi);                       \
     register const VD ei = _mm512_getexp_pd(xi); VDP(ei);             \
     ASSERT_FINITE(ec);                                                \
