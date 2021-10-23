@@ -2,12 +2,14 @@
 #include "rnd.h"
 #include "timer.h"
 
+#ifdef TDNORME_SEQSRT
+static int dcmp(const double x[static 1], const double y[static 1])
+{
+  return ((*x < *y) ? -1 : ((*y < *x) ? 1 : 0));
+}
+#else /* !TDNORME_SEQSRT */
 #include "psort.h"
-
-/* static int dcmp(const double x[static 1], const double y[static 1]) */
-/* { */
-/*   return ((*x < *y) ? -1 : ((*y < *x) ? 1 : 0)); */
-/* } */
+#endif /* ?TDNORME_SEQSRT */
 
 int main(int argc, char *argv[])
 {
@@ -44,7 +46,7 @@ int main(int argc, char *argv[])
 #endif /* !NDEBUG */
   uint64_t b = 0u, e = 0u;
   char s[26u] = { '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0' };
-  (void)fprintf(stdout, "\"IT\",\"DPs\",\"N2sd\",\"XPsd\",\"NEsd\",\"WDP\",\"DPre\",\"N2re\",\"XPre\",\"NEre\"\n");
+  (void)fprintf(stdout, "\"IT\",\"DPs\",\"NFsd\",\"N2sd\",\"XPsd\",\"NEsd\",\"WDP\",\"DPre\",\"NFre\",\"N2re\",\"XPre\",\"NEre\"\n");
   (void)fflush(stdout);
 
   for (size_t it = 0u; it < nit; ++it) {
@@ -61,10 +63,16 @@ int main(int argc, char *argv[])
     }
 
     b = rdtsc_beg(rd);
+    const double nf = dnf(n, x);
+    e = rdtsc_end(rd);
+    const double nfl = (double)tsc_lap(hz, b, e);
+
+    b = rdtsc_beg(rd);
     const double dp = ddp(n, x);
     e = rdtsc_end(rd);
     const double dpl = (double)tsc_lap(hz, b, e);
     (void)fprintf(stdout, "%s,", dtoa(s, dpl));
+    (void)fprintf(stdout, "%s,", dtoa(s, (nfl / dpl)));
     (void)fflush(stdout);
 
     b = rdtsc_beg(rd);
@@ -88,11 +96,16 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, "%s,", dtoa(s, (nel / dpl)));
     (void)fflush(stdout);
 
-    /* qsort(x, n, sizeof(double), (int (*)(const void*, const void*))dcmp); */
+#ifdef TDNORME_SEQSRT
+    qsort(x, n, sizeof(double), (int (*)(const void*, const void*))dcmp);
+#else /* !TDNORME_SEQSRT */
     dpsort(n, x);
+#endif /* ?TDNORME_SEQSRT */
+
     const double sq = wsq(n, x);
     (void)fprintf(stdout, "%s,", dtoa(s, sq));
     (void)fprintf(stdout, "%s,", dtoa(s, dre(dp, sq)));
+    (void)fprintf(stdout, "%s,", dtoa(s, dre(nf, sq)));
     (void)fprintf(stdout, "%s,", dtoa(s, dre(n2, sq)));
     (void)fprintf(stdout, "%s,", dtoa(s, dre(xp, sq)));
     (void)fprintf(stdout, "%s\n", dtoa(s, dre(ne, sq)));
