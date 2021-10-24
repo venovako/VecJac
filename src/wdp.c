@@ -45,11 +45,13 @@ double dne(const fnat n, const double x[static restrict VDL])
 
 double dnf(const fnat n, const double x[static restrict VDL])
 {
+#ifdef DZNRME_SEQRED
   alignas(VA) double sq[VDL]
 #ifndef NDEBUG
     = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }
 #endif /* !NDEBUG */
     ;
+#endif /* DZNRME_SEQRED */
   register __m512d vsq = _mm512_setzero_pd();
   for (fnat i = 0u; i < n; i += VDL) {
     register __m512d xi = _mm512_load_pd(x + i);
@@ -61,13 +63,8 @@ double dnf(const fnat n, const double x[static restrict VDL])
 #ifndef DZNRME_ITSORT
   VDSORT(vsq);
 #endif /* !DZNRME_ITSORT */
-  _mm512_store_pd(sq, vsq);
 #ifdef DZNRME_SEQRED
-  double s = 0.0;
-  for (fnat i = 0u; i < VDL; ++i)
-    s += sq[i];
-  return sqrt(s);
-#else /* !DZNRME_SEQRED */
+  _mm512_store_pd(sq, vsq);
   sq[0u] += sq[1u];
   sq[2u] += sq[3u];
   sq[4u] += sq[5u];
@@ -76,6 +73,12 @@ double dnf(const fnat n, const double x[static restrict VDL])
   sq[4u] += sq[6u];
   sq[0u] += sq[4u];
   return sqrt(*sq);
+#else /* !DZNRME_SEQRED */
+  vsq = _mm512_permutexvar_pd(_mm512_set_epi64(7, 6, 3, 2, 5, 4, 1, 0), vsq);
+  register const __m256d sq4 = _mm256_hadd_pd(_mm512_extractf64x4_pd(vsq, 0), _mm512_extractf64x4_pd(vsq, 1));
+  register const __m128d sq2 = _mm_hadd_pd(_mm256_extractf128_pd(sq4, 0), _mm256_extractf128_pd(sq4, 1));
+  register const __m128 sqs = _mm_castpd_ps(sq2);
+  return sqrt(_mm_cvtsd_f64(sq2) + _mm_cvtsd_f64(_mm_movehl_ps(sqs, sqs)));
 #endif /* ?DZNRME_SEQRED */
 }
 
