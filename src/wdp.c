@@ -18,13 +18,13 @@ double wsq(const fnat n, const double x[static restrict 1])
 double dn2(const fnat n, const double x[static restrict 1])
 {
   const fint incx = 1;
-  return BLAS_D(nrm2)(&n, x, &incx);
+  return BLAS_D(nrm2)((const long long*)&n, x, &incx);
 }
 
 double ddp(const fnat n, const double x[static restrict 1])
 {
   const fint incx = 1;
-  return sqrt(BLAS_D(dot)(&n, x, &incx, x, &incx));
+  return sqrt(BLAS_D(dot)((const long long*)&n, x, &incx, x, &incx));
 }
 
 double xdp(const fnat n, const double x[static restrict 1])
@@ -78,7 +78,8 @@ double dnf(const fnat n, const double x[static restrict VDL])
   register const __m256d sq4 = _mm256_hadd_pd(_mm512_extractf64x4_pd(vsq, 0), _mm512_extractf64x4_pd(vsq, 1));
   register const __m128d sq2 = _mm_hadd_pd(_mm256_extractf128_pd(sq4, 0), _mm256_extractf128_pd(sq4, 1));
   register const __m128 sqs = _mm_castpd_ps(sq2);
-  return sqrt(_mm_cvtsd_f64(sq2) + _mm_cvtsd_f64(_mm_movehl_ps(sqs, sqs)));
+  register const __m128d sqd = _mm_castps_pd(_mm_movehl_ps(sqs, sqs));
+  return sqrt(_mm_cvtsd_f64(sq2) + _mm_cvtsd_f64(sqd));
 #endif /* ?DZNRME_SEQRED */
 }
 

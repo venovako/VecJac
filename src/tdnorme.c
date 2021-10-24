@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   unsigned rd[2u] = { 0u, 0u };
   const uint64_t hz = tsc_get_freq_hz_(rd);
 #ifndef NDEBUG
-  (void)fprintf(stderr, "TSC frequency: %lu Hz\n", hz);
+  (void)fprintf(stderr, "TSC frequency: %llu+(%u/%u) Hz.\n", (unsigned long long)hz, rd[0u], rd[1u]);
   (void)fflush(stderr);
 #endif /* !NDEBUG */
   uint64_t b = 0u, e = 0u;

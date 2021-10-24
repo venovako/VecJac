@@ -3,21 +3,21 @@
 
 #include "vec.h"
 
-// assumes m0 = _mm512_set1_ps(-0.0f)
+// assumes _zero = _mm512_set1_ps(-0.0f)
 #ifdef VSABS
 #error VSABS already defined
 #else /* !VSABS */
-#define VSABS(x) VSANDNOT(m0,(x))
+#define VSABS(x) VSANDNOT(_zero,(x))
 #endif /* ?VSABS */
 #ifdef VSNEG
 #error VSNEG already defined
 #else /* !VSNEG */
-#define VSNEG(x) VSXOR((x),m0)
+#define VSNEG(x) VSXOR((x),_zero)
 #endif /* ?VSNEG */
 #ifdef VSSGN
 #error VSSGN already defined
 #else /* !VSSGN */
-#define VSSGN(x) VSAND((x),m0)
+#define VSSGN(x) VSAND((x),_zero)
 #endif /* ?VSSGN */
 #ifdef VCFMA
 #error VCFMA already defined
@@ -27,21 +27,21 @@
   di=_mm512_fmadd_ps(ar,bi,_mm512_fmadd_ps(ai,br,ci))
 #endif /* ?VCFMA */
 
-// assumes m0 = _mm512_set1_pd(-0.0)
+// assumes _zero = _mm512_set1_pd(-0.0)
 #ifdef VDABS
 #error VDABS already defined
 #else /* !VDABS */
-#define VDABS(x) VDANDNOT(m0,(x))
+#define VDABS(x) VDANDNOT(_zero,(x))
 #endif /* ?VDABS */
 #ifdef VDNEG
 #error VDNEG already defined
 #else /* !VDNEG */
-#define VDNEG(x) VDXOR((x),m0)
+#define VDNEG(x) VDXOR((x),_zero)
 #endif /* ?VDNEG */
 #ifdef VDSGN
 #error VDSGN already defined
 #else /* !VDSGN */
-#define VDSGN(x) VDAND((x),m0)
+#define VDSGN(x) VDAND((x),_zero)
 #endif /* ?VDSGN */
 #ifdef VZFMA
 #error VZFMA already defined

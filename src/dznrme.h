@@ -36,8 +36,8 @@
 #error DZNRME_VARS2 already defined
 #else /* !DZNRME_VARS2 */
 #ifdef DZNRME_ITSORT
-#define DZNRME_VARS2                           \
-  register const VD m0 = _mm512_set1_pd(-0.0); \
+#define DZNRME_VARS2                              \
+  register const VD _zero = _mm512_set1_pd(-0.0); \
   DZNRME_VARS1
 #else /* !DZNRME_ITSORT */
 #define DZNRME_VARS2 DZNRME_VARS1

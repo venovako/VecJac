@@ -7,12 +7,12 @@
 #ifdef DZNRMF_VARS0
 #error DZNRMF_VARS0 already defined
 #else /* !DZNRMF_VARS0 */
-#define DZNRMF_VARS0                                  \
-  register const VD _inf = _mm512_set1_pd(-HUGE_VAL); \
-  register const VD _one = _mm512_set1_pd(-1.0);      \
-  register const VD m0 = _mm512_set1_pd(-0.0);        \
-  register const VD  one = _mm512_set1_pd( 1.0);      \
-  register VD re = _inf;                              \
+#define DZNRMF_VARS0                                   \
+  register const VD  _inf = _mm512_set1_pd(-HUGE_VAL); \
+  register const VD  _one = _mm512_set1_pd(-1.0);      \
+  register const VD _zero = _mm512_set1_pd(-0.0);      \
+  register const VD   one = _mm512_set1_pd( 1.0);      \
+  register VD re = _inf;                               \
   register VD rf =  one
 #endif /* ?DZNRMF_VARS0 */
 
