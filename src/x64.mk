@@ -43,21 +43,30 @@ OPTFLAGS=-O0 -xHost -qopt-multi-version-aggressive
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -check=stack,uninit -DPRINTOUT=stderr
 ifneq ($(ARCH),Darwin) # Linux
 DBGFLAGS += -debug parallel
-endif # ?Linux
+endif # Linux
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
-LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_MKL
+LIBFLAGS=-I. -I../../JACSD/jstrat
+ifndef LAPACK
+LIBFLAGS += -DUSE_MKL
 ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
 LIBFLAGS += -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
+endif # MKL
 LDFLAGS=-L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
+ifdef LAPACK
+LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas -lifcoremt
+else # MKL
 ifeq ($(ARCH),Darwin)
 LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib -lmkl_intel_$(ABI) -lmkl_sequential -lmkl_core
 else # Linux
-LIBFLAGS += -static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
 LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_intel_$(ABI) -lmkl_sequential -lmkl_core
 endif # ?Darwin
+endif # ?LAPACK
+ifneq ($(ARCH),Darwin) # Linux
+LIBFLAGS += -static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
+endif # Linux
 LDFLAGS += -lpthread -lm -ldl
 CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
 CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)

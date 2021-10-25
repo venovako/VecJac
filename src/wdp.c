@@ -18,13 +18,13 @@ double wsq(const fnat n, const double x[static restrict 1])
 double dn2(const fnat n, const double x[static restrict 1])
 {
   const fint incx = 1;
-  return BLAS_D(nrm2)((const long long*)&n, x, &incx);
+  return BLAS_D(nrm2)((const fint*)&n, x, &incx);
 }
 
 double ddp(const fnat n, const double x[static restrict 1])
 {
   const fint incx = 1;
-  return sqrt(BLAS_D(dot)((const long long*)&n, x, &incx, x, &incx));
+  return sqrt(BLAS_D(dot)((const fint*)&n, x, &incx, x, &incx));
 }
 
 double xdp(const fnat n, const double x[static restrict 1])
