@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 #endif /* !NDEBUG */
   uint64_t b = 0u, e = 0u;
   char s[26u] = { '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0' };
-  (void)fprintf(stdout, "\"IT\",\"DPs\",\"NFsd\",\"N2sd\",\"XPsd\",\"NEsd\",\"WDP\",\"DPre\",\"NFre\",\"N2re\",\"XPre\",\"NEre\"\n");
+  (void)fprintf(stdout, "\"IT\",\"DPs\",\"NDsd\",\"N2sd\",\"XPsd\",\"NEsd\",\"WDP\",\"DPre\",\"NDre\",\"N2re\",\"XPre\",\"NEre\"\n");
   (void)fflush(stdout);
 
   for (size_t it = 0u; it < nit; ++it) {
@@ -63,16 +63,16 @@ int main(int argc, char *argv[])
     }
 
     b = rdtsc_beg(rd);
-    const double nf = dnf(n, x);
+    const double nd = dnd(n, x);
     e = rdtsc_end(rd);
-    const double nfl = (double)tsc_lap(hz, b, e);
+    const double ndl = (double)tsc_lap(hz, b, e);
 
     b = rdtsc_beg(rd);
     const double dp = ddp(n, x);
     e = rdtsc_end(rd);
     const double dpl = (double)tsc_lap(hz, b, e);
     (void)fprintf(stdout, "%s,", dtoa(s, dpl));
-    (void)fprintf(stdout, "%s,", dtoa(s, (nfl / dpl)));
+    (void)fprintf(stdout, "%s,", dtoa(s, (ndl / dpl)));
     (void)fflush(stdout);
 
     b = rdtsc_beg(rd);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     const double sq = wsq(n, x);
     (void)fprintf(stdout, "%s,", dtoa(s, sq));
     (void)fprintf(stdout, "%s,", dtoa(s, dre(dp, sq)));
-    (void)fprintf(stdout, "%s,", dtoa(s, dre(nf, sq)));
+    (void)fprintf(stdout, "%s,", dtoa(s, dre(nd, sq)));
     (void)fprintf(stdout, "%s,", dtoa(s, dre(n2, sq)));
     (void)fprintf(stdout, "%s,", dtoa(s, dre(xp, sq)));
     (void)fprintf(stdout, "%s\n", dtoa(s, dre(ne, sq)));

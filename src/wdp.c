@@ -15,11 +15,19 @@ double wsq(const fnat n, const double x[static restrict 1])
   return (double)sqrtw(sq);
 }
 
+#ifndef USE_MKL
+extern double BLAS_D(nrm2)(const fint n[static 1], const double x[static 1], const fint incx[static 1]);
+#endif /* !USE_MKL */
+
 double dn2(const fnat n, const double x[static restrict 1])
 {
   const fint incx = 1;
   return BLAS_D(nrm2)((const fint*)&n, x, &incx);
 }
+
+#ifndef USE_MKL
+extern double BLAS_D(dot)(const fint n[static 1], const double x[static 1], const fint incx[static 1], const double y[static 1], const fint incy[static 1]);
+#endif /* !USE_MKL */
 
 double ddp(const fnat n, const double x[static restrict 1])
 {
@@ -27,23 +35,26 @@ double ddp(const fnat n, const double x[static restrict 1])
   return sqrt(BLAS_D(dot)((const fint*)&n, x, &incx, x, &incx));
 }
 
-double xdp(const fnat n, const double x[static restrict 1])
+double xdp(const fnat n, const double x[static restrict VDL])
 {
-  long double sq = 0.0L;
-  for (fnat i = 0u; i < n; ++i) {
-    const long double l = x[i];
-    sq += (l * l);
+  long double sq[VDL] = { 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L, 0.0L };
+  for (fnat i = 0u; i < n; i += VDL) {
+    for (fnat j = 0u; j < VDL; ++j) {
+      const long double l = x[i + j];
+      sq[j] += (l * l);
+    }
   }
-  return (double)sqrtl(sq);
+  sq[0u] += sq[1u];
+  sq[2u] += sq[3u];
+  sq[4u] += sq[5u];
+  sq[6u] += sq[7u];
+  sq[0u] += sq[2u];
+  sq[4u] += sq[6u];
+  sq[0u] += sq[4u];
+  return (double)sqrtl(*sq);
 }
 
-double dne(const fnat n, const double x[static restrict VDL])
-{
-  double e0, f0, e1, f1;
-  return dnorme_(&n, x, &e0, &f0, &e1, &f1);
-}
-
-double dnf(const fnat n, const double x[static restrict VDL])
+double dnd(const fnat n, const double x[static restrict VDL])
 {
 #ifdef DZNRME_SEQRED
   alignas(VA) double sq[VDL]
@@ -81,6 +92,12 @@ double dnf(const fnat n, const double x[static restrict VDL])
   register const __m128d sqd = _mm_castps_pd(_mm_movehl_ps(sqs, sqs));
   return sqrt(_mm_cvtsd_f64(sq2) + _mm_cvtsd_f64(sqd));
 #endif /* ?DZNRME_SEQRED */
+}
+
+double dne(const fnat n, const double x[static restrict VDL])
+{
+  double e0, f0, e1, f1;
+  return dnorme_(&n, x, &e0, &f0, &e1, &f1);
 }
 
 double dre(const double c, const double e)
