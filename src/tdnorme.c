@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 #endif /* !NDEBUG */
   uint64_t b = 0u, e = 0u;
   char s[26u] = { '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0' };
-  (void)fprintf(stdout, "\"IT\",\"DPs\",\"NDsd\",\"N2sd\",\"XPsd\",\"NEsd\",\"WDP\",\"DPre\",\"NDre\",\"N2re\",\"XPre\",\"NEre\"\n");
+  (void)fprintf(stdout, "\"IT\",\"NBs\",\"DPs\",\"N2s\",\"NFs\",\"NEs\",\"NSs\",\"NCs\",\"NDs\",\"WDP\",\"NBre\",\"DPre\",\"N2re\",\"NFre\",\"NEre\",\"NSre\",\"NCre\",\"NDre\"\n");
   (void)fflush(stdout);
 
   for (size_t it = 0u; it < nit; ++it) {
@@ -62,38 +62,60 @@ int main(int argc, char *argv[])
       _mm512_store_pd(xi, _mm512_abs_pd(_mm512_load_pd(xi)));
     }
 
+    // call the reference BLAS for warmup
     b = rdtsc_beg(rd);
-    const double nd = dnd(n, x);
+    const double nb = dnb(n, x);
     e = rdtsc_end(rd);
-    const double ndl = (double)tsc_lap(hz, b, e);
+    (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
+    (void)fflush(stdout);
 
+    // call the MKL: ddot
     b = rdtsc_beg(rd);
     const double dp = ddp(n, x);
     e = rdtsc_end(rd);
-    const double dpl = (double)tsc_lap(hz, b, e);
-    (void)fprintf(stdout, "%s,", dtoa(s, dpl));
-    (void)fprintf(stdout, "%s,", dtoa(s, (ndl / dpl)));
+    (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
     (void)fflush(stdout);
 
+    // call the MKL: dnrm2
     b = rdtsc_beg(rd);
     const double n2 = dn2(n, x);
     e = rdtsc_end(rd);
-    const double n2l = (double)tsc_lap(hz, b, e);
-    (void)fprintf(stdout, "%s,", dtoa(s, (n2l / dpl)));
+    (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
     (void)fflush(stdout);
 
+    // use long double: dnormf
     b = rdtsc_beg(rd);
-    const double xp = xdp(n, x);
+    const double nf = dnf(n, x);
     e = rdtsc_end(rd);
-    const double xpl = (double)tsc_lap(hz, b, e);
-    (void)fprintf(stdout, "%s,", dtoa(s, (xpl / dpl)));
+    (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
     (void)fflush(stdout);
 
+    // dnorme
     b = rdtsc_beg(rd);
     const double ne = dne(n, x);
     e = rdtsc_end(rd);
-    const double nel = (double)tsc_lap(hz, b, e);
-    (void)fprintf(stdout, "%s,", dtoa(s, (nel / dpl)));
+    (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
+    (void)fflush(stdout);
+
+    // dnorms
+    b = rdtsc_beg(rd);
+    const double ns = dns(n, x);
+    e = rdtsc_end(rd);
+    (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
+    (void)fflush(stdout);
+
+    // simple overflowing dnorme
+    b = rdtsc_beg(rd);
+    const double nc = dne(n, x);
+    e = rdtsc_end(rd);
+    (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
+    (void)fflush(stdout);
+
+    // simple overflowing dnorms
+    b = rdtsc_beg(rd);
+    const double nd = dns(n, x);
+    e = rdtsc_end(rd);
+    (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
     (void)fflush(stdout);
 
 #ifdef TDNORME_SEQSRT
@@ -102,13 +124,18 @@ int main(int argc, char *argv[])
     dpsort(n, x);
 #endif /* ?TDNORME_SEQSRT */
 
+    // use wide precision
     const double sq = wsq(n, x);
     (void)fprintf(stdout, "%s,", dtoa(s, sq));
+
+    (void)fprintf(stdout, "%s,", dtoa(s, dre(nb, sq)));
     (void)fprintf(stdout, "%s,", dtoa(s, dre(dp, sq)));
-    (void)fprintf(stdout, "%s,", dtoa(s, dre(nd, sq)));
     (void)fprintf(stdout, "%s,", dtoa(s, dre(n2, sq)));
-    (void)fprintf(stdout, "%s,", dtoa(s, dre(xp, sq)));
-    (void)fprintf(stdout, "%s\n", dtoa(s, dre(ne, sq)));
+    (void)fprintf(stdout, "%s,", dtoa(s, dre(nf, sq)));
+    (void)fprintf(stdout, "%s,", dtoa(s, dre(ne, sq)));
+    (void)fprintf(stdout, "%s,", dtoa(s, dre(ns, sq)));
+    (void)fprintf(stdout, "%s,", dtoa(s, dre(nc, sq)));
+    (void)fprintf(stdout, "%s\n", dtoa(s, dre(nd, sq)));
     (void)fflush(stdout);
   }
 

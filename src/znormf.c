@@ -1,25 +1,26 @@
 #include "znormf.h"
 
 #include "dznrmf.h"
-#include "dkvsrt.h"
 
-double znormf_(const fnat m[static restrict 1], const double zr[static restrict VDL], const double zi[static restrict VDL], double e0[static restrict 1], double f0[static restrict 1], double e1[static restrict 1], double f1[static restrict 1])
+double znormf_(const fnat m[static restrict 1], const double zr[static restrict 1], const double zi[static restrict 1], double e0[static restrict 1], double f0[static restrict 1], double e1[static restrict 1], double f1[static restrict 1])
 {
-#ifndef NDEBUG
-  if (IS_NOT_VFPENV)
-    return -5.0;
-  if (*m & VDL_1)
-    return -1.0;
-  if (IS_NOT_ALIGNED(zr))
-    return -2.0;
-  if (IS_NOT_ALIGNED(zi))
-    return -3.0;
-#endif /* !NDEBUG */
-
-  DZNRMF_VARS;
-  DZNRMF_LOOP(zr,-4.0);
-  DZNRMF_LOOP(zi,-4.0);
-  VDKVSORT(re,rf);
-  VDEFRED(re,rf);
-  DZNRMF_RET;
+  long double sq = 0.0L;
+  for (fnat i = 0u; i < *m; ++i) {
+    const long double l = zr[i];
+    sq += (l * l);
+  }
+  for (fnat i = 0u; i < *m; ++i) {
+    const long double l = zi[i];
+    sq += (l * l);
+  }
+  if (isfinite(sq)) {
+    ldbl2ef(sq, e1, f1);
+    sq = sqrtl(sq);
+    ldbl2ef(sq, e0, f0);
+  }
+  else {
+    *e1 = *e0 = HUGE_VAL;
+    *f1 = *f0 = (isinf(sq) ? 1.0 : 0.0);
+  }
+  return (double)sq;
 }

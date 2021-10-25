@@ -1,44 +1,47 @@
-#ifndef DZNRME_H
-#define DZNRME_H
+#ifndef DZNRMS_H
+#define DZNRMS_H
 
+#include "vecdef.h"
+#include "d8sort.h"
 #include "defops.h"
 
-#ifdef DZNRME_VARS0
-#error DZNRME_VARS0 already defined
-#else /* !DZNRME_VARS0 */
-#define DZNRME_VARS0                                  \
-  register const VD _inf = _mm512_set1_pd(-HUGE_VAL); \
-  register const VD _one = _mm512_set1_pd(-1.0);      \
-  register const VD  one = _mm512_set1_pd( 1.0);      \
-  register VD re = _inf;                              \
+#ifdef DZNRMS_VARS0
+#error DZNRMS_VARS0 already defined
+#else /* !DZNRMS_VARS0 */
+#define DZNRMS_VARS0                                   \
+  register const VD  _inf = _mm512_set1_pd(-HUGE_VAL); \
+  register const VD  _one = _mm512_set1_pd(-1.0);      \
+  register const VD _zero = _mm512_set1_pd(-0.0);      \
+  register const VD   one = _mm512_set1_pd( 1.0);      \
+  register VD re = _inf;                               \
   register VD rf =  one
-#endif /* ?DZNRME_VARS0 */
+#endif /* ?DZNRMS_VARS0 */
 
-#ifdef DZNRME_VARS1
-#error DZNRME_VARS1 already defined
-#else /* !DZNRME_VARS1 */
+#ifdef DZNRMS_VARS1
+#error DZNRMS_VARS1 already defined
+#else /* !DZNRMS_VARS1 */
 #ifdef __AVX512DQ__
-#define DZNRME_VARS1                                  \
+#define DZNRMS_VARS1                                  \
   register const __m512i ione = _mm512_set1_epi64(1); \
-  DZNRME_VARS0
+  DZNRMS_VARS0
 #else /* !__AVX512DQ__ */
-#define DZNRME_VARS1                                  \
+#define DZNRMS_VARS1                                  \
   register const __m256i ione = _mm256_set1_epi32(1); \
-  DZNRME_VARS0
+  DZNRMS_VARS0
 #endif /* ?__AVX512DQ__ */
-#endif /* ?DZNRME_VARS1 */
+#endif /* ?DZNRMS_VARS1 */
 
-#ifdef DZNRME_VARS
-#error DZNRME_VARS already defined
-#else /* !DZNRME_VARS */
+#ifdef DZNRMS_VARS
+#error DZNRMS_VARS already defined
+#else /* !DZNRMS_VARS */
 #ifdef NDEBUG
-#define DZNRME_VARS DZNRME_VARS1
+#define DZNRMS_VARS DZNRMS_VARS1
 #else /* !NDEBUG */
-#define DZNRME_VARS                                 \
+#define DZNRMS_VARS                                 \
   register const VD inf = _mm512_set1_pd(HUGE_VAL); \
-  DZNRME_VARS1
+  DZNRMS_VARS1
 #endif /* ?NDEBUG */
-#endif /* ?DZNRME_VARS */
+#endif /* ?DZNRMS_VARS */
 
 #ifdef ASSERT_FINITE
 #error ASSERT_FINITE already defined
@@ -52,15 +55,17 @@
 #endif /* ?NDEBUG */
 #endif /* ?ASSERT_FINITE */
 
-#ifdef DZNRME_LOOP
-#error DZNRME_LOOP already defined
-#else /* !DZNRME_LOOP */
-#define DZNRME_LOOP(x,ec)                                             \
+#ifdef DZNRMS_LOOP
+#error DZNRMS_LOOP already defined
+#else /* !DZNRMS_LOOP */
+#define DZNRMS_LOOP(x,ec)                                             \
   for (fnat i = 0u; i < *m; i += VDL) {                               \
     register VD xi = _mm512_load_pd((x) + i); VDP(xi);                \
     register const VD reh = VDLSB(re); VDP(reh);                      \
     register const VD rep = _mm512_sub_pd(re, reh); VDP(rep);         \
     register const VD rfp = _mm512_scalef_pd(rf, reh); VDP(rfp);      \
+    xi = VDABS(xi); VDP(xi);                                          \
+    VDSORT(xi); VDP(xi);                                              \
     register const VD fi = VDMANT(xi); VDP(fi);                       \
     register const VD ei = _mm512_getexp_pd(xi); VDP(ei);             \
     ASSERT_FINITE(ec);                                                \
@@ -75,12 +80,12 @@
     re = _mm512_add_pd(emax, _mm512_getexp_pd(rf)); VDP(re);          \
     rf = VDMANT(rf); VDP(rf);                                         \
   }
-#endif /* ?DZNRME_LOOP */
+#endif /* ?DZNRMS_LOOP */
 
-#ifdef DZNRME_RET
-#error DZNRME_RET already defined
-#else /* !DZNRME_RET */
-#define DZNRME_RET                      \
+#ifdef DZNRMS_RET
+#error DZNRMS_RET already defined
+#else /* !DZNRMS_RET */
+#define DZNRMS_RET                      \
   _mm512_mask_storeu_pd(e1, 0x01u, re); \
   _mm512_mask_storeu_pd(f1, 0x01u, rf); \
   if ((long)*e1 & 1l) {                 \
@@ -92,6 +97,6 @@
     *f0 = sqrt(*f1);                    \
   }                                     \
   return scalb(*f0, *e0)
-#endif /* ?DZNRME_RET */
+#endif /* ?DZNRMS_RET */
 
-#endif /* !DZNRME_H */
+#endif /* !DZNRMS_H */

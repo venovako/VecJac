@@ -18,6 +18,7 @@ RM=rm -rfv
 AR=xiar
 ARFLAGS=-qnoipo -lib rsv
 CC=icc
+FC=ifort
 CXX=icpx
 CPUFLAGS=-DKNL -fPIC -fexceptions -fno-omit-frame-pointer -rdynamic
 ifdef NDEBUG
@@ -26,7 +27,7 @@ SUFX=-$(ABI)_$(NDEBUG)$(WP)
 else # DEBUG
 SUFX=-$(ABI)_$(DEBUG)$(WP)
 endif # ?NDEBUG
-DBGFLAGS=-traceback -w3
+DBGFLAGS=-traceback
 FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -fimf-use-svml=true
 ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
@@ -36,7 +37,7 @@ OPTFLAGS=-O$(NDEBUG) -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high
 DBGFLAGS += -DNDEBUG -qopt-report=5
 else # DEBUG
 OPTFLAGS=-O0 -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high
-DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug parallel -debug pubnames -check=stack,uninit -DPRINTOUT=stderr
+DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug parallel -debug pubnames -DPRINTOUT=stderr
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
 LIBFLAGS=-static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -I. -I../../JACSD/jstrat
@@ -55,4 +56,16 @@ LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_inte
 endif # ?LAPACK
 LDFLAGS += -lpthread -lm -ldl -lmemkind
 CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
+FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -threads -assume ieee_fpe_flags
 CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
+ifdef NDEBUG
+CFLAGS += -w3
+CXXFLAGS += -w3
+else # DEBUG
+CFLAGS += -check=stack,uninit -w3
+FFLAGS += -check all
+CXXFLAGS += -check=stack,uninit -w3
+endif # ?NDEBUG
+ifeq ($(ABI),ilp64)
+FFLAGS += -i8
+endif # ilp64
