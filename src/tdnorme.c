@@ -14,7 +14,7 @@ static int dcmp(const double x[static 1], const double y[static 1])
 int main(int argc, char *argv[])
 {
   if (4 != argc) {
-    (void)fprintf(stderr, "%s 2^{EXP} {AUB} {nIT}\n", *argv);
+    (void)fprintf(stderr, "%s 2^{EXP} 2^{AUB} {nIT}\n", *argv);
     return EXIT_FAILURE;
   }
 
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     (void)fprintf(stderr, "%zu = 2^{EXP} < %u\n", n, VDL);
     return EXIT_FAILURE;
   }
-  const double aub = atof(argv[2u]);
+  const double aub = scalbn(1.0, atoi(argv[2u]));
   if (aub <= 0.0) {
     (void)fprintf(stderr, "{AUB} <= 0\n");
     return EXIT_FAILURE;
