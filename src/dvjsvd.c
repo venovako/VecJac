@@ -1,7 +1,7 @@
 #include "dvjsvd.h"
 
 #include "dscale.h"
-#include "dnormf.h"
+#include "dnorm2.h"
 #include "ddpscl.h"
 #include "djac2.h"
 #include "djrot.h"
@@ -84,9 +84,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const size_t _q = r[pq_];
         double *const Gp = G + _p * (*ldG);
         double *const Gq = G + _q * (*ldG);
-        if ((pe = fmin(pe, dnormf_(m, Gp, (eS + _p), (fS + _p), (s + _p), (c + _p)))) < 0.0)
+        if ((pe = fmin(pe, dnorm2_(m, Gp, (eS + _p), (fS + _p), (s + _p), (c + _p)))) < 0.0)
           continue;
-        if ((qe = fmin(qe, dnormf_(m, Gq, (eS + _q), (fS + _q), (s + _q), (c + _q)))) < 0.0)
+        if ((qe = fmin(qe, dnorm2_(m, Gq, (eS + _q), (fS + _q), (s + _q), (c + _q)))) < 0.0)
           continue;
         // pack the norms
         s[pq] = eS[_p];

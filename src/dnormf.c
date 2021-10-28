@@ -9,14 +9,8 @@ double dnormf_(const fnat m[static restrict 1], const double x[static restrict 1
     const long double l = x[i];
     sq += (l * l);
   }
-  if (isfinite(sq)) {
-    ldbl2ef(sq, e1, f1);
-    sq = sqrtl(sq);
-    ldbl2ef(sq, e0, f0);
-  }
-  else {
-    *e1 = *e0 = HUGE_VAL;
-    *f1 = *f0 = (isinf(sq) ? 1.0 : 0.0);
-  }
+  ldbl2ef(sq, e1, f1);
+  sq = sqrtl(sq);
+  ldbl2ef(sq, e0, f0);
   return (double)sq;
 }

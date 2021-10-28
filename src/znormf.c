@@ -6,21 +6,13 @@ double znormf_(const fnat m[static restrict 1], const double zr[static restrict 
 {
   long double sq = 0.0L;
   for (fnat i = 0u; i < *m; ++i) {
-    const long double l = zr[i];
-    sq += (l * l);
+    const long double lr = zr[i];
+    sq += (lr * lr);
+    const long double li = zi[i];
+    sq += (li * li);
   }
-  for (fnat i = 0u; i < *m; ++i) {
-    const long double l = zi[i];
-    sq += (l * l);
-  }
-  if (isfinite(sq)) {
-    ldbl2ef(sq, e1, f1);
-    sq = sqrtl(sq);
-    ldbl2ef(sq, e0, f0);
-  }
-  else {
-    *e1 = *e0 = HUGE_VAL;
-    *f1 = *f0 = (isinf(sq) ? 1.0 : 0.0);
-  }
+  ldbl2ef(sq, e1, f1);
+  sq = sqrtl(sq);
+  ldbl2ef(sq, e0, f0);
   return (double)sq;
 }

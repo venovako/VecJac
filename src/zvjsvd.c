@@ -1,7 +1,7 @@
 #include "zvjsvd.h"
 
 #include "zscale.h"
-#include "znormf.h"
+#include "znorm2.h"
 #include "zdpscl.h"
 #include "zjac2.h"
 #include "zjrot.h"
@@ -102,11 +102,11 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const size_t _q = r[pq_];
         double *const Grp = Gr + _p * (*ldGr);
         double *const Gip = Gi + _p * (*ldGi);
-        if ((pe = fmin(pe, znormf_(m, Grp, Gip, (eS + _p), (fS + _p), (s + _p), (c + _p)))) < 0.0)
+        if ((pe = fmin(pe, znorm2_(m, Grp, Gip, (eS + _p), (fS + _p), (s + _p), (c + _p)))) < 0.0)
           continue;
         double *const Grq = Gr + _q * (*ldGr);
         double *const Giq = Gi + _q * (*ldGi);
-        if ((qe = fmin(qe, znormf_(m, Grq, Giq, (eS + _q), (fS + _q), (s + _q), (c + _q)))) < 0.0)
+        if ((qe = fmin(qe, znorm2_(m, Grq, Giq, (eS + _q), (fS + _q), (s + _q), (c + _q)))) < 0.0)
           continue;
         // pack the norms
         s[pq] = eS[_p];

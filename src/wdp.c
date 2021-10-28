@@ -1,5 +1,5 @@
 #include "wdp.h"
-#include "dnorm2.h"
+#include "dnormb.h"
 #include "dnorme.h"
 #include "dnormf.h"
 #include "dnorms.h"
@@ -8,7 +8,7 @@
 double dnb(const fnat n, const double x[static restrict 1])
 {
   const fint incx = 1;
-  return dnorm2_((const fint*)&n, x, &incx);
+  return dnormb_((const fint*)&n, x, &incx);
 }
 
 #ifndef USE_MKL

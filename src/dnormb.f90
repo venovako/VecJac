@@ -1,4 +1,4 @@
-!> \brief \b DNORM2
+!> \brief \b DNORMB
 !
 !  =========== DOCUMENTATION ===========
 !
@@ -8,7 +8,7 @@
 !  Definition:
 !  ===========
 !
-!       DOUBLE PRECISION FUNCTION DNORM2(N,X,INCX)
+!       DOUBLE PRECISION FUNCTION DNORMB(N,X,INCX)
 !
 !       .. Scalar Arguments ..
 !       INTEGER INCX,N
@@ -23,10 +23,10 @@
 !>
 !> \verbatim
 !>
-!> DNORM2 returns the euclidean norm of a vector via the function
+!> DNORMB returns the euclidean norm of a vector via the function
 !> name, so that
 !>
-!>    DNORM2 := sqrt( x'*x )
+!>    DNORMB := sqrt( x'*x )
 !> \endverbatim
 !
 !  Arguments:
@@ -85,9 +85,9 @@
 !> \endverbatim
 !>
 !  =====================================================================
-function DNORM2( n, x, incx ) 
+function DNORMB( n, x, incx ) 
    integer, parameter :: wp = kind(1.d0)
-   real(wp) :: DNORM2
+   real(wp) :: DNORMB
 !
 !  -- Reference BLAS level1 routine (version 3.9.1) --
 !  -- Reference BLAS is a software package provided by Univ. of Tennessee,    --
@@ -122,7 +122,7 @@ function DNORM2( n, x, incx )
 !
 !  Quick return if possible
 !
-   DNORM2 = zero
+   DNORMB = zero
    if( n <= 0 ) return
 !
    scl = one
@@ -194,6 +194,6 @@ function DNORM2( n, x, incx )
       scl = one
       sumsq = amed
    end if
-   DNORM2 = scl*sqrt( sumsq )
+   DNORMB = scl*sqrt( sumsq )
    return
 end function
