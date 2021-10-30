@@ -106,14 +106,14 @@ int main(int argc, char *argv[])
 
     // simple overflowing dnorme
     b = rdtsc_beg(rd);
-    const double nc = dne(n, x);
+    const double nc = dnc(n, x);
     e = rdtsc_end(rd);
     (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
     (void)fflush(stdout);
 
     // simple overflowing dnorms
     b = rdtsc_beg(rd);
-    const double nd = dns(n, x);
+    const double nd = dnd(n, x);
     e = rdtsc_end(rd);
     (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
     (void)fflush(stdout);

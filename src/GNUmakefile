@@ -44,7 +44,7 @@ dnorme$(SUFX).o: dnorme.c dnorme.h dznrme.h dkvsrt.h d8sort.h defops.h vecdef.h 
 dnormf$(SUFX).o: dnormf.c dnormf.h dznrmf.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-dnorms$(SUFX).o: dnorms.c dnorms.h dznrms.h d8sort.h defops.h vecdef.h vec.h common.h $(MKFS)
+dnorms$(SUFX).o: dnorms.c dnorms.h dznrms.h d8sort.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 dnormx$(SUFX).o: dnormx.c dnormx.h dznrmx.h vec.h common.h $(MKFS)
@@ -104,7 +104,7 @@ znorme$(SUFX).o: znorme.c znorme.h dznrme.h dkvsrt.h d8sort.h defops.h vecdef.h 
 znormf$(SUFX).o: znormf.c znormf.h dznrmf.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-znorms$(SUFX).o: znorms.c znorms.h dznrms.h d8sort.h defops.h vecdef.h vec.h common.h $(MKFS)
+znorms$(SUFX).o: znorms.c znorms.h dznrms.h d8sort.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 znormx$(SUFX).o: znormx.c znormx.h dznrmx.h vec.h common.h $(MKFS)

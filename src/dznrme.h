@@ -1,16 +1,19 @@
 #ifndef DZNRME_H
 #define DZNRME_H
 
+#include "vecdef.h"
+#include "d8sort.h"
 #include "defops.h"
 
 #ifdef DZNRME_VARS0
 #error DZNRME_VARS0 already defined
 #else /* !DZNRME_VARS0 */
-#define DZNRME_VARS0                                  \
-  register const VD _inf = _mm512_set1_pd(-HUGE_VAL); \
-  register const VD _one = _mm512_set1_pd(-1.0);      \
-  register const VD  one = _mm512_set1_pd( 1.0);      \
-  register VD re = _inf;                              \
+#define DZNRME_VARS0                                   \
+  register const VD  _inf = _mm512_set1_pd(-HUGE_VAL); \
+  register const VD _zero = _mm512_set1_pd(-0.0);      \
+  register const VD  _one = _mm512_set1_pd(-1.0);      \
+  register const VD   one = _mm512_set1_pd( 1.0);      \
+  register VD re = _inf;                               \
   register VD rf =  one
 #endif /* ?DZNRME_VARS0 */
 
@@ -61,6 +64,8 @@
     register const VD reh = VDLSB(re); VDP(reh);                      \
     register const VD rep = _mm512_sub_pd(re, reh); VDP(rep);         \
     register const VD rfp = _mm512_scalef_pd(rf, reh); VDP(rfp);      \
+    xi = VDABS(xi); VDP(xi);                                          \
+    VDSORT(xi); VDP(xi);                                              \
     register const VD fi = VDMANT(xi); VDP(fi);                       \
     register const VD ei = _mm512_getexp_pd(xi); VDP(ei);             \
     ASSERT_FINITE(ec);                                                \

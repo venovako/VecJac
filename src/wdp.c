@@ -54,9 +54,9 @@ double dnc(const fnat n, const double x[static restrict VDL])
   register __m512d vsq = _mm512_setzero_pd();
   for (fnat i = 0u; i < n; i += VDL) {
     register __m512d xi = _mm512_load_pd(x + i);
+    VDSORT(xi);
     vsq = _mm512_fmadd_pd(xi, xi, vsq);
   }
-  VDSORT(vsq);
   vsq = _mm512_permutexvar_pd(_mm512_set_epi64(7, 6, 3, 2, 5, 4, 1, 0), vsq);
   register const __m256d sq4 = _mm256_hadd_pd(_mm512_extractf64x4_pd(vsq, 0), _mm512_extractf64x4_pd(vsq, 1));
   register const __m128d sq2 = _mm_hadd_pd(_mm256_extractf128_pd(sq4, 0), _mm256_extractf128_pd(sq4, 1));
