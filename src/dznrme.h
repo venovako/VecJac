@@ -2,18 +2,19 @@
 #define DZNRME_H
 
 #include "vecdef.h"
-#include "d8sort.h"
+/* #include "d8sort.h" */
 #include "defops.h"
+#include "dkvsrt.h"
 
 #ifdef DZNRME_VARS0
 #error DZNRME_VARS0 already defined
 #else /* !DZNRME_VARS0 */
-#define DZNRME_VARS0                                   \
-  register const VD  _inf = _mm512_set1_pd(-HUGE_VAL); \
-  register const VD _zero = _mm512_set1_pd(-0.0);      \
-  register const VD  _one = _mm512_set1_pd(-1.0);      \
-  register const VD   one = _mm512_set1_pd( 1.0);      \
-  register VD re = _inf;                               \
+#define DZNRME_VARS0                                    \
+  register const VD  _inf = _mm512_set1_pd(-HUGE_VAL);  \
+  /* register const VD _zero = _mm512_set1_pd(-0.0); */ \
+  register const VD  _one = _mm512_set1_pd(-1.0);       \
+  register const VD   one = _mm512_set1_pd( 1.0);       \
+  register VD re = _inf;                                \
   register VD rf =  one
 #endif /* ?DZNRME_VARS0 */
 
@@ -64,8 +65,8 @@
     register const VD reh = VDLSB(re); VDP(reh);                      \
     register const VD rep = _mm512_sub_pd(re, reh); VDP(rep);         \
     register const VD rfp = _mm512_scalef_pd(rf, reh); VDP(rfp);      \
-    xi = VDABS(xi); VDP(xi);                                          \
-    VDSORT(xi); VDP(xi);                                              \
+    /* xi = VDABS(xi); VDP(xi); */                                    \
+    /* VDSORT(xi); VDP(xi); */                                        \
     register const VD fi = VDMANT(xi); VDP(fi);                       \
     register const VD ei = _mm512_getexp_pd(xi); VDP(ei);             \
     ASSERT_FINITE(ec);                                                \
@@ -82,20 +83,38 @@
   }
 #endif /* ?DZNRME_LOOP */
 
+#ifdef DZNRME_RED
+#error DZNRME_RED already defined
+#else /* !DZNRME_RED */
+#ifdef DZNRME_SEQRED
+#define DZNRME_RED           \
+  alignas(VA) double e[VDL]; \
+  alignas(VA) double f[VDL]; \
+  _mm512_store_pd(e, re);    \
+  _mm512_store_pd(f, rf);    \
+  efred(e, f);               \
+  *e1 = e[VDL_1];            \
+  *f1 = f[VDL_1]
+#else /* !DZNRME_SEQRED */
+#define DZNRME_RED                      \
+  VDEFRED(re,rf);                       \
+  _mm512_mask_storeu_pd(e1, 0x01u, re); \
+  _mm512_mask_storeu_pd(f1, 0x01u, rf)
+#endif /* ?DZNRME_SEQRED */
+#endif /* ?DZNRME_RED */
+
 #ifdef DZNRME_RET
 #error DZNRME_RET already defined
 #else /* !DZNRME_RET */
-#define DZNRME_RET                      \
-  _mm512_mask_storeu_pd(e1, 0x01u, re); \
-  _mm512_mask_storeu_pd(f1, 0x01u, rf); \
-  if ((long)*e1 & 1l) {                 \
-    *e0 = scalbn((*e1 - 1.0), -1);      \
-    *f0 = sqrt(scalbn(*f1, 1));         \
-  }                                     \
-  else {                                \
-    *e0 = scalbn(*e1, -1);              \
-    *f0 = sqrt(*f1);                    \
-  }                                     \
+#define DZNRME_RET                 \
+  if ((long)*e1 & 1l) {            \
+    *e0 = scalbn((*e1 - 1.0), -1); \
+    *f0 = sqrt(scalbn(*f1, 1));    \
+  }                                \
+  else {                           \
+    *e0 = scalbn(*e1, -1);         \
+    *f0 = sqrt(*f1);               \
+  }                                \
   return scalb(*f0, *e0)
 #endif /* ?DZNRME_RET */
 

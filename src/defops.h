@@ -67,4 +67,43 @@
 #define VDEFLE(e0,e1,f0,f1) MDOR(_mm512_cmplt_pd_mask(e0,e1),_mm512_mask_cmple_pd_mask(_mm512_cmpeq_pd_mask(e0,e1),f0,f1))
 #endif /* ?VDEFLE */
 
+#ifdef DZNRME_SEQRED
+static inline void efswp(double e0[static restrict 1], double f0[static restrict 1], double e1[static restrict 1], double f1[static restrict 1])
+{
+  if ((*e0 > *e1) || ((*e0 == *e1) && (*f0 > *f1))) {
+    double t = *e1;
+    *e1 = *e0;
+    *e0 = t;
+    t = *f1;
+    *f1 = *f0;
+    *f0 = t;
+  }
+}
+
+static inline void efsum(double e0[static restrict 1], double f0[static restrict 1], double e1[static restrict 1], double f1[static restrict 1], int ef[static restrict 1])
+{
+  efswp(e0, f0, e1, f1);
+  *f1 = fma(scalb(1.0, fmax((*e0 - *e1), -HUGE_VAL)), *f0, *f1);
+  *f1 = scalbn(frexp(*f1, ef), 1);
+  *e1 += --*ef;
+}
+
+static inline void efred(double e[static restrict VDL], double f[static restrict VDL])
+{
+  int ef
+#ifndef NDEBUG
+    = 0
+#endif /* !NDEBUG */
+    ;
+  for (unsigned i = 0u; i < VDL_1; ) {
+    double *const e0 = (e + i);
+    double *const f0 = (f + i);
+    ++i;
+    double *const e1 = (e + i);
+    double *const f1 = (f + i);
+    efsum(e0, f0, e1, f1, &ef);
+  }
+}
+#endif /* DZNRME_SEQRED */
+
 #endif /* !DEFOPS_H */
