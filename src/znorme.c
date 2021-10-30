@@ -16,8 +16,10 @@ double znorme_(const fnat m[static restrict 1], const double zr[static restrict 
 #endif /* !NDEBUG */
 
   DZNRME_VARS;
-  DZNRME_LOOP(zr,-4.0);
-  DZNRME_LOOP(zi,-4.0);
+  for (fnat i = 0u; i < *m; i += VDL) {
+    DZNRME_LOOP(zr,-4.0);
+    DZNRME_LOOP(zi,-4.0);
+  }
   VDKVSORT(re,rf);
   DZNRME_RED;
   DZNRME_RET;

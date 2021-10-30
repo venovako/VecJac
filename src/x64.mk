@@ -47,7 +47,7 @@ DBGFLAGS += -debug parallel
 endif # Linux
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
-LIBFLAGS=-I. -I../../JACSD/jstrat
+LIBFLAGS=-DDZNRME_SEQRED -I. -I../../JACSD/jstrat
 ifdef SLEEF
 LIBFLAGS += -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF

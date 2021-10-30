@@ -21,4 +21,14 @@ static inline void dbl2ef(const double d, double e[static restrict 1], double f[
   }
 }
 
+static inline void sqef(const double e0[static restrict 1], const double f0[static restrict 1], double e1[static restrict 1], double f1[static restrict 1])
+{
+  *e1 = scalbn(*e0, 1);
+  *f1 = ((*f0) * (*f0));
+  if (*f1 >= 2.0) {
+    ++*e1;
+    *f1 = scalbn(*f1, -1);
+  }
+}
+
 #endif /* !DZNRM2_H */

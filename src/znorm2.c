@@ -9,6 +9,6 @@ double znorm2_(const fnat m[static restrict 1], const double zr[static restrict 
   const double di = BLAS_D(znrm2)((const fint*)&m, zi, &incx);
   const double d = hypot(dr, di);
   dbl2ef(d, e0, f0);
-  dbl2ef((d * d), e1, f1);
+  sqef(e0, f0, e1, f1);
   return d;
 }

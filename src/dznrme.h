@@ -60,7 +60,7 @@
 #error DZNRME_LOOP already defined
 #else /* !DZNRME_LOOP */
 #define DZNRME_LOOP(x,ec)                                             \
-  for (fnat i = 0u; i < *m; i += VDL) {                               \
+  {                                                                   \
     register VD xi = _mm512_load_pd((x) + i); VDP(xi);                \
     register const VD reh = VDLSB(re); VDP(reh);                      \
     register const VD rep = _mm512_sub_pd(re, reh); VDP(rep);         \
