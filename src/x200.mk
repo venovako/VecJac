@@ -41,6 +41,9 @@ DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-inf
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
 LIBFLAGS=-static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -I. -I../../JACSD/jstrat
+ifdef SLEEF
+LIBFLAGS += -DUSE_SLEEF -I$(SLEEF)/include
+endif # SLEEF
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL
 ifeq ($(ABI),ilp64)
@@ -49,6 +52,9 @@ endif # ilp64
 LIBFLAGS += -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
 endif # MKL
 LDFLAGS=-L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
+ifdef SLEEF
+LDFLAGS += -L$(SLEEF)/lib -lsleefquad
+endif # SLEEF
 ifdef LAPACK
 LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas -lifcoremt
 else # MKL

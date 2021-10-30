@@ -14,7 +14,7 @@ double znormf_(const fnat m[static restrict 1], const double zr[static restrict 
     const long double li = zi[i];
     sqi += (li * li);
   }
-  long double sq = hypotl(sqr, sqi);
+  long double sq = (sqr + sqi);
   ldbl2ef(sq, e1, f1);
   sq = sqrtl(sq);
   ldbl2ef(sq, e0, f0);

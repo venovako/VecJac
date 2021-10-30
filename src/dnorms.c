@@ -13,8 +13,35 @@ double dnorms_(const fnat m[static restrict 1], const double x[static restrict V
     return -2.0;
 #endif /* !NDEBUG */
 
-  DZNRMS_VARS;
-  DZNRMS_LOOP(x,-3.0);
-  VDEFRED(re,rf);
-  DZNRMS_RET;
+#ifdef USE_SLEEF
+  register const VD _zero = _mm512_set1_pd(-0.0);
+  __float128 rq[VDL];
+
+  Sleef_quadx8 rv = Sleef_splatq8_avx512f(Q_ZERO);
+  for (fnat i = 0u; i < *m; i += VDL) {
+    register VD xi = VDABS(_mm512_load_pd(x + i)); VDP(xi);
+    VDSORT(xi); VDP(xi);
+    const Sleef_quadx8 qi = Sleef_cast_from_doubleq8_avx512f(xi);
+    rv = Sleef_fmaq8_u05avx512f(qi, qi, rv);
+  }
+
+  Sleef_storeq8_avx512f(rq, rv);
+
+  *rq += rq[1u];
+  *rq += rq[2u];
+  *rq += rq[3u];
+  *rq += rq[4u];
+  *rq += rq[5u];
+  *rq += rq[6u];
+  *rq += rq[7u];
+
+  pquad2ef(rq, e1, f1);
+  *rq = __sqrtq(*rq);
+  pquad2ef(rq, e0, f0);
+  return (double)*rq;
+#else /* !USE_SLEEF */
+  *e1 = *e0 = -HUGE_VAL;
+  *f1 = *f0 = 1.0;
+  return -0.0;
+#endif /* ?USE_SLEEF */
 }

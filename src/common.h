@@ -8,6 +8,7 @@ extern __float128 __fabsq(__float128);
 extern __float128 __fmaq(__float128, __float128, __float128);
 extern __float128 __fmaxq(__float128, __float128);
 extern __float128 __fminq(__float128, __float128);
+extern __float128 __frexpq(__float128, int*);
 extern __float128 __hypotq(__float128, __float128);
 extern __float128 __scalbq(__float128, __float128);
 extern __float128 __invsqrtq(__float128);
@@ -44,6 +45,9 @@ extern __float128 __sqrtq(__float128);
 #ifdef fminw
 #error fminw already defined
 #endif /* fminw */
+#ifdef frexpw
+#error frexpw already defined
+#endif /* frexpw */
 #ifdef hypotw
 #error hypotw already defined
 #endif /* hypotw */
@@ -85,6 +89,7 @@ typedef long double wide;
 #define fmaw        fmal
 #define fmaxw       fmaxl
 #define fminw       fminl
+#define frexpw      frexpl
 #define hypotw      hypotl
 #define scalbw      scalbl
 #define invsqrtw    invsqrtl
@@ -102,6 +107,7 @@ typedef __float128  wide;
 #define fmaw        __fmaq
 #define fmaxw       __fmaxq
 #define fminw       __fminq
+#define frexpw      __frexpq
 #define hypotw      __hypotq
 #define scalbw      __scalbq
 #define invsqrtw    __invsqrtq
@@ -137,25 +143,6 @@ typedef __float128  wide;
 #include <sys/stat.h>
 #include <unistd.h>
 
-#ifdef FINT_C
-#error FINT_C already defined
-#endif /* FINT_C */
-#ifdef FNAT_C
-#error FNAT_C already defined
-#endif /* FNAT_C */
-
-#ifdef MKL_ILP64
-typedef  int64_t fint;
-typedef uint64_t fnat;
-#define FINT_C(x) INT64_C(x)
-#define FNAT_C(x) UINT64_C(x)
-#else /* LP64 */
-typedef  int32_t fint;
-typedef uint32_t fnat;
-#define FINT_C(x) INT32_C(x)
-#define FNAT_C(x) UINT32_C(x)
-#endif /* ?MKL_ILP64 */
-
 #ifdef _OPENMP
 #include <omp.h>
 #endif /* _OPENMP */
@@ -181,11 +168,28 @@ typedef uint32_t fnat;
 #define MKL_Complex16 double _Complex
 #endif /* !MKL_Complex16 */
 #include <mkl.h>
+#ifdef MKL_INT
+typedef  MKL_INT fint;
+#else /* !MKL_INT */
+#error MKL_INT not defined
+#endif /* ?MKL_INT */
+#ifdef MKL_UINT
+typedef MKL_UINT fnat;
+#else /* !MKL_UINT */
+#error MKL_UINT not defined
+#endif /* !MKL_UINT */
 #define BLAS_S(name) s##name
 #define BLAS_D(name) d##name
 #define BLAS_C(name) c##name
 #define BLAS_Z(name) z##name
 #else /* some other Fortran-compatible BLAS */
+#ifdef MKL_ILP64
+typedef  int64_t fint;
+typedef uint64_t fnat;
+#else /* LP64 */
+typedef  int32_t fint;
+typedef uint32_t fnat;
+#endif /* ?MKL_ILP64 */
 #define BLAS_S(name) s##name##_
 #define BLAS_D(name) d##name##_
 #define BLAS_C(name) c##name##_
