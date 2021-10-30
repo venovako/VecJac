@@ -60,7 +60,12 @@ LIBFLAGS += -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
 endif # MKL
 LDFLAGS=-L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
 ifdef SLEEF
-LDFLAGS += -L$(SLEEF)/lib -lsleefquad
+ifdef ($(ARCH),Darwin)
+LDFLAGS += -L$(SLEEF)/lib -Wl,-rpath,$(SLEEF)/lib
+else # Linux
+LDFLAGS += -L$(SLEEF)/lib64 -Wl,-rpath=$(SLEEF)/lib64
+endif # ?Darwin
+LDFLAGS += -lsleefquad
 endif # SLEEF
 ifdef LAPACK
 LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas -lifcoremt
