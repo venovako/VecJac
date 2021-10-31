@@ -13,10 +13,23 @@ double dnorme_(const fnat m[static restrict 1], const double x[static restrict V
     return -2.0;
 #endif /* !NDEBUG */
 
+  if (!*m) {
+    *e1 = *e0 = -HUGE_VAL;
+    *f1 = *f0 = 1.0;
+    return -0.0;
+  }
+
+  _mm_prefetch((const char*)x, _MM_HINT_T0);
   DZNRME_VARS;
-  for (fnat i = 0u; i < *m; i += VDL) {
+
+  const fnat m_ = *m - VDL;
+  fnat j = 0u, i;
+  for (i = j; j < m_; i = j) {
+    _mm_prefetch((const char*)(x + (j += VDL)), _MM_HINT_T0);
     DZNRME_LOOP(x,-3.0);
   }
+  DZNRME_LOOP(x,-3.0);
+
   VDKVSORT(re,rf);
   DZNRME_RED;
   DZNRME_RET;
