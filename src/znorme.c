@@ -18,7 +18,7 @@ double znorme_(const fnat m[static restrict 1], const double zr[static restrict 
   if (!*m) {
     *e1 = *e0 = -HUGE_VAL;
     *f1 = *f0 = 1.0;
-    return -0.0;
+    return 0.0;
   }
 
   _mm_prefetch((const char*)zr, _MM_HINT_T0);

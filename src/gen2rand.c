@@ -64,7 +64,9 @@ int main(int argc, char *argv[])
   }
   unsigned rd[2u] = { 0u, 0u };
   uint64_t hz = tsc_get_freq_hz_(rd), be[2u] = { UINT64_C(0), UINT64_C(0) };
-  (void)fprintf(stdout, "TSC frequency: %llu+(%u/%u) Hz.\n", (unsigned long long)hz, rd[0u], rd[1u]);
+#ifndef NDEBUG
+  (void)fprintf(stderr, "TSC frequency: %llu+(%u/%u) Hz.\n", (unsigned long long)hz, rd[0u], rd[1u]);
+#endif /* !NDEBUG */
   const char t = (char)toupper(argv[1][0]);
   if (!t)
     return EXIT_FAILURE;
