@@ -6,13 +6,11 @@
 int main(int argc, char *argv[])
 {
   if (4 != argc) {
-    (void)fprintf(stderr, "%s filename batch_size #batches\n", *argv);
+    (void)fprintf(stderr, "%s filename 2^{batch_size} #batches\n", *argv);
     return EXIT_FAILURE;
   }
 
-  const size_t n = atoz(argv[2u]);
-  if (!n)
-    return EXIT_SUCCESS;
+  const size_t n = ((size_t)1u << atoz(argv[2u]));
   fint th = 0;
 #ifdef _OPENMP
   th = omp_get_max_threads();
