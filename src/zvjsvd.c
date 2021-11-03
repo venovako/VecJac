@@ -114,6 +114,14 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         s[pq_] = eS[_q];
         c[pq_] = fS[_q];
         const double complex z = zdpscl_(m, Grp, Gip, Grq, Giq, (s + pq), (c + pq));
+#ifndef NDEBUG
+        if (!isfinite(creal(z)))
+          pe = -1.0;
+        if (!isfinite(cimag(z)))
+          qe = -1.0;
+        if ((pe < 0.0) || (qe < 0.0))
+          continue;
+#endif /* !NDEBUG */
         // ensure that the compiler does not rearrange accesses to t and ca
         _mm_mfence();
         // repack data

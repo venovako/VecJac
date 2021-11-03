@@ -94,6 +94,15 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         s[pq_] = eS[_q];
         c[pq_] = fS[_q];
         const double d = ddpscl_(m, Gp, Gq, (s + pq), (c + pq));
+#ifndef NDEBUG
+        if (!isfinite(d)) {
+          pe = -1.0;
+          if (isnan(d))
+            qe = -1.0;
+        }
+        if ((pe < 0.0) || (qe < 0.0))
+          continue;
+#endif /* !NDEBUG */
         // ensure that the compiler does not rearrange accesses to t and l1
         _mm_mfence();
         // repack data

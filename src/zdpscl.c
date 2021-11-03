@@ -4,22 +4,31 @@ double complex zdpscl_(const fnat m[static restrict 1], const double xr[static r
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -7.0;
+    return NAN;
   if (*m & VDL_1)
-    return -1.0;
+    return NAN;
   if (IS_NOT_ALIGNED(xr))
-    return -2.0;
+    return NAN;
   if (IS_NOT_ALIGNED(xi))
-    return -3.0;
+    return NAN;
   if (IS_NOT_ALIGNED(yr))
-    return -4.0;
+    return NAN;
   if (IS_NOT_ALIGNED(yi))
-    return -5.0;
-  if (!(e[0u] > -HUGE_VAL))
-    return -6.0;
-  if (!(e[1u] > -HUGE_VAL))
-    return -6.0;
+    return NAN;
+  if (!(e[0u] < HUGE_VAL))
+    return NAN;
+  if (!(e[1u] < HUGE_VAL))
+    return NAN;
+  if (!(f[0u] >= 1.0) || !(f[0u] < 2.0))
+    return NAN;
+  if (!(f[1u] >= 1.0) || !(f[0u] < 2.0))
+    return NAN;
 #endif /* !NDEBUG */
+
+  if (!(e[0u] > -HUGE_VAL))
+    return 0.0;
+  if (!(e[1u] > -HUGE_VAL))
+    return 0.0;
 
   register const VD xe = _mm512_set1_pd(-(e[0u]));
   register const VD ye = _mm512_set1_pd(-(e[1u]));
