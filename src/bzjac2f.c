@@ -27,10 +27,6 @@ int main(int argc, char *argv[])
   const size_t b = atoz(argv[3u]);
   if (!b)
     return EXIT_SUCCESS;
-  if (b > 10000u) {
-    (void)fprintf(stderr, "#batches is limited to at most 10000.\n");
-    return EXIT_FAILURE;
-  }
   const size_t
     nl = strlen(argv[1u]),
     nl1 = (nl + 1u);
@@ -116,20 +112,20 @@ int main(int argc, char *argv[])
 
   unsigned rd[2u] = { 0u, 0u };
   uint64_t hz = tsc_get_freq_hz_(rd), be[2u] = { UINT64_C(0), UINT64_C(0) };
-#ifndef NDEBUG
   (void)fprintf(stderr, "TSC frequency: %llu+(%u/%u) Hz.\n", (unsigned long long)hz, rd[0u], rd[1u]);
-#endif /* !NDEBUG */
+  (void)fflush(stderr);
 
   (void)fprintf(stdout, "\"B\",\"Ts\",\"REN\",\"RLN\",\"RLX\",\"RLM\"\n");
+  (void)fflush(stdout);
   const char *bf = (const char*)NULL;
   if (b <= 10u)
-    bf = "%zu";
+    bf = "%1zu";
   else if (b <= 100u)
     bf = "%2zu";
   else if (b <= 1000u)
     bf = "%3zu";
   else // b > 1000
-    bf = "%4zu";
+    bf = "%zu";
   const size_t n_t = n / imax(th, 1);
   const size_t cnt = n_t * sizeof(double);
   char a[31u] = { '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0' };
@@ -176,7 +172,7 @@ int main(int argc, char *argv[])
       RE[i] = wrecf(a11[i], a22[i], a21r[i], a21i[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], (AE + i), (AN + i));
       r = fmaxw(r, RE[i]);
     }
-    (void)fprintf(stdout, "%30s", xtoa(a, (long double)r));
+    (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
     (void)fflush(stdout);
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(fk,fl,t,c,n,n_t,cnt,jn)
@@ -209,12 +205,13 @@ int main(int argc, char *argv[])
       x = fmaxw(x, AE[i]);
       m = fmaxw(m, AN[i]);
     }
-    (void)fprintf(stdout, "%30s,", xtoa(a, (long double)r));
-    (void)fprintf(stdout, "%30s,", xtoa(a, (long double)x));
-    (void)fprintf(stdout, "%30s\n", xtoa(a, (long double)m));
+    (void)fprintf(stdout, "%s,", xtoa(a, (long double)r));
+    (void)fprintf(stdout, "%s,", xtoa(a, (long double)x));
+    (void)fprintf(stdout, "%s\n", xtoa(a, (long double)m));
     (void)fflush(stdout);
   }
   (void)fprintf(stderr, "max(#threads) = %u\n", (unsigned)th);
+  (void)fflush(stderr);
 
   (void)close(fj);
   (void)close(fr);
