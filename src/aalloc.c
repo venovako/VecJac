@@ -175,3 +175,13 @@ fint zalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], 
 
   return t;
 }
+
+void czfree_(void **const A)
+{
+  if (A) {
+    if (*A) {
+      free(*A);
+      *A = NULL;
+    }
+  }
+}

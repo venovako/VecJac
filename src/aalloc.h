@@ -11,4 +11,7 @@ extern fint dalloc2_(const fnat m[static restrict 1], const fnat n[static restri
 extern fint calloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], float complex **const restrict A, fnat ldA[static restrict 1], float **const restrict Ar, fnat ldAr[static restrict 1], float **const restrict Ai, fnat ldAi[static restrict 1]);
 extern fint zalloc2_(const fnat m[static restrict 1], const fnat n[static restrict 1], double complex **const restrict A, fnat ldA[static restrict 1], double **const restrict Ar, fnat ldAr[static restrict 1], double **const restrict Ai, fnat ldAi[static restrict 1]);
 
+// for Fortran, clean & free
+extern void czfree_(void **const A);
+
 #endif /* !AALLOC_H */

@@ -1,1 +1,0 @@
-      INTEGER, EXTERNAL :: DJROT
