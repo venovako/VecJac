@@ -112,11 +112,11 @@ double dnd(const fnat n, const double x[static restrict VDL])
 double wsq(const fnat n, const double x[static restrict 1])
 {
   wide sq = W_ZERO;
-#ifdef WSQ_OMPRED
+#ifdef WSQ_OMP
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,x) reduction(+:sq)
 #endif /* !_OPENMP */
-#endif /* WSQ_OMPRED */
+#endif /* WSQ_OMP */
   for (fnat i = 0u; i < n; ++i) {
     const wide w = x[i];
     sq = fmaw(w, w, sq);

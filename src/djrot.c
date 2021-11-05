@@ -2,6 +2,7 @@
 
 fint djrot_(const fint n[static restrict 1], double x[static restrict VDL], double y[static restrict VDL], const double t[static restrict 1], const double c[static restrict 1])
 {
+#ifndef NDEBUG
   if (IS_NOT_VFPENV)
     return -6;
   if (*n & VDL_1)
@@ -10,6 +11,7 @@ fint djrot_(const fint n[static restrict 1], double x[static restrict VDL], doub
     return -2;
   if (IS_NOT_ALIGNED(y))
     return -3;
+#endif /* !NDEBUG */
 
   if (!*n)
     return 0;
@@ -20,9 +22,11 @@ fint djrot_(const fint n[static restrict 1], double x[static restrict VDL], doub
     const fnat n_ = (fnat)-*n;
     if (*t == 0.0) {
       if (*c == 1.0) {
+#ifdef DJROT_OMP
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n_,x,y)
 #endif /* _OPENMP */
+#endif /* DJROT_OMP */
         for (fnat i = 0u; i < n_; i += VDL) {
           double *const xi = x + i;
           double *const yi = y + i;
@@ -36,15 +40,19 @@ fint djrot_(const fint n[static restrict 1], double x[static restrict VDL], doub
       // should never happen
       return -5;
     }
+#ifdef DJROT_OMP
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(n_,tc,x,y)
 #endif /* _OPENMP */
+#endif /* DJROT_OMP */
     {
       register const VD t_ = _mm512_set1_pd(tc[0]);
       register const VD c_ = _mm512_set1_pd(tc[1]);
+#ifdef DJROT_OMP
 #ifdef _OPENMP
 #pragma omp for
 #endif /* _OPENMP */
+#endif /* DJROT_OMP */
       for (fnat i = 0u; i < n_; i += VDL) {
         double *const xi = x + i;
         double *const yi = y + i;
@@ -63,15 +71,19 @@ fint djrot_(const fint n[static restrict 1], double x[static restrict VDL], doub
       return -5;
     }
     const fnat n_ = (fnat)*n;
+#ifdef DJROT_OMP
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(n_,tc,x,y)
 #endif /* _OPENMP */
+#endif /* DJROT_OMP */
     {
       register const VD t_ = _mm512_set1_pd(tc[0]);
       register const VD c_ = _mm512_set1_pd(tc[1]);
+#ifdef DJROT_OMP
 #ifdef _OPENMP
 #pragma omp for
 #endif /* _OPENMP */
+#endif /* DJROT_OMP */
       for (fnat i = 0u; i < n_; i += VDL) {
         double *const xi = x + i;
         double *const yi = y + i;

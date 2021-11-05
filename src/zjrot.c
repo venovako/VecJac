@@ -5,6 +5,7 @@
 
 fint zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], double xi[static restrict VDL], double yr[static restrict VDL], double yi[static restrict VDL], const double t[static restrict 1], const double c[static restrict 1], const double ca[static restrict 1], const double sa[static restrict 1])
 {
+#ifndef NDEBUG
   if (IS_NOT_VFPENV)
     return -10;
   if (*n & VDL_1)
@@ -17,6 +18,7 @@ fint zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], dou
     return -4;
   if (IS_NOT_ALIGNED(yi))
     return -5;
+#endif /* !NDEBUG */
 
   if (!*n)
     return 0;
@@ -43,17 +45,21 @@ fint zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], dou
 
   if (*n < 0) { // permute
     const fnat n_ = (fnat)-*n;
+#ifdef ZJROT_OMP
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(n_,cstc,xr,xi,yr,yi)
 #endif /* _OPENMP */
+#endif /* ZJROT_OMP */
     {
       register const VD cta = _mm512_set1_pd(cstc[0]);
       register const VD sta = _mm512_set1_pd(cstc[1]);
       register const VD cna = _mm512_set1_pd(cstc[2]);
       register const VD c_ = _mm512_set1_pd(cstc[3]);
+#ifdef ZJROT_OMP
 #ifdef _OPENMP
 #pragma omp for
 #endif /* _OPENMP */
+#endif /* ZJROT_OMP */
       for (fnat i = 0u; i < n_; i += VDL) {
         double *const xri = xr + i;
         double *const xii = xi + i;
@@ -75,17 +81,21 @@ fint zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], dou
   }
   else { // no permute
     const fnat n_ = (fnat)*n;
+#ifdef ZJROT_OMP
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(n_,cstc,xr,xi,yr,yi)
 #endif /* _OPENMP */
+#endif /* ZJROT_OMP */
     {
       register const VD cta = _mm512_set1_pd(cstc[0]);
       register const VD sta = _mm512_set1_pd(cstc[1]);
       register const VD cna = _mm512_set1_pd(cstc[2]);
       register const VD c_ = _mm512_set1_pd(cstc[3]);
+#ifdef ZJROT_OMP
 #ifdef _OPENMP
 #pragma omp for
 #endif /* _OPENMP */
+#endif /* ZJROT_OMP */
       for (fnat i = 0u; i < n_; i += VDL) {
         double *const xri = xr + i;
         double *const xii = xi + i;

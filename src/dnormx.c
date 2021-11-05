@@ -6,7 +6,7 @@ double dnormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -2.0;
+    return -5.0;
   if (*m & VDL_1)
     return -1.0;
   if (IS_NOT_ALIGNED(A))
@@ -14,7 +14,7 @@ double dnormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
   if (*ldA < *m)
     return -4.0;
   if (*ldA & VDL_1)
-    return -4.0;
+    return -4.5;
 #endif /* !NDEBUG */
 
 #ifdef _OPENMP

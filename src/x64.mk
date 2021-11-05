@@ -26,11 +26,27 @@ CXX=icpx
 endif # ?Darwin
 CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer -rdynamic
 ifdef NDEBUG
+ifdef MKL
+ifeq ($(MKL),intel_thread)
 CPUFLAGS += -qopenmp
+endif # intel_thread
+else # !MKL
+CPUFLAGS += -qopenmp
+endif # ?MKL
 SUFX=-$(ABI)_$(NDEBUG)$(WP)
 else # DEBUG
+ifdef MKL
+ifeq ($(MKL),intel_thread)
+LDG=-liomp5
+endif # intel_thread
+endif # MKL
 SUFX=-$(ABI)_$(DEBUG)$(WP)
 endif # ?NDEBUG
+ifndef MKL
+ifndef LAPACK
+MKL=sequential
+endif # !LAPACK
+endif # !MKL
 DBGFLAGS=-traceback
 FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -fimf-use-svml=true
 ifeq ($(WP),l)
@@ -79,7 +95,7 @@ endif # ?LAPACK
 ifneq ($(ARCH),Darwin) # Linux
 LIBFLAGS += -static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
 endif # Linux
-LDFLAGS += -lpthread -lm -ldl
+LDFLAGS += $(LDG) -lpthread -lm -ldl
 CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
 FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads -assume ieee_fpe_flags
 CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)

@@ -6,7 +6,7 @@ double znormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -2.0;
+    return -7.0;
   if (*m & VDL_1)
     return -1.0;
   if (IS_NOT_ALIGNED(Ar))
@@ -14,13 +14,13 @@ double znormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
   if (*ldAr < *m)
     return -4.0;
   if (*ldAr & VDL_1)
-    return -4.0;
+    return -4.5;
   if (IS_NOT_ALIGNED(Ai))
     return -5.0;
   if (*ldAi < *m)
     return -6.0;
   if (*ldAi & VDL_1)
-    return -6.0;
+    return -6.5;
 #endif /* !NDEBUG */
 
 #ifdef _OPENMP

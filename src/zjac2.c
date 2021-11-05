@@ -56,6 +56,35 @@ p[i >> VDLlg] = MD2U(P)
 
 fint zjac2_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21r[static restrict VDL], const double a21i[static restrict VDL], double s[static restrict VDL], double t[static restrict VDL], double c[static restrict VDL], double ca[static restrict VDL], double sa[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
 {
+#ifndef NDEBUG
+  if (IS_NOT_VFPENV)
+    return -14;
+  if (*n & VDL_1)
+    return -1;
+  if (IS_NOT_ALIGNED(a11))
+    return -2;
+  if (IS_NOT_ALIGNED(a22))
+    return -3;
+  if (IS_NOT_ALIGNED(a21r))
+    return -4;
+  if (IS_NOT_ALIGNED(a21i))
+    return -5;
+  if (IS_NOT_ALIGNED(s))
+    return -6;
+  if (IS_NOT_ALIGNED(t))
+    return -7;
+  if (IS_NOT_ALIGNED(c))
+    return -8;
+  if (IS_NOT_ALIGNED(ca))
+    return -9;
+  if (IS_NOT_ALIGNED(sa))
+    return -10;
+  if (IS_NOT_ALIGNED(l1))
+    return -11;
+  if (IS_NOT_ALIGNED(l2))
+    return -12;
+#endif /* !NDEBUG */
+
 #ifdef _OPENMP
   fint th = 0;
 

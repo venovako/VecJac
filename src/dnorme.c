@@ -6,7 +6,7 @@ double dnorme_(const fnat m[static restrict 1], const double x[static restrict V
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -4.0;
+    return -7.0;
   if (*m & VDL_1)
     return -1.0;
   if (IS_NOT_ALIGNED(x))

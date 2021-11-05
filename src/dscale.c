@@ -7,7 +7,7 @@ fint dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -2;
+    return -6;
   if (*m & VDL_1)
     return -1;
   if (IS_NOT_ALIGNED(A))
@@ -42,7 +42,7 @@ fint dlscal_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -2;
+    return -8;
   if (*m & VDL_1)
     return -1;
   if (IS_NOT_ALIGNED(A))

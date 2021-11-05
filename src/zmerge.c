@@ -4,7 +4,7 @@ fint zmerge_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -2;
+    return -9;
   if (*m & VDL__2)
     return -1;
   if (IS_NOT_ALIGNED(Ar))

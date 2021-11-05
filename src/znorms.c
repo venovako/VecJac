@@ -6,7 +6,7 @@ double znorms_(const fnat m[static restrict 1], const double zr[static restrict 
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -5.0;
+    return -8.0;
   if (*m & VDL_1)
     return -1.0;
   if (IS_NOT_ALIGNED(zr))
