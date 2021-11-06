@@ -67,6 +67,12 @@
 #define VDEFLE(e0,e1,f0,f1) MDOR(_mm512_cmplt_pd_mask(e0,e1),_mm512_mask_cmple_pd_mask(_mm512_cmpeq_pd_mask(e0,e1),f0,f1))
 #endif /* ?VDEFLE */
 
+#ifdef DBL_MAX_FIN_EXP
+#error DBL_MAX_FIN_EXP already defined
+#else /* !DBL_MAX_FIN_EXP */
+#define DBL_MAX_FIN_EXP 1023.0
+#endif /* ?DBL_MAX_FIN_EXP */
+
 #ifdef DZNRME_SEQRED
 static inline void efswp(double e0[static restrict 1], double f0[static restrict 1], double e1[static restrict 1], double f1[static restrict 1])
 {

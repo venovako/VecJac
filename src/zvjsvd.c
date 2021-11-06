@@ -23,6 +23,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     return -2;
   if (n_2 & VDL_1)
     return -2;
+  if (*n >= 0x10000000u) // 2^28
+    return -2;
   if (IS_NOT_ALIGNED(Gr))
     return -3;
   if (*ldGr < *m)
@@ -164,7 +166,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         f21 = VDMANT(f21);
         register const MD c12 = VDEFLE(e12,e21,f12,f21);
         register const VD E = _mm512_mask_blend_pd(c12, e12, e21);
-        register const VD d = _mm512_min_pd(_mm512_sub_pd(_mm512_set1_pd(1023.0), E), _mm512_setzero_pd());
+        register const VD d = _mm512_min_pd(_mm512_sub_pd(_mm512_set1_pd(DBL_MAX_FIN_EXP), E), _mm512_setzero_pd());
         e12 = _mm512_add_pd(e12, d);
         e21 = _mm512_add_pd(e21, d);
         register const VD _a11 = _mm512_scalef_pd(f12, e12);

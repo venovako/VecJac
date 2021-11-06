@@ -29,9 +29,9 @@ _mm512_store_pd((t + i), t1);                                                   
 register const VD C = _mm512_invsqrt_pd(_mm512_fmadd_pd(t1, t1, one)); VDP(C);                                         \
 _mm512_store_pd((c + i), C);                                                                                           \
 register const VD L1 = _mm512_fmadd_pd(t1, _mm512_fmadd_pd(a2, t1, ab), a1); VDP(L1);                                  \
-_mm512_store_pd((l1 + i), L1);                                                                                         \
+_mm512_store_pd((l1 + i), L1); /* TODO: not necessary, remove in the production code */                                \
 register const VD L2 = _mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2); VDP(L2);                                  \
-_mm512_store_pd((l2 + i), L2);                                                                                         \
+_mm512_store_pd((l2 + i), L2); /* TODO: not necessary, remove in the production code */                                \
 register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                                                            \
 p[i >> VDLlg] = MD2U(P)
 #endif /* ?ZJAC2_LOOP */
