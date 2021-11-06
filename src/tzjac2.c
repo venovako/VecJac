@@ -48,9 +48,12 @@ int main(int argc, char *argv[])
     (void)printf("%25s,", dtoa(a, c[i]));
     (void)printf("%25s,", dtoa(a, ca[i]));
     (void)printf("%25s,", dtoa(a, sa[i]));
-    RE = wrecf(a11[i], a22[i], a21r[i], a21i[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], &ae, &an);
+    const double c2 = (c[i] * c[i]);
+    l1[i] *= c2;
     (void)printf("%25s,", dtoa(a, l1[i]));
+    l2[i] *= c2;
     (void)printf("%25s,", dtoa(a, l2[i]));
+    RE = wrecf(a11[i], a22[i], a21r[i], a21i[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], &ae, &an);
     (void)printf("%30s\n", xtoa(a, (long double)RE));
   }
   return EXIT_SUCCESS;

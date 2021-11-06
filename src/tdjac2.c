@@ -41,9 +41,12 @@ int main(int argc, char *argv[])
   for (fnat i = 0u; i < n; ++i) {
     (void)printf("%25s,", dtoa(a, t[i]));
     (void)printf("%25s,", dtoa(a, c[i]));
-    RE = wrerf(a11[i], a22[i], a21[i], t[i], c[i], l1[i], l2[i], &ae, &an);
+    const double c2 = (c[i] * c[i]);
+    l1[i] *= c2;
     (void)printf("%25s,", dtoa(a, l1[i]));
+    l2[i] *= c2;
     (void)printf("%25s,", dtoa(a, l2[i]));
+    RE = wrerf(a11[i], a22[i], a21[i], t[i], c[i], l1[i], l2[i], &ae, &an);
     (void)printf("%30s\n", xtoa(a, (long double)RE));
   }
   return EXIT_SUCCESS;
