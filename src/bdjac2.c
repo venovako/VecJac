@@ -160,8 +160,8 @@ int main(int argc, char *argv[])
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       const double c2 = (c[i] * c[i]);
-      L1[i] = (l1[i] * c2);
-      L2[i] = (l2[i] * c2);
+      L1[i] = (l1[i] *= c2);
+      L2[i] = (l2[i] *= c2);
       RE[i] = wrerf(a11[i], a22[i], a21[i], t[i], c[i], l1[i], l2[i], (AE + i), (AN + i));
       r = fmaxw(r, RE[i]);
     }
