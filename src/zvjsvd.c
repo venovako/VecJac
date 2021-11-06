@@ -80,8 +80,12 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   unsigned *const p = iwork;
   unsigned *const pc = p + (n_2 >> VDLlg);
 
-  double M = 0.0;
-  // TODO: initial znormx (to M) and zscale, return -19 if fail (infs and/or nans)
+  double M = znormx_(m, n, Gr, ldGr, Gi, ldGi);
+  if (!(M >= 0.0))
+    return -19;
+  if (!(M <= DBL_MAX))
+    return -19;
+  // TODO: zscale_ if needed
 
   // see LAPACK's ZGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
@@ -252,14 +256,14 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           M = fmax(M, 0.0);
         else {
           s[i] = zjrot_(&_m, (Gr + _p * (*ldGr)), (Gi + _p * (*ldGi)), (Gr + _q * (*ldGr)), (Gi + _q * (*ldGi)), &_t, &_c, &_ca, &_sa);
-          M = fmax(M, ((s[i] < 0.0) ? HUGE_VAL : s[i]));
+          M = fmax(M, (!(s[i] >= 0.0) ? HUGE_VAL : s[i]));
           s[i] = zjrot_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_t, &_c, &_ca, &_sa);
           // V should not overflow but check anyway
-          if ((s[i] < 0.0) || (s[i] > DBL_MAX))
+          if (!(s[i] >= 0.0) || !(s[i] <= DBL_MAX))
             M = HUGE_VAL;
         }
       }
-      if (M > DBL_MAX)
+      if (!(M <= DBL_MAX))
         return -23;
     }
     if (!swt)

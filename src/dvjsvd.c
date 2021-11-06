@@ -62,8 +62,12 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   unsigned *const p = iwork;
   unsigned *const pc = p + (n_2 >> VDLlg);
 
-  double M = 0.0;
-  // TODO: initial dnormx (to M) and dscale, return -15 if fail (infs and/or nans)
+  double M = dnormx_(m, n, G, ldG);
+  if (!(M >= 0.0))
+    return -15;
+  if (!(M <= DBL_MAX))
+    return -15;
+  // TODO: dscale_ if needed
 
   // see LAPACK's DGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
@@ -224,14 +228,14 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           M = fmax(M, 0.0);
         else {
           s[i] = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_t, &_c);
-          M = fmax(M, ((s[i] < 0.0) ? HUGE_VAL : s[i]));
+          M = fmax(M, (!(s[i] >= 0.0) ? HUGE_VAL : s[i]));
           s[i] = djrot_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_t, &_c);
           // V should not overflow but check anyway
-          if ((s[i] < 0.0) || (s[i] > DBL_MAX))
+          if (!(s[i] >= 0.0) || !(s[i] <= DBL_MAX))
             M = HUGE_VAL;
         }
       }
-      if (M > DBL_MAX)
+      if (!(M <= DBL_MAX))
         return -19;
     }
     if (!swt)
