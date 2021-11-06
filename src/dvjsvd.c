@@ -221,6 +221,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         else // no-op
           triv = true;
         if (!triv && !rte) {
+          // TODO: FIXME
           const fint _g = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_t, &_c);
           if (!(rte = ((rte <= _g) ? rte : _g))) {
             const fint _v = djrot_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_t, &_c);
