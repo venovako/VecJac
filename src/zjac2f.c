@@ -14,6 +14,7 @@
 #else /* !ZJAC2_PARAMS */
 #define ZJAC2_PARAMS                                   \
   DZJAC2_PARAMS;                                       \
+  register const VD  huge = _mm512_set1_pd(DBL_MAX);   \
   register const VD be = _mm512_set1_pd(BIG_EXP);      \
   register const VD dtm = _mm512_set1_pd(DBL_TRUE_MIN)
 #endif /* ?ZJAC2_PARAMS */

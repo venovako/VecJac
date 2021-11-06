@@ -81,7 +81,6 @@ int main(int argc, char *argv[])
     *const a22 = (double*)aligned_alloc(VA, nt),
     *const a21r = (double*)aligned_alloc(VA, nt),
     *const a21i = (double*)aligned_alloc(VA, nt),
-    *const s = (double*)aligned_alloc(VA, nt),
     *const t = (double*)aligned_alloc(VA, nt),
     *const c = (double*)aligned_alloc(VA, nt),
     *const ca = (double*)aligned_alloc(VA, nt),
@@ -92,7 +91,6 @@ int main(int argc, char *argv[])
   assert(a22);
   assert(a21r);
   assert(a21i);
-  assert(s);
   assert(t);
   assert(c);
   assert(ca);
@@ -166,19 +164,18 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     be[0u] = rdtsc_beg(rd);
-    th = imax(th, zjac2_((const fnat*)&n, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, p));
+    th = imax(th, zjac2_((const fnat*)&n, a11, a22, a21r, a21i, t, c, ca, sa, l1, l2, p));
     be[1u] = rdtsc_end(rd);
-    (void)fprintf(stdout, "%15.9Lf", tsc_lap(hz, be[0u], be[1u]));
-    (void)fflush(stdout);
-    (void)dzjac2_pp((fnat)n, s, c, l1, l2, p, (double*)L1, (double*)L2);
-    (void)fprintf(stdout, ",");
+    (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
     wide r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,s,t,c,ca,sa,l1,l2,AE,AN,L1,L2,RE) reduction(max:r)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,t,c,ca,sa,l1,l2,AE,AN,L1,L2,RE) reduction(max:r)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
-      RE[i] = wrec(a11[i], a22[i], a21r[i], a21i[i], s[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], (AE + i), (AN + i), (L1 + i), (L2 + i));
+      L1[i] = l1[i];
+      L2[i] = l2[i];
+      RE[i] = wrecf(a11[i], a22[i], a21r[i], a21i[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], (AE + i), (AN + i));
       r = fmaxw(r, RE[i]);
     }
     (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
@@ -243,7 +240,6 @@ int main(int argc, char *argv[])
   free(ca);
   free(c);
   free(t);
-  free(s);
   free(a21i);
   free(a21r);
   free(a22);

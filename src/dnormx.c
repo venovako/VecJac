@@ -24,7 +24,8 @@ double dnormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
   DZNRMX_LOOP(A,ldA);
 
   return y;
-#else /* !_OPENMP */  
+#else /* !_OPENMP */
+  register const VD _zero = _mm512_set1_pd(-0.0);
   register const VD inf = _mm512_set1_pd(HUGE_VAL);
   register VD x = _mm512_set1_pd(-HUGE_VAL);
 

@@ -78,18 +78,17 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   unsigned *const p = iwork;
   unsigned *const pc = p + (n_2 >> VDLlg);
 
+  double M = 0.0;
+  // TODO: initial znormx (to M) and zscale, return -19 if fail (infs and/or nans)
+
   // see LAPACK's ZGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
-  const fnat l = 2;
-  fint e = 0;
-  double M = 0.0;
   unsigned sw = 0u;
 
   while (sw < *swp) {
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
-      if ((zlscal_(m, n, Gr, ldGr, Gi, ldGi, &l, &M, &e) < 0) || !isfinite(M))
-        return -19;
+      // TODO: rescale according to M if necessary and update M
       const unsigned *const r = js + st * (size_t)(*n);
       double pe = 0.0, qe = 0.0;
 #ifdef _OPENMP
@@ -188,7 +187,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         continue;
       swt += stt;
       const fnat kk = (k << VDLlg);
-      if (zjac2_(&kk, a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, p) < 0)
+      if (zjac2_(&kk, a11, a22, a21r, a21i, t, c, ca, sa, l1, l2, p) < 0)
         return -22;
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
@@ -212,9 +211,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             s[k_] = ((b & 1u) ? 2.0 : 1.0);
         }
       }
-      fint rte = 0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,s,t,c,ca,sa,kk) reduction(min:rte)
+#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,s,t,c,ca,sa,kk) reduction(max:M)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < kk; ++i) {
         const size_t _p = *(const size_t*)(a11 + i);
@@ -248,16 +246,18 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         }
         else // no-op
           triv = true;
-        if (!triv && !rte) {
-          // TODO: FIXME
-          const fint _g = zjrot_(&_m, (Gr + _p * (*ldGr)), (Gi + _p * (*ldGi)), (Gr + _q * (*ldGr)), (Gi + _q * (*ldGi)), &_t, &_c, &_ca, &_sa);
-          if (!(rte = ((rte <= _g) ? rte : _g))) {
-            const fint _v = zjrot_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_t, &_c, &_ca, &_sa);
-            rte = ((rte <= _v) ? rte : _v);
-          }
+        if (triv)
+          M = fmax(M, 0.0);
+        else {
+          s[i] = zjrot_(&_m, (Gr + _p * (*ldGr)), (Gi + _p * (*ldGi)), (Gr + _q * (*ldGr)), (Gi + _q * (*ldGi)), &_t, &_c, &_ca, &_sa);
+          M = fmax(M, ((s[i] < 0.0) ? HUGE_VAL : s[i]));
+          s[i] = zjrot_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_t, &_c, &_ca, &_sa);
+          // V should not overflow but check anyway
+          if ((s[i] < 0.0) || (s[i] > DBL_MAX))
+            M = HUGE_VAL;
         }
       }
-      if (rte)
+      if (M > DBL_MAX)
         return -23;
     }
     if (!swt)

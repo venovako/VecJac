@@ -44,6 +44,7 @@ double zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], d
   register const VD cna = _mm512_set1_pd(-(csta[0u]));
   register const VD c_ = _mm512_set1_pd(*c);
 
+  register const VD _zero = _mm512_set1_pd(-0.0);
   register VD mx = _mm512_setzero_pd()
     , _r
 #ifndef NDEBUG
@@ -74,8 +75,8 @@ double zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], d
       _mm512_store_pd(yri, yr_);
       _mm512_store_pd(yii, yi_);
 
-      _r = _mm512_abs_pd(yr_);
-      _i = _mm512_abs_pd(yi_);
+      _r = VDABS(yr_);
+      _i = VDABS(yi_);
       mx = _mm512_max_pd(mx, _mm512_max_pd(_r, _i));
 
       VZFMA(_r,_i,x_r,x_i,cna,sta,y_r,y_i);
@@ -84,8 +85,8 @@ double zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], d
       _mm512_store_pd(xri, xr_);
       _mm512_store_pd(xii, xi_);
 
-      _r = _mm512_abs_pd(xr_);
-      _i = _mm512_abs_pd(xi_);
+      _r = VDABS(xr_);
+      _i = VDABS(xi_);
       mx = _mm512_max_pd(mx, _mm512_max_pd(_r, _i));
     }
   }
@@ -108,8 +109,8 @@ double zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], d
       _mm512_store_pd(xri, xr_);
       _mm512_store_pd(xii, xi_);
 
-      _r = _mm512_abs_pd(xr_);
-      _i = _mm512_abs_pd(xi_);
+      _r = VDABS(xr_);
+      _i = VDABS(xi_);
       mx = _mm512_max_pd(mx, _mm512_max_pd(_r, _i));
 
       VZFMA(_r,_i,x_r,x_i,cna,sta,y_r,y_i);
@@ -118,8 +119,8 @@ double zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], d
       _mm512_store_pd(yri, yr_);
       _mm512_store_pd(yii, yi_);
 
-      _r = _mm512_abs_pd(yr_);
-      _i = _mm512_abs_pd(yi_);
+      _r = VDABS(yr_);
+      _i = VDABS(yi_);
       mx = _mm512_max_pd(mx, _mm512_max_pd(_r, _i));
     }
   }

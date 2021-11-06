@@ -1,5 +1,7 @@
 #include "djrot.h"
 
+#include "vecdef.h"
+
 double djrot_(const fint n[static restrict 1], double x[static restrict VDL], double y[static restrict VDL], const double t[static restrict 1], const double c[static restrict 1])
 {
 #ifndef NDEBUG
@@ -16,7 +18,9 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
   if (!*n)
     return 0.0;
 
+  register const VD _zero = _mm512_set1_pd(-0.0);
   register VD mx = _mm512_setzero_pd();
+
   if (*n < 0) { // permute
     const fnat n_ = (fnat)-*n;
     if (*t == 0.0) {
@@ -26,7 +30,7 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
           double *const yi = y + i;
           register const VD x_ = _mm512_load_pd(xi);
           register const VD y_ = _mm512_load_pd(yi);
-          mx = _mm512_max_pd(mx, _mm512_max_pd(_mm512_abs_pd(x_), _mm512_abs_pd(y_)));
+          mx = _mm512_max_pd(mx, _mm512_max_pd(VDABS(x_), VDABS(y_)));
           _mm512_store_pd(xi, y_);
           _mm512_store_pd(yi, x_);
         }
@@ -44,7 +48,7 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
       register const VD y_ = _mm512_load_pd(yi);
       register const VD x_r = _mm512_mul_pd(_mm512_fnmadd_pd(x_, t_, y_), c_);
       register const VD y_r = _mm512_mul_pd(_mm512_fmadd_pd(y_, t_, x_), c_);
-      mx = _mm512_max_pd(mx, _mm512_max_pd(_mm512_abs_pd(x_r), _mm512_abs_pd(y_r)));
+      mx = _mm512_max_pd(mx, _mm512_max_pd(VDABS(x_r), VDABS(y_r)));
       _mm512_store_pd(xi, x_r);
       _mm512_store_pd(yi, y_r);
     }
@@ -54,7 +58,7 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
     if (*t == 0.0) {
       if (*c == 1.0) {
         for (fnat i = 0u; i < n_; i += VDL)
-          mx = _mm512_max_pd(mx, _mm512_max_pd(_mm512_abs_pd(_mm512_load_pd(x + i)), _mm512_abs_pd(_mm512_load_pd(y + i))));
+          mx = _mm512_max_pd(mx, _mm512_max_pd(VDABS(_mm512_load_pd(x + i)), VDABS(_mm512_load_pd(y + i))));
         return _mm512_reduce_max_pd(mx);
       }
       // should never happen
@@ -69,7 +73,7 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
       register const VD y_ = _mm512_load_pd(yi);
       register const VD x_r = _mm512_mul_pd(_mm512_fmadd_pd(y_, t_, x_), c_);
       register const VD y_r = _mm512_mul_pd(_mm512_fnmadd_pd(x_, t_, y_), c_);
-      mx = _mm512_max_pd(mx, _mm512_max_pd(_mm512_abs_pd(x_r), _mm512_abs_pd(y_r)));
+      mx = _mm512_max_pd(mx, _mm512_max_pd(VDABS(x_r), VDABS(y_r)));
       _mm512_store_pd(xi, x_r);
       _mm512_store_pd(yi, y_r);
     }

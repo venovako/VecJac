@@ -2,36 +2,19 @@
 
 #include "dzjac2.h"
 
-#ifdef BIG_EXP
-#error BIG_EXP already defined
-#else /* !BIG_EXP */
-// (double)(DBL_MAX_EXP - 3)
-#define BIG_EXP 1021.0
-#endif /* ?BIG_EXP */
-
 #ifdef DJAC2_PARAMS
 #error DJAC2_PARAMS already defined
 #else /* !DJAC2_PARAMS */
-#define DJAC2_PARAMS                                   \
-  DZJAC2_PARAMS;                                       \
-  register const VD be = _mm512_set1_pd(BIG_EXP)
+#define DJAC2_PARAMS DZJAC2_PARAMS
 #endif /* ?DJAC2_PARAMS */
 
 #ifdef DJAC2_LOOP
 #error DJAC2_LOOP already defined
 #else /* !DJAC2_LOOP */
 #define DJAC2_LOOP                                                                                                     \
-register VD a1 = _mm512_load_pd(a11 + i); VDP(a1);                                                                     \
-register VD a2 = _mm512_load_pd(a22 + i); VDP(a2);                                                                     \
-register VD ar = _mm512_load_pd(a21 + i); VDP(ar);                                                                     \
-register const VD e1 = _mm512_sub_pd(be, _mm512_getexp_pd(a1)); VDP(e1);                                               \
-register const VD e2 = _mm512_sub_pd(be, _mm512_getexp_pd(a2)); VDP(e2);                                               \
-register const VD er = _mm512_sub_pd(be, _mm512_getexp_pd(ar)); VDP(er);                                               \
-register const VD es = _mm512_min_pd(_mm512_min_pd(e1, e2), _mm512_min_pd(er, huge)); VDP(es);                         \
-_mm512_store_pd((s + i), es);                                                                                          \
-ar = _mm512_scalef_pd(ar, es); VDP(ar);                                                                                \
-a1 = _mm512_scalef_pd(a1, es); VDP(a1);                                                                                \
-a2 = _mm512_scalef_pd(a2, es); VDP(a2);                                                                                \
+register const VD ar = _mm512_load_pd(a21 + i); VDP(ar);                                                               \
+register const VD a1 = _mm512_load_pd(a11 + i); VDP(a1);                                                               \
+register const VD a2 = _mm512_load_pd(a22 + i); VDP(a2);                                                               \
 register const VD aa = VDABS(ar); VDP(aa);                                                                             \
 register const VD as = VDSGN(ar); VDP(as);                                                                             \
 register const VD ab = _mm512_scalef_pd(aa, one); VDP(ab);                                                             \
@@ -49,11 +32,11 @@ register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                     
 p[i >> VDLlg] = MD2U(P)
 #endif /* ?DJAC2_LOOP */
 
-fint djac2_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21[static restrict VDL], double s[static restrict VDL], double t[static restrict VDL], double c[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
+fint djac2_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21[static restrict VDL], double t[static restrict VDL], double c[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -11;
+    return -10;
   if (*n & VDL_1)
     return -1;
   if (IS_NOT_ALIGNED(a11))
@@ -62,22 +45,20 @@ fint djac2_(const fnat n[static restrict 1], const double a11[static restrict VD
     return -3;
   if (IS_NOT_ALIGNED(a21))
     return -4;
-  if (IS_NOT_ALIGNED(s))
-    return -5;
   if (IS_NOT_ALIGNED(t))
-    return -6;
+    return -5;
   if (IS_NOT_ALIGNED(c))
-    return -7;
+    return -6;
   if (IS_NOT_ALIGNED(l1))
-    return -8;
+    return -7;
   if (IS_NOT_ALIGNED(l2))
-    return -9;
+    return -8;
 #endif /* !NDEBUG */
 
 #ifdef _OPENMP
   fint th = 0;
 
-#pragma omp parallel for default(none) shared(n,a11,a22,a21,s,t,c,l1,l2,p) reduction(max:th)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21,t,c,l1,l2,p) reduction(max:th)
   for (fnat i = 0u; i < *n; i += VDL) {
     DJAC2_PARAMS;
     DJAC2_LOOP;
