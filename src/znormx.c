@@ -24,7 +24,7 @@ double znormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
 #endif /* !NDEBUG */
 
 #ifdef _OPENMP
-  double y = -HUGE_VAL;
+  double y = 0.0;
 
 #pragma omp parallel for default(none) shared(m,n,Ar,ldAr) reduction(max:y)
   DZNRMX_LOOP(Ar,ldAr);
@@ -35,7 +35,7 @@ double znormx_(const fnat m[static restrict 1], const fnat n[static restrict 1],
 #else /* !_OPENMP */
   register const VD _zero = _mm512_set1_pd(-0.0);
   register const VD inf = _mm512_set1_pd(HUGE_VAL);
-  register VD x = _mm512_set1_pd(-HUGE_VAL);
+  register VD x = _mm512_setzero_pd();
 
   DZNRMX_LOOP(Ar,ldAr);
   DZNRMX_LOOP(Ai,ldAi);
