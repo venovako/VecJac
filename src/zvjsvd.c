@@ -52,8 +52,14 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   if (IS_NOT_ALIGNED(work))
     return -16;
 
+  double M = znormx_(m, n, Gr, ldGr, Gi, ldGi);
+  if (!(M <= DBL_MAX))
+    return -19;
+  if (copysign(1.0, M) == -1.0)
+    return -19;
+
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,Vr,ldVr,Vi,ldVi)
+#pragma omp parallel for default(none) shared(n,Vr,ldVr,Vi,ldVi,eS,fS)
 #endif /* _OPENMP */
   for (fnat j = 0u; j < *n; ++j) {
     register const VD z = _mm512_setzero_pd();
@@ -63,7 +69,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       _mm512_store_pd((Vrj + i), z);
       _mm512_store_pd((Vij + i), z);
     }
-    Vrj[j] = 1.0;
+    fS[j] = Vrj[j] = 1.0;
+    eS[j] = -HUGE_VAL;
   }
 
   double *const a11 = work;
@@ -80,11 +87,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   unsigned *const p = iwork;
   unsigned *const pc = p + (n_2 >> VDLlg);
 
-  double M = znormx_(m, n, Gr, ldGr, Gi, ldGi);
-  if (!(M >= 0.0))
-    return -19;
-  if (!(M <= DBL_MAX))
-    return -19;
+  if (M == 0.0)
+    return 0;
   // TODO: zscale_ if needed
 
   // see LAPACK's ZGESVJ

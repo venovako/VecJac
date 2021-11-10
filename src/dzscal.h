@@ -27,15 +27,4 @@
 #endif /* ?_OPENMP */
 #endif /* ?DZSCAL_LOOP */
 
-static inline fint s(const double M, const fint l)
-{
-  int e
-#ifndef NDEBUG
-    = 0
-#endif /* !NDEBUG */
-    ;
-  (void)frexp(M, &e);
-  return (DBL_MAX_EXP - l - e);
-}
-
 #endif /* !DZSCAL_H */

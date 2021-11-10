@@ -40,15 +40,22 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   if (IS_NOT_ALIGNED(work))
     return -12;
 
+  double M = dnormx_(m, n, G, ldG);
+  if (!(M <= DBL_MAX))
+    return -15;
+  if (copysign(1.0, M) == -1.0)
+    return -15;
+
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,V,ldV)
+#pragma omp parallel for default(none) shared(n,V,ldV,eS,fS)
 #endif /* _OPENMP */
   for (fnat j = 0u; j < *n; ++j) {
     register const VD z = _mm512_setzero_pd();
     double *const Vj = V + j * (size_t)(*ldV);
     for (fnat i = 0u; i < *n; i += VDL)
       _mm512_store_pd((Vj + i), z);
-    Vj[j] = 1.0;
+    fS[j] = Vj[j] = 1.0;
+    eS[j] = -HUGE_VAL;
   }
 
   double *const a11 = work;
@@ -62,11 +69,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   unsigned *const p = iwork;
   unsigned *const pc = p + (n_2 >> VDLlg);
 
-  double M = dnormx_(m, n, G, ldG);
-  if (!(M >= 0.0))
-    return -15;
-  if (!(M <= DBL_MAX))
-    return -15;
+  if (M == 0.0)
+    return 0;
   // TODO: dscale_ if needed
 
   // see LAPACK's DGESVJ
