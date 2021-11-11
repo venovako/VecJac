@@ -6,7 +6,9 @@ MKFS=GNUmakefile $(COMPILER).mk
 
 .PHONY: all help clean
 
-all: libvecjac$(SUFX).a bdjac2$(SUFX).exe bdjac2f$(SUFX).exe bdlevd2$(SUFX).exe bzjac2$(SUFX).exe bzjac2f$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe tdjac2$(SUFX).exe tdnorme$(SUFX).exe tpjs$(SUFX).exe tzjac2$(SUFX).exe
+# Requires adding -DTEST_JAC2 to LIBFLAGS:
+# bdjac2$(SUFX).exe bzjac2$(SUFX).exe tdjac2$(SUFX).exe tzjac2$(SUFX).exe
+all: libvecjac$(SUFX).a bdjac2f$(SUFX).exe bdlevd2$(SUFX).exe bzjac2f$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe tdnorme$(SUFX).exe tpjs$(SUFX).exe
 
 help:
 	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [all|clean|help]"
@@ -51,10 +53,10 @@ dnorms$(SUFX).o: dnorms.c dnorms.h dznrms.h d8sort.h vecdef.h vec.h common.h $(M
 dnormx$(SUFX).o: dnormx.c dnormx.h dznrmx.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-dscale$(SUFX).o: dscale.c dscale.h dzscal.h dnormx.h vec.h common.h $(MKFS)
+dscale$(SUFX).o: dscale.c dscale.h dzscal.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-dvjsvd$(SUFX).o: dvjsvd.c dvjsvd.h dscale.h dnorm2.h ddpscl.h djac2.h djrot.h vecdef.h defops.h vec.h common.h $(MKFS)
+dvjsvd$(SUFX).o: dvjsvd.c dvjsvd.h dnormx.h dscale.h dnorm2.h dznrm2.h ddpscl.h djac2.h djrot.h vecdef.h defops.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 laev2$(SUFX).o: laev2.c laev2.h common.h $(MKFS)
@@ -114,17 +116,17 @@ znormx$(SUFX).o: znormx.c znormx.h dznrmx.h vecdef.h vec.h common.h $(MKFS)
 zmerge$(SUFX).o: zmerge.c zmerge.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-zscale$(SUFX).o: zscale.c zscale.h dzscal.h znormx.h vec.h common.h $(MKFS)
+zscale$(SUFX).o: zscale.c zscale.h dzscal.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 zsplit$(SUFX).o: zsplit.c zsplit.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-zvjsvd$(SUFX).o: zvjsvd.c zvjsvd.h zscale.h znorm2.h zdpscl.h zjac2.h zjrot.h vecdef.h defops.h vec.h common.h $(MKFS)
+zvjsvd$(SUFX).o: zvjsvd.c zvjsvd.h znormx.h zscale.h znorm2.h dznrm2.h zdpscl.h zjac2.h zjrot.h vecdef.h defops.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-bdjac2$(SUFX).exe: bdjac2.c libvecjac$(SUFX).a $(MKFS)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+# bdjac2$(SUFX).exe: bdjac2.c libvecjac$(SUFX).a $(MKFS)
+# 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
 bdjac2f$(SUFX).exe: bdjac2f.c libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
@@ -132,8 +134,8 @@ bdjac2f$(SUFX).exe: bdjac2f.c libvecjac$(SUFX).a $(MKFS)
 bdlevd2$(SUFX).exe: bdlevd2.c libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
-bzjac2$(SUFX).exe: bzjac2.c libvecjac$(SUFX).a $(MKFS)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+# bzjac2$(SUFX).exe: bzjac2.c libvecjac$(SUFX).a $(MKFS)
+# 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
 bzjac2f$(SUFX).exe: bzjac2f.c libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
@@ -144,8 +146,8 @@ bzlevd2$(SUFX).exe: bzlevd2.c libvecjac$(SUFX).a $(MKFS)
 gen2rand$(SUFX).exe: gen2rand.c libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
-tdjac2$(SUFX).exe: tdjac2.c libvecjac$(SUFX).a $(MKFS)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+# tdjac2$(SUFX).exe: tdjac2.c libvecjac$(SUFX).a $(MKFS)
+# 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
 psort$(SUFX).o: psort.cpp psort.h $(MKFS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -159,8 +161,8 @@ tdnorme$(SUFX).exe: tdnorme$(SUFX).o psort$(SUFX).o libvecjac$(SUFX).a $(MKFS)
 tpjs$(SUFX).exe: tpjs.c libvecjac$(SUFX).a ../../JACSD/libjstrat$(DEBUG).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
-tzjac2$(SUFX).exe: tzjac2.c libvecjac$(SUFX).a $(MKFS)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+# tzjac2$(SUFX).exe: tzjac2.c libvecjac$(SUFX).a $(MKFS)
+# 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
 clean:
 	-$(RM) aalloc$(SUFX).o aalloc$(SUFX).optrpt
@@ -199,15 +201,16 @@ clean:
 	-$(RM) zsplit$(SUFX).o zsplit$(SUFX).optrpt
 	-$(RM) zvjsvd$(SUFX).o zvjsvd$(SUFX).optrpt
 	-$(RM) libvecjac$(SUFX).a
-	-$(RM) bdjac2$(SUFX).exe bdjac2.optrpt
 	-$(RM) bdjac2f$(SUFX).exe bdjac2f.optrpt
 	-$(RM) bdlevd2$(SUFX).exe bdlevd2.optrpt
-	-$(RM) bzjac2$(SUFX).exe bzjac2.optrpt
 	-$(RM) bzjac2f$(SUFX).exe bzjac2f.optrpt
 	-$(RM) bzlevd2$(SUFX).exe bzlevd2.optrpt
 	-$(RM) gen2rand$(SUFX).exe gen2rand.optrpt
-	-$(RM) tdjac2$(SUFX).exe tdjac2.optrpt
 	-$(RM) psort$(SUFX).o psort$(SUFX).optrpt psort$(SUFX).opt.yaml
 	-$(RM) tdnorme$(SUFX).exe tdnorme$(SUFX).o tdnorme$(SUFX).optrpt
 	-$(RM) tpjs$(SUFX).exe tpjs.optrpt
-	-$(RM) tzjac2$(SUFX).exe tzjac2.optrpt
+
+# -$(RM) bdjac2$(SUFX).exe bdjac2.optrpt
+# -$(RM) bzjac2$(SUFX).exe bzjac2.optrpt
+# -$(RM) tdjac2$(SUFX).exe tdjac2.optrpt
+# -$(RM) tzjac2$(SUFX).exe tzjac2.optrpt

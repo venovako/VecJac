@@ -1,12 +1,24 @@
+#ifdef TEST_JAC2
+#error TEST_JAC2 has to be undefined
+#endif /* TEST_JAC2 */
+
 #include "dvjsvd.h"
 
+#include "dnormx.h"
 #include "dscale.h"
 #include "dnorm2.h"
+#include "dznrm2.h"
 #include "ddpscl.h"
 #include "djac2.h"
 #include "djrot.h"
 #include "vecdef.h"
 #include "defops.h"
+
+#ifdef DBL_MAX_ROT_EXP
+#error DBL_MAX_ROT_EXP already defined
+#else /* !DBL_MAX_ROT_EXP */
+#define DBL_MAX_ROT_EXP 1022
+#endif /* ?DBL_MAX_ROT_EXP */
 
 fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], double G[static restrict VDL], const fnat ldG[static restrict 1], double V[static restrict VDL], const fnat ldV[static restrict 1], double eS[static restrict 1], double fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], double work[static restrict VDL], unsigned iwork[static restrict 1])
 {
@@ -61,17 +73,29 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   double *const a11 = work;
   double *const a22 = a11 + n_2;
   double *const a21 = a22 + n_2;
-  double *const s = a21 + n_2;
-  double *const t = s + n_2;
+  double *const t = a21 + n_2;
   double *const c = t + n_2;
-  double *const l1 = c + n_2;
+  double *const s = c + n_2;
+  double *const l1 = s + n_2;
   double *const l2 = l1 + n_2;
   unsigned *const p = iwork;
   unsigned *const pc = p + (n_2 >> VDLlg);
 
   if (M == 0.0)
     return 0;
-  // TODO: dscale_ if needed
+  dbl2ef((DBL_MAX / *m), t, c);
+  const int DBL_MAX_NRM_EXP = (int)*t;
+  dbl2ef(M, t, c);
+  int eM = (int)*t;
+  int sR = DBL_MAX_ROT_EXP - eM;
+  int sN = DBL_MAX_NRM_EXP - eM - 1;
+  if (sN) {
+    *(fint*)t = sN;
+    if (dscale_(m, n, G, ldG, (const fint*)t) < 0)
+      return -15;
+    M = scalbn(M, sN);
+  }
+  int sT = sN;
 
   // see LAPACK's DGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
@@ -80,54 +104,87 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   while (sw < *swp) {
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
-      // TODO: rescale according to M if necessary and update M
+      // rescale according to M if necessary and update M
+      dbl2ef(M, t, c);
+      eM = (int)*t;
+      sR = DBL_MAX_ROT_EXP - eM;
+      sN = DBL_MAX_NRM_EXP - eM - 1;
+      if (sR < 0) {
+        (void)fprintf(stderr, "Transformations in danger in sweep %u, step %u; rescaling by 2^%d.\n", sw, st, sN);
+        (void)fflush(stderr);
+        *(fint*)t = sN;
+        if (dscale_(m, n, G, ldG, (const fint*)t) < 0)
+          return -15;
+        M = scalbn(M, sN);
+        sT += sN;
+      }
+      // compute the norms, overflow-aware
       const unsigned *const r = js + st * (size_t)(*n);
-      double pe = 0.0, qe = 0.0;
+      double nM = 0.0;
+      bool overflow = false;
+      do {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,a21,s,c,l1,l2,tol) reduction(min:pe,qe)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,t,c) reduction(max:nM)
+#endif /* _OPENMP */
+        for (fnat pq = 0u; pq < *n; pq += 2u) {
+          const fnat pq_ = pq + 1u;
+          const fnat _pq = (pq >> 1u);
+          const size_t _p = r[pq];
+          const size_t _q = r[pq_];
+          double *const Gp = G + _p * (*ldG);
+          nM = fmax(nM, fmin(dnorm2_(m, Gp, (eS + _p), (fS + _p), (t + _pq), (c + _pq)), HUGE_VAL));
+          double *const Gq = G + _q * (*ldG);
+          nM = fmax(nM, fmin(dnorm2_(m, Gq, (eS + _q), (fS + _q), (t + _pq), (c + _pq)), HUGE_VAL));
+        }
+        if (overflow = (nM > DBL_MAX)) {
+          (void)fprintf(stderr, "Frobenius norm overflow in sweep %u, step %u; rescaling by 2^%d.\n", sw, st, sN);
+          (void)fflush(stderr);
+          *(fint*)t = sN;
+          if (dscale_(m, n, G, ldG, (const fint*)t) < 0)
+            return -15;
+          M = scalbn(M, sN);
+          sT += sN;
+        }
+      } while (overflow);
+      // scaled dot-products
+      nM = 0.0;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,s) reduction(min:nM)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat pq_ = pq + 1u;
         const fnat _pq = (pq >> 1u);
         const size_t _p = r[pq];
         const size_t _q = r[pq_];
+        // pack the norms
+        const double e2[2u] = { eS[_p], eS[_q] };
+        const double f2[2u] = { fS[_p], fS[_q] };
         double *const Gp = G + _p * (*ldG);
         double *const Gq = G + _q * (*ldG);
-        if ((pe = fmin(pe, dnorm2_(m, Gp, (eS + _p), (fS + _p), (s + _p), (c + _p)))) < 0.0)
-          continue;
-        if ((qe = fmin(qe, dnorm2_(m, Gq, (eS + _q), (fS + _q), (s + _q), (c + _q)))) < 0.0)
-          continue;
-        // pack the norms
-        s[pq] = eS[_p];
-        c[pq] = fS[_p];
-        s[pq_] = eS[_q];
-        c[pq_] = fS[_q];
-        const double d = ddpscl_(m, Gp, Gq, (s + pq), (c + pq));
-#ifndef NDEBUG
-        if (!isfinite(d)) {
-          pe = -1.0;
-          if (isnan(d))
-            qe = -1.0;
-        }
-        if ((pe < 0.0) || (qe < 0.0))
-          continue;
-#endif /* !NDEBUG */
-        // ensure that the compiler does not rearrange accesses to t and l1
-        _mm_mfence();
-        // repack data
-        s[_pq] = d;
-        t[_pq] = fS[_p];
-        c[_pq] = fS[_q];
-        l1[_pq] = eS[_p];
-        l2[_pq] = eS[_q];
+        const double d = ddpscl_(m, Gp, Gq, e2, f2);
+        if (!(isfinite(s[_pq] = d)))
+          nM = fmin(nM, -16);
       }
-      if (pe < 0.0)
-        return -16;
-      if (qe < 0.0)
-        return -17;
-      fnat stt = 0u, k = 0u;
+      if (nM < 0.0)
+        return (fint)nM;
+      // repack data
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,s,t,c,l1,l2,p,pc,tol,k) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n,r,eS,fS,t,c,l1,l2)
+#endif /* _OPENMP */
+      for (fnat pq = 0u; pq < *n; pq += 2u) {
+        const fnat pq_ = pq + 1u;
+        const fnat _pq = (pq >> 1u);
+        const size_t _p = r[pq];
+        const size_t _q = r[pq_];
+        t[_pq] = eS[_p];
+        c[_pq] = eS[_q];
+        l1[_pq] = fS[_p];
+        l2[_pq] = fS[_q];
+      }
+      fnat stt = 0u, k = 0u;
+      // TODO
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,t,c,s,p,pc,tol,k) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
@@ -140,10 +197,10 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           continue;
         stt += p[j];
         // Grammian pre-scaling into the double precision range
-        register const VD f1 = _mm512_load_pd(t + i);
-        register const VD f2 = _mm512_load_pd(c + i);
-        register const VD e1 = _mm512_load_pd(l1 + i);
-        register const VD e2 = _mm512_load_pd(l2 + i);
+        register const VD f1 = _mm512_load_pd(l1 + i);
+        register const VD f2 = _mm512_load_pd(l2 + i);
+        register const VD e1 = _mm512_load_pd(t + i);
+        register const VD e2 = _mm512_load_pd(c + i);
         register VD f12 = _mm512_div_pd(f1, f2);
         register VD e12 = _mm512_sub_pd(e1, e2);
         register VD f21 = _mm512_div_pd(f2, f1);
@@ -175,11 +232,11 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         continue;
       swt += stt;
       const fnat kk = (k << VDLlg);
-      if (djac2_(&kk, a11, a22, a21, t, c, l1, l2, p) < 0)
-        return -18;
+      if (djac2_(&kk, a11, a22, a21, t, c, p) < 0)
+        return -17;
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(a11,a22,s,p,pc,r,k) reduction(+:np)
+#pragma omp parallel for default(none) shared(a11,a22,a21,p,pc,r,k) reduction(+:np)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < k; ++i) {
         const fnat i_ = (i << VDLlg);
@@ -192,15 +249,15 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           *(size_t*)(a11 + k_) = _p;
           *(size_t*)(a22 + k_) = _q;
           if (x & 1u) {
-            s[k_] = ((b & 1u) ? -2.0 : -1.0);
+            a21[k_] = ((b & 1u) ? -2.0 : -1.0);
             ++np;
           }
           else
-            s[k_] = ((b & 1u) ? 2.0 : 1.0);
+            a21[k_] = ((b & 1u) ? 2.0 : 1.0);
         }
       }
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,s,t,c,kk) reduction(max:M)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,t,c,kk) reduction(max:M)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < kk; ++i) {
         const size_t _p = *(const size_t*)(a11 + i);
@@ -208,19 +265,19 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         double _t, _c;
         fint _m, _n;
         bool triv = false;
-        if (s[i] == -2.0) {
+        if (a21[i] == -2.0) {
           _m = -(fint)*m;
           _n = -(fint)*n;
           _t = t[i];
           _c = c[i];
         }
-        else if (s[i] == -1.0) {
+        else if (a21[i] == -1.0) {
           _m = -(fint)*m;
           _n = -(fint)*n;
           _t = 0.0;
           _c = 1.0;
         }
-        else if (s[i] == 2.0) {
+        else if (a21[i] == 2.0) {
           _m = (fint)*m;
           _n = (fint)*n;
           _t = t[i];
@@ -231,16 +288,16 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         if (triv)
           M = fmax(M, 0.0);
         else {
-          s[i] = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_t, &_c);
-          M = fmax(M, (!(s[i] >= 0.0) ? HUGE_VAL : s[i]));
-          s[i] = djrot_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_t, &_c);
+          a21[i] = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_t, &_c);
+          M = fmax(M, (!(a21[i] >= 0.0) ? HUGE_VAL : a21[i]));
+          a21[i] = djrot_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_t, &_c);
           // V should not overflow but check anyway
-          if (!(s[i] >= 0.0) || !(s[i] <= DBL_MAX))
+          if (!(a21[i] >= 0.0) || !(a21[i] <= DBL_MAX))
             M = HUGE_VAL;
         }
       }
       if (!(M <= DBL_MAX))
-        return -19;
+        return -18;
     }
     if (!swt)
       break;

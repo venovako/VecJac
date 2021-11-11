@@ -1,6 +1,5 @@
 #include "dscale.h"
 
-#include "dnormx.h"
 #include "dzscal.h"
 
 fint dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], double A[static restrict VDL], const fnat ldA[static restrict 1], const fint e[static restrict 1])
