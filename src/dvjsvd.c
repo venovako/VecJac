@@ -56,7 +56,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   if (!(M <= DBL_MAX))
     return -15;
   if (copysign(1.0, M) == -1.0)
-    return -15;
+    return -16;
 
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,V,ldV,eS,fS)
@@ -83,7 +83,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
   if (M == 0.0)
     return 0;
-  dbl2ef((DBL_MAX / *m), t, c);
+  const double M_m = (DBL_MAX / (*m << 1u));
+  dbl2ef(M_m, t, c);
   const int DBL_MAX_NRM_EXP = (int)*t;
   dbl2ef(M, t, c);
   int eM = (int)*t;
@@ -92,7 +93,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   if (sN) {
     *(fint*)t = sN;
     if (dscale_(m, n, G, ldG, (const fint*)t) < 0)
-      return -15;
+      return -17;
     M = scalbn(M, sN);
   }
   int sT = sN;
@@ -114,7 +115,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         (void)fflush(stderr);
         *(fint*)t = sN;
         if (dscale_(m, n, G, ldG, (const fint*)t) < 0)
-          return -15;
+          return -18;
         M = scalbn(M, sN);
         sT += sN;
       }
@@ -124,24 +125,33 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       bool overflow = false;
       do {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,t,c) reduction(max:nM)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,t,c,l1,l2) reduction(max:nM)
 #endif /* _OPENMP */
         for (fnat pq = 0u; pq < *n; pq += 2u) {
-          const fnat pq_ = pq + 1u;
           const fnat _pq = (pq >> 1u);
+          if (nM > DBL_MAX) {
+            l1[_pq] = NAN;
+            l2[_pq] = NAN;
+            continue;
+          }
+          const fnat pq_ = pq + 1u;
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
           double *const Gp = G + _p * (*ldG);
-          nM = fmax(nM, fmin(dnorm2_(m, Gp, (eS + _p), (fS + _p), (t + _pq), (c + _pq)), HUGE_VAL));
+          nM = fmax(nM, fmin((l1[_pq] = dnorm2_(m, Gp, (eS + _p), (fS + _p), (t + _pq), (c + _pq))), HUGE_VAL));
+          if (nM > DBL_MAX) {
+            l2[_pq] = NAN;
+            continue;
+          }
           double *const Gq = G + _q * (*ldG);
-          nM = fmax(nM, fmin(dnorm2_(m, Gq, (eS + _q), (fS + _q), (t + _pq), (c + _pq)), HUGE_VAL));
+          nM = fmax(nM, fmin((l2[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (t + _pq), (c + _pq))), HUGE_VAL));
         }
         if (overflow = (nM > DBL_MAX)) {
           (void)fprintf(stderr, "Frobenius norm overflow in sweep %u, step %u; rescaling by 2^%d.\n", sw, st, sN);
           (void)fflush(stderr);
           *(fint*)t = sN;
           if (dscale_(m, n, G, ldG, (const fint*)t) < 0)
-            return -15;
+            return -19;
           M = scalbn(M, sN);
           sT += sN;
         }
@@ -152,8 +162,12 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,s) reduction(min:nM)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
-        const fnat pq_ = pq + 1u;
         const fnat _pq = (pq >> 1u);
+        if (nM < 0.0) {
+          s[_pq] = NAN;
+          continue;
+        }
+        const fnat pq_ = pq + 1u;
         const size_t _p = r[pq];
         const size_t _q = r[pq_];
         // pack the norms
@@ -161,9 +175,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const double f2[2u] = { fS[_p], fS[_q] };
         double *const Gp = G + _p * (*ldG);
         double *const Gq = G + _q * (*ldG);
-        const double d = ddpscl_(m, Gp, Gq, e2, f2);
-        if (!(isfinite(s[_pq] = d)))
-          nM = fmin(nM, -16);
+        s[_pq] = ddpscl_(m, Gp, Gq, e2, f2);
+        if (!(isfinite(s[_pq])))
+          nM = fmin(nM, -20.0);
       }
       if (nM < 0.0)
         return (fint)nM;
@@ -233,7 +247,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       swt += stt;
       const fnat kk = (k << VDLlg);
       if (djac2_(&kk, a11, a22, a21, t, c, p) < 0)
-        return -17;
+        return -21;
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(a11,a22,a21,p,pc,r,k) reduction(+:np)
@@ -252,14 +266,18 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             a21[k_] = ((b & 1u) ? -2.0 : -1.0);
             ++np;
           }
-          else
+          else // no swap
             a21[k_] = ((b & 1u) ? 2.0 : 1.0);
         }
       }
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,t,c,kk) reduction(max:M)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,s,t,c,kk) reduction(max:M)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < kk; ++i) {
+        if (M > DBL_MAX) {
+          s[i] = NAN;
+          continue;
+        }
         const size_t _p = *(const size_t*)(a11 + i);
         const size_t _q = *(const size_t*)(a22 + i);
         double _t, _c;
@@ -288,16 +306,20 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         if (triv)
           M = fmax(M, 0.0);
         else {
-          a21[i] = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_t, &_c);
-          M = fmax(M, (!(a21[i] >= 0.0) ? HUGE_VAL : a21[i]));
-          a21[i] = djrot_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_t, &_c);
+          s[i] = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_t, &_c);
+          M = fmax(M, (!(s[i] >= 0.0) ? HUGE_VAL : s[i]));
+          if (M > DBL_MAX) {
+            s[i] = NAN;
+            continue;
+          }
+          s[i] = djrot_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_t, &_c);
           // V should not overflow but check anyway
-          if (!(a21[i] >= 0.0) || !(a21[i] <= DBL_MAX))
+          if (!(s[i] >= 0.0) || !(s[i] <= DBL_MAX))
             M = HUGE_VAL;
         }
       }
-      if (!(M <= DBL_MAX))
-        return -18;
+      if (M > DBL_MAX)
+        return -22;
     }
     if (!swt)
       break;
