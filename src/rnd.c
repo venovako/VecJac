@@ -1,9 +1,10 @@
 #include "rnd.h"
 
-static const double daub = DBL_MAX / 4;
-static const double zaub = DBL_MAX / 8;
-static const float  saub = FLT_MAX / 4;
-static const float  caub = FLT_MAX / 8;
+static const float saub = FLT_MAX / 16;
+static const float caub = FLT_MAX / 16;
+
+static const double daub = DBL_MAX / 16;
+static const double zaub = DBL_MAX / 16;
 
 static void gen_rand8(const size_t n, uint8_t r[static restrict 1])
 {

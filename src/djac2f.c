@@ -2,20 +2,13 @@
 
 #include "dzjac2.h"
 
-#ifdef BIG_EXP
-#error BIG_EXP already defined
-#else /* !BIG_EXP */
-// (double)(DBL_MAX_EXP - 3)
-#define BIG_EXP 1021.0
-#endif /* ?BIG_EXP */
-
 #ifdef DJAC2_PARAMS
 #error DJAC2_PARAMS already defined
 #else /* !DJAC2_PARAMS */
-#define DJAC2_PARAMS                                \
-  DZJAC2_PARAMS;                                    \
-  register const VD huge = _mm512_set1_pd(DBL_MAX); \
-  register const VD be = _mm512_set1_pd(BIG_EXP)
+#define DJAC2_PARAMS                                 \
+  DZJAC2_PARAMS;                                     \
+  register const VD huge = _mm512_set1_pd(DBL_MAX);  \
+  register const VD be = _mm512_set1_pd(DBL_BIG_EXP)
 #endif /* ?DJAC2_PARAMS */
 
 #ifdef DJAC2_LOOP
