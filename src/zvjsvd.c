@@ -1,7 +1,3 @@
-#ifdef TEST_JAC2
-#error TEST_JAC2 has to be undefined
-#endif /* TEST_JAC2 */
-
 #include "zvjsvd.h"
 
 #include "znormx.h"

@@ -1,4 +1,4 @@
-#include "djac2.h"
+#include "djac2t.h"
 #include "dzjac2.h"
 #include "wnrme.h"
 #include "rnd.h"
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     be[0u] = rdtsc_beg(rd);
-    th = imax(th, djac2_((const fnat*)&n, a11, a22, a21, t, c, l1, l2, p));
+    th = imax(th, djac2t_((const fnat*)&n, a11, a22, a21, t, c, l1, l2, p));
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);

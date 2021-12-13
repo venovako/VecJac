@@ -1,5 +1,5 @@
 #include "rnd.h"
-#include "djac2.h"
+#include "djac2t.h"
 #include "wnrme.h"
 
 int main(int argc, char *argv[])
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  (void)printf("djac2=%d\n", (int)djac2_(&n, a11, a22, a21, t, c, l1, l2, &p));
+  (void)printf("djac2=%d\n", (int)djac2t_(&n, a11, a22, a21, t, c, l1, l2, &p));
   (void)printf("%25s,%25s,%25s,%25s,%30s\n", "\"t\"", "\"c\"", "\"L1\"", "\"L2\"", "\"RE\"");
   char a[31] = { '\0' };
   wide RE = W_MONE, ae = W_MONE, an = W_MONE;
