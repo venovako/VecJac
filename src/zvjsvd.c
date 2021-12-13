@@ -5,7 +5,7 @@
 #include "znorm2.h"
 #include "dznrm2.h"
 #include "zdpscl.h"
-#include "zjac2.h"
+#include "zjac2f.h"
 #include "zjrot.h"
 #include "vecdef.h"
 #include "defops.h"
@@ -270,7 +270,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         continue;
       swt += stt;
       const fnat kk = (k << VDLlg);
-      if (zjac2_(&kk, a11, a22, a21r, a21i, t, c, ca, sa, p) < 0)
+      if (zjac2f_(&kk, a11, a22, a21r, a21i, t, c, ca, sa, l1, l2, p) < 0)
         return -26;
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP

@@ -5,7 +5,7 @@
 #include "dnorm2.h"
 #include "dznrm2.h"
 #include "ddpscl.h"
-#include "djac2.h"
+#include "djac2f.h"
 #include "djrot.h"
 #include "vecdef.h"
 #include "defops.h"
@@ -242,7 +242,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         continue;
       swt += stt;
       const fnat kk = (k << VDLlg);
-      if (djac2_(&kk, a11, a22, a21, t, c, p) < 0)
+      if (djac2f_(&kk, a11, a22, a21, t, c, l1, l2, p) < 0)
         return -21;
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
