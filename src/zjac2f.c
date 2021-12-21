@@ -44,9 +44,9 @@ register VD L1 = _mm512_fmadd_pd(t1, _mm512_fmadd_pd(a2, t1, ab), a1);          
 register VD L2 = _mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2);                                                 \
 L1 = _mm512_mul_pd(L1, C); VDP(L1);                                                                                    \
 L2 = _mm512_mul_pd(L2, C); VDP(L2);                                                                                    \
+es = VDNEG(es);                                                                                                        \
 register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                                                            \
 p[i >> VDLlg] = MD2U(P);                                                                                               \
-es = VDNEG(es);                                                                                                        \
 L1 = _mm512_scalef_pd(L1, es);                                                                                         \
 _mm512_store_pd((l1 + i), L1);                                                                                         \
 L2 = _mm512_scalef_pd(L2, es);                                                                                         \
