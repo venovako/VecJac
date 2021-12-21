@@ -256,7 +256,9 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         _a21i = _mm512_scalef_pd(_a21i, d);
         // pack the data and record the translation in pc
         fnat kk;
+#ifdef _OPENMP
 #pragma omp atomic capture seq_cst
+#endif /* _OPENMP */
         kk = k++;
         // lower 8 bits: mask, upper 24 bits: j (assumes n < 2^28)
         pc[kk] |= (j << VDL);

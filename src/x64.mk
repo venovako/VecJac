@@ -98,14 +98,14 @@ endif # Linux
 LDFLAGS += $(LDG) -lpthread -lm -ldl
 CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
 FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads -assume ieee_fpe_flags
-CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
+CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(subst -debug pubnames,,$(DBGFLAGS)) $(LIBFLAGS) $(CPUFLAGS) $(subst -no-ftz,,$(FPUFLAGS))
 ifdef NDEBUG
 CFLAGS += -w3
 CXXFLAGS += -w3
 else # DEBUG
 CFLAGS += -check=stack,uninit -w3
 FFLAGS += -check all
-CXXFLAGS += -check=stack,uninit -w3
+CXXFLAGS += -fcheck=stack,uninit -w3
 endif # ?NDEBUG
 ifeq ($(ABI),ilp64)
 FFLAGS += -i8
