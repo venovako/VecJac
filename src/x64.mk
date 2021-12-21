@@ -98,14 +98,23 @@ endif # Linux
 LDFLAGS += $(LDG) -lpthread -lm -ldl
 CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
 FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads -assume ieee_fpe_flags
-CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(subst -debug pubnames,,$(DBGFLAGS)) $(LIBFLAGS) $(CPUFLAGS) $(subst -no-ftz,,$(FPUFLAGS))
+CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS)
+ifeq ($(ARCH),Darwin)
+CXXFLAGS += $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
+else # Linux
+CXXFLAGS += $(subst -debug pubnames,,$(DBGFLAGS)) $(LIBFLAGS) $(CPUFLAGS) $(subst -no-ftz,,$(FPUFLAGS))
+endif # ?Darwin
 ifdef NDEBUG
 CFLAGS += -w3
 CXXFLAGS += -w3
 else # DEBUG
 CFLAGS += -check=stack,uninit -w3
 FFLAGS += -check all
+ifeq ($(ARCH),Darwin)
+CXXFLAGS += -check=stack,uninit -w3
+else # Linux
 CXXFLAGS += -fcheck=stack,uninit -w3
+endif # ?Darwin
 endif # ?NDEBUG
 ifeq ($(ABI),ilp64)
 FFLAGS += -i8
