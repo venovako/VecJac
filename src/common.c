@@ -110,3 +110,12 @@ char *xtoa(char s[static restrict 31], const long double x)
       *d = ' ';
   return s;
 }
+
+int set_cbwr()
+{
+#ifdef USE_MKL
+  return (mkl_cbwr_set(mkl_cbwr_get_auto_branch()) != MKL_CBWR_SUCCESS);
+#else /* !USE_MKL */
+  return -1;
+#endif /* ?USE_MKL */
+}

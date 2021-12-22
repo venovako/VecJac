@@ -228,4 +228,6 @@ extern char *stoa(char s[static restrict 17], const float x);
 extern char *dtoa(char s[static restrict 26], const double x);
 extern char *xtoa(char s[static restrict 31], const long double x);
 
+extern int set_cbwr();
+
 #endif /* !COMMON_H */
