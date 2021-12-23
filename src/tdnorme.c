@@ -13,7 +13,8 @@ static int dcmp(const double x[static 1], const double y[static 1])
 
 int main(int argc, char *argv[])
 {
-  (void)set_cbwr();
+  (void)fprintf(stderr, "CBWR: %d\n", set_cbwr());
+  (void)fflush(stderr);
 
   if (4 != argc) {
     (void)fprintf(stderr, "%s 2^{EXP} 2^{AUB} {nIT}\n", *argv);

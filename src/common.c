@@ -114,8 +114,9 @@ char *xtoa(char s[static restrict 31], const long double x)
 int set_cbwr()
 {
 #ifdef USE_MKL
-  return (mkl_cbwr_set(mkl_cbwr_get_auto_branch()) != MKL_CBWR_SUCCESS);
+  const int b = mkl_cbwr_get_auto_branch();
+  return ((mkl_cbwr_set(b) == MKL_CBWR_SUCCESS) ? b : -1);
 #else /* !USE_MKL */
-  return -1;
+  return -2;
 #endif /* ?USE_MKL */
 }
