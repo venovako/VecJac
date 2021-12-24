@@ -74,8 +74,7 @@ int main(int argc, char *argv[])
     *const cs1 = (double*)aligned_alloc(sizeof(double), nt),
     *const sn1 = (double*)aligned_alloc(sizeof(double), nt),
     *const l1 = (double*)aligned_alloc(sizeof(double), nt),
-    *const l2 = (double*)aligned_alloc(sizeof(double), nt),
-    *const t = (double*)aligned_alloc(sizeof(double), nt);
+    *const l2 = (double*)aligned_alloc(sizeof(double), nt);
   assert(a11);
   assert(a22);
   assert(a21);
@@ -83,16 +82,6 @@ int main(int argc, char *argv[])
   assert(sn1);
   assert(l1);
   assert(l2);
-  assert(t);
-
-  const size_t nw = n * sizeof(wide);
-  wide
-    *const RE = (wide*)aligned_alloc(sizeof(wide), nw),
-    *const AE = (wide*)aligned_alloc(sizeof(wide), nw),
-    *const AN = (wide*)aligned_alloc(sizeof(wide), nw);
-  assert(RE);
-  assert(AE);
-  assert(AN);
 
   unsigned rd[2u] = { 0u, 0u };
   uint64_t hz = tsc_get_freq_hz_(rd), be[2u] = { UINT64_C(0), UINT64_C(0) };
@@ -155,24 +144,25 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, "%15.9Lf", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,cs1,sn1,t)
+#pragma omp parallel for default(none) shared(n,cs1,sn1)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i)
-      t[i] = dlevd2_pp(cs1[i], sn1[i]);
+      sn1[i] = dlevd2_pp(cs1[i], sn1[i]);
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     wide r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,a11,a22,a21,t,cs1,l1,l2,AE,AN,RE) reduction(max:r)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21,cs1,sn1,l1,l2) reduction(max:r)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
-      RE[i] = wrerf(a11[i], a22[i], a21[i], t[i], cs1[i], l1[i], l2[i], (AE + i), (AN + i));
-      r = fmaxw(r, RE[i]);
+      wide AE = W_ZERO, AN = W_ZERO;
+      const wide RE = wrerf(a11[i], a22[i], a21[i], sn1[i], cs1[i], l1[i], l2[i], &AE, &AN);
+      r = fmaxw(r, RE);
     }
     (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
     (void)fflush(stdout);
 #ifdef _OPENMP
-#pragma omp parallel default(none) shared(fk,fl,t,cs1,n,n_t,cnt,jn)
+#pragma omp parallel default(none) shared(fk,fl,cs1,sn1,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
       const fint mt =
@@ -184,7 +174,7 @@ int main(int argc, char *argv[])
         ;
       const size_t tnt = mt * n_t;
       const off_t off = (jn + tnt) * sizeof(double);
-      if ((ssize_t)cnt != pread(fk, (t + tnt), cnt, off))
+      if ((ssize_t)cnt != pread(fk, (sn1 + tnt), cnt, off))
         exit(EXIT_FAILURE);
       if ((ssize_t)cnt != pread(fl, (cs1 + tnt), cnt, off))
         exit(EXIT_FAILURE);
@@ -194,13 +184,14 @@ int main(int argc, char *argv[])
     wide x = W_ZERO, m = W_ZERO;
     r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,l1,l2,t,cs1,AE,AN,RE) reduction(max:r,x,m)
+#pragma omp parallel for default(none) shared(n,l1,l2,cs1,sn1) reduction(max:r,x,m)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
-      RE[i] = wlam(l1[i], l2[i], t[i], cs1[i], (AE + i), (AN + i));
-      r = fmaxw(r, RE[i]);
-      x = fmaxw(x, AE[i]);
-      m = fmaxw(m, AN[i]);
+      wide AE = W_ZERO, AN = W_ZERO;
+      const wide RE = wlam(l1[i], l2[i], sn1[i], cs1[i], &AE, &AN);
+      r = fmaxw(r, RE);
+      x = fmaxw(x, AE);
+      m = fmaxw(m, AN);
     }
     (void)fprintf(stdout, "%s,", xtoa(a, (long double)r));
     (void)fprintf(stdout, "%s,", xtoa(a, (long double)x));
@@ -216,11 +207,6 @@ int main(int argc, char *argv[])
   (void)close(fl);
   (void)close(fk);
 
-  free(AN);
-  free(AE);
-  free(RE);
-
-  free(t);
   free(l2);
   free(l1);
   free(sn1);

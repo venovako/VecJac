@@ -95,15 +95,6 @@ int main(int argc, char *argv[])
   assert(l2);
   assert(t);
 
-  const size_t nw = n * sizeof(wide);
-  wide
-    *const RE = (wide*)aligned_alloc(sizeof(wide), nw),
-    *const AE = (wide*)aligned_alloc(sizeof(wide), nw),
-    *const AN = (wide*)aligned_alloc(sizeof(wide), nw);
-  assert(RE);
-  assert(AE);
-  assert(AN);
-
   unsigned rd[2u] = { 0u, 0u };
   uint64_t hz = tsc_get_freq_hz_(rd), be[2u] = { UINT64_C(0), UINT64_C(0) };
   (void)fprintf(stderr, "TSC frequency: %llu+(%u/%u) Hz.\n", (unsigned long long)hz, rd[0u], rd[1u]);
@@ -175,11 +166,12 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
     wide r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,t,cs1,snr,sni,l1,l2,AE,AN,RE) reduction(max:r)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,t,cs1,snr,sni,l1,l2) reduction(max:r)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
-      RE[i] = wrecf(a11[i], a22[i], a21r[i], a21i[i], t[i], cs1[i], snr[i], sni[i], l1[i], l2[i], (AE + i), (AN + i));
-      r = fmaxw(r, RE[i]);
+      wide AE = W_ZERO, AN = W_ZERO;
+      const wide RE = wrecf(a11[i], a22[i], a21r[i], a21i[i], t[i], cs1[i], snr[i], sni[i], l1[i], l2[i], &AE, &AN);
+      r = fmaxw(r, RE);
     }
     (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
     (void)fflush(stdout);
@@ -206,13 +198,14 @@ int main(int argc, char *argv[])
     wide x = W_ZERO, m = W_ZERO;
     r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,l1,l2,t,cs1,AE,AN,RE) reduction(max:r,x,m)
+#pragma omp parallel for default(none) shared(n,l1,l2,t,cs1) reduction(max:r,x,m)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
-      RE[i] = wlam(l1[i], l2[i], t[i], cs1[i], (AE + i), (AN + i));
-      r = fmaxw(r, RE[i]);
-      x = fmaxw(x, AE[i]);
-      m = fmaxw(m, AN[i]);
+      wide AE = W_ZERO, AN = W_ZERO;
+      const wide RE = wlam(l1[i], l2[i], t[i], cs1[i], &AE, &AN);
+      r = fmaxw(r, RE);
+      x = fmaxw(x, AE);
+      m = fmaxw(m, AN);
     }
     (void)fprintf(stdout, "%s,", xtoa(a, (long double)r));
     (void)fprintf(stdout, "%s,", xtoa(a, (long double)x));
@@ -228,10 +221,6 @@ int main(int argc, char *argv[])
   (void)close(ff);
   (void)close(fl);
   (void)close(fk);
-
-  free(AN);
-  free(AE);
-  free(RE);
 
   free(t);
   free(l2);
