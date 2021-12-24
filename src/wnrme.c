@@ -20,8 +20,8 @@ static wide waer(const wide a11, const wide a22, const wide a21, const wide s, c
   const wide _s = -s;
   const wide c2 = c * c;
   const wide t2 = t * t;
-  *L1 = scalbw((c2 * l1), _s);
-  *L2 = scalbw((c2 * l2), _s);
+  *L1 = scalbw(l1, _s);
+  *L2 = scalbw(l2, _s);
   const wide l = *L1 - *L2;
   const wide tl = t * l;
   return wnrmer(fmaw(c2, fmaw(*L2, t2, *L1), -a11), fmaw(c2, fmaw(*L1, t2, *L2), -a22), fmaw(c2, tl, -a21));
@@ -33,8 +33,8 @@ static wide waec(const wide a11, const wide a22, const wide a21r, const wide a21
   const wide _s = -s;
   const wide c2 = c * c;
   const wide t2 = t * t;
-  *L1 = scalbw((c2 * l1), _s);
-  *L2 = scalbw((c2 * l2), _s);
+  *L1 = scalbw(l1, _s);
+  *L2 = scalbw(l2, _s);
   const wide l = *L1 - *L2;
   const wide tl = t * l;
   return wnrmec(fmaw(c2, fmaw(*L2, t2, *L1), -a11), fmaw(c2, fmaw(*L1, t2, *L2), -a22), fmaw(c2, (ca * tl), -a21r), fmaw(c2, (sa * tl), -a21i));
