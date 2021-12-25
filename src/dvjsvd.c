@@ -201,8 +201,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         // convergence check
         register VD _a21 = _mm512_load_pd(s + i);
         register const VD _zero = _mm512_set1_pd(-0.0);
+        register const VD _tol = _mm512_set1_pd(tol);
         register const VD _a21_ = VDABS(_a21);
-        pc[j] = MD2U(_mm512_cmple_pd_mask(_mm512_set1_pd(tol), _a21_));
+        pc[j] = MD2U(_mm512_cmple_pd_mask(_tol, _a21_));
         if (!(p[j] = _mm_popcnt_u32(pc[j])))
           continue;
         stt += p[j];
