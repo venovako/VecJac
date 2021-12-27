@@ -15,29 +15,30 @@ wide wnrmec(const wide a11, const wide a22, const wide a21r, const wide a21i)
 // absolute error checkers
 
 // return || U L U^T - A ||_F
-static wide waer(const wide a11, const wide a22, const wide a21, const wide s, const wide t, const wide c, const wide l1, const wide l2, wide L1[static restrict 1], wide L2[static restrict 1])
+static wide waer(const wide a11, const wide a22, const wide a21, const wide cs, const wide sn, const wide l1, const wide l2)
 {
-  const wide _s = -s;
-  const wide c2 = c * c;
+  const wide c2 = cs * cs;
+  const wide t = sn / cs;
   const wide t2 = t * t;
-  *L1 = scalbw(l1, _s);
-  *L2 = scalbw(l2, _s);
-  const wide l = *L1 - *L2;
+  const wide l = l1 - l2;
   const wide tl = t * l;
-  return wnrmer(fmaw(c2, fmaw(*L2, t2, *L1), -a11), fmaw(c2, fmaw(*L1, t2, *L2), -a22), fmaw(c2, tl, -a21));
+  return wnrmer(fmaw(c2, fmaw(l2, t2, l1), -a11), fmaw(c2, fmaw(l1, t2, l2), -a22), fmaw(c2, tl, -a21));
 }
 
 // return || U L U^H - A ||_F
-static wide waec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide s, const wide t, const wide c, const wide ca, const wide sa, const wide l1, const wide l2, wide L1[static restrict 1], wide L2[static restrict 1])
+static wide waec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide cs, wide ca, wide sa, const wide l1, const wide l2)
 {
-  const wide _s = -s;
-  const wide c2 = c * c;
+  const wide c2 = cs * cs;
+  const wide sn = hypotw(ca, sa);
+  if (sn != W_ZERO) {
+    ca /= sn;
+    sa /= sn;
+  }
+  const wide t = sn / cs;
   const wide t2 = t * t;
-  *L1 = scalbw(l1, _s);
-  *L2 = scalbw(l2, _s);
-  const wide l = *L1 - *L2;
+  const wide l = l1 - l2;
   const wide tl = t * l;
-  return wnrmec(fmaw(c2, fmaw(*L2, t2, *L1), -a11), fmaw(c2, fmaw(*L1, t2, *L2), -a22), fmaw(c2, (ca * tl), -a21r), fmaw(c2, (sa * tl), -a21i));
+  return wnrmec(fmaw(c2, fmaw(l2, t2, l1), -a11), fmaw(c2, fmaw(l1, t2, l2), -a22), fmaw(c2, (ca * tl), -a21r), fmaw(c2, (sa * tl), -a21i));
 }
 
 // return || U L U^T - A ||_F
@@ -63,17 +64,17 @@ static wide waecf(const wide a11, const wide a22, const wide a21r, const wide a2
 // relative error checkers
 
 // return || U L U^T - A ||_F / || A ||_F
-wide wrer(const wide a11, const wide a22, const wide a21, const wide s, const wide t, const wide c, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1], wide L1[static restrict 1], wide L2[static restrict 1])
+wide wrer(const wide a11, const wide a22, const wide a21, const wide cs, const wide sn, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1])
 {
-  *ae = waer(a11, a22, a21, s, t, c, l1, l2, L1, L2);
+  *ae = waer(a11, a22, a21, cs, sn, l1, l2);
   *an = wnrmer(a11, a22, a21);
   return fmaxw((*ae / *an), W_ZERO);
 }
 
 // return || U L U^H - A ||_F / || A ||_F
-wide wrec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide s, const wide t, const wide c, const wide ca, const wide sa, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1], wide L1[static restrict 1], wide L2[static restrict 1])
+wide wrec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide cs, const wide ca, const wide sa, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1])
 {
-  *ae = waec(a11, a22, a21r, a21i, s, t, c, ca, sa, l1, l2, L1, L2);
+  *ae = waec(a11, a22, a21r, a21i, cs, ca, sa, l1, l2);
   *an = wnrmec(a11, a22, a21r, a21i);
   return fmaxw((*ae / *an), W_ZERO);
 }

@@ -81,34 +81,23 @@ int main(int argc, char *argv[])
     *const a22 = (double*)aligned_alloc(VA, nt),
     *const a21r = (double*)aligned_alloc(VA, nt),
     *const a21i = (double*)aligned_alloc(VA, nt),
-    *const t = (double*)aligned_alloc(VA, nt),
-    *const c = (double*)aligned_alloc(VA, nt),
+    *const cs = (double*)aligned_alloc(VA, nt),
     *const ca = (double*)aligned_alloc(VA, nt),
     *const sa = (double*)aligned_alloc(VA, nt),
     *const l1 = (double*)aligned_alloc(VA, nt),
-    *const l2 = (double*)aligned_alloc(VA, nt),
-    *const s = (double*)aligned_alloc(VA, nt);
+    *const l2 = (double*)aligned_alloc(VA, nt);
   assert(a11);
   assert(a22);
   assert(a21r);
   assert(a21i);
-  assert(t);
-  assert(c);
+  assert(cs);
   assert(ca);
   assert(sa);
   assert(l1);
   assert(l2);
-  assert(s);
 
   unsigned *const p = (unsigned*)malloc((n >> VDLlg) * sizeof(unsigned));
   assert(p);
-
-  const size_t nw = n * sizeof(wide);
-  wide
-    *const L1 = (wide*)aligned_alloc(sizeof(wide), nw),
-    *const L2 = (wide*)aligned_alloc(sizeof(wide), nw);
-  assert(L1);
-  assert(L2);
 
   unsigned rd[2u] = { 0u, 0u };
   uint64_t hz = tsc_get_freq_hz_(rd), be[2u] = { UINT64_C(0), UINT64_C(0) };
@@ -160,23 +149,23 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     be[0u] = rdtsc_beg(rd);
-    th = imax(th, zjac2s_((const fnat*)&n, a11, a22, a21r, a21i, t, c, ca, sa, l1, l2, p, s));
+    th = imax(th, zjac2s_((const fnat*)&n, a11, a22, a21r, a21i, cs, ca, sa, l1, l2, p));
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
     wide r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,s,t,c,ca,sa,l1,l2,L1,L2) reduction(max:r)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,cs,ca,sa,l1,l2) reduction(max:r)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       wide AE = W_ZERO, AN = W_ZERO;
-      const wide RE = wrec(a11[i], a22[i], a21r[i], a21i[i], s[i], t[i], c[i], ca[i], sa[i], l1[i], l2[i], &AE, &AN, (L1 + i), (L2 + i));
+      const wide RE = wrec(a11[i], a22[i], a21r[i], a21i[i], cs[i], ca[i], sa[i], l1[i], l2[i], &AE, &AN);
       r = fmaxw(r, RE);
     }
     (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
     (void)fflush(stdout);
 #ifdef _OPENMP
-#pragma omp parallel default(none) shared(fk,fl,l1,l2,n,n_t,cnt,jn)
+#pragma omp parallel default(none) shared(fk,fl,ca,sa,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
       const fint mt =
@@ -188,9 +177,9 @@ int main(int argc, char *argv[])
         ;
       const size_t tnt = mt * n_t;
       const off_t off = (jn + tnt) * sizeof(double);
-      if ((ssize_t)cnt != pread(fk, (l1 + tnt), cnt, off))
+      if ((ssize_t)cnt != pread(fk, (ca + tnt), cnt, off))
         exit(EXIT_FAILURE);
-      if ((ssize_t)cnt != pread(fl, (l2 + tnt), cnt, off))
+      if ((ssize_t)cnt != pread(fl, (sa + tnt), cnt, off))
         exit(EXIT_FAILURE);
     }
     (void)fprintf(stdout, ",");
@@ -198,11 +187,11 @@ int main(int argc, char *argv[])
     wide x = W_ZERO, m = W_ZERO;
     r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,l1,l2,L1,L2) reduction(max:r,x,m)
+#pragma omp parallel for default(none) shared(n,l1,l2,ca,sa) reduction(max:r,x,m)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       wide AE = W_ZERO, AN = W_ZERO;
-      const wide RE = wlam(L1[i], L2[i], l1[i], l2[i], &AE, &AN);
+      const wide RE = wlam(l1[i], l2[i], ca[i], sa[i], &AE, &AN);
       r = fmaxw(r, RE);
       x = fmaxw(x, AE);
       m = fmaxw(m, AN);
@@ -222,18 +211,13 @@ int main(int argc, char *argv[])
   (void)close(fl);
   (void)close(fk);
 
-  free(L2);
-  free(L1);
-
   free(p);
 
-  free(s);
   free(l2);
   free(l1);
   free(sa);
   free(ca);
-  free(c);
-  free(t);
+  free(cs);
   free(a21i);
   free(a21r);
   free(a22);

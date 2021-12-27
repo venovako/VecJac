@@ -141,14 +141,7 @@ int main(int argc, char *argv[])
 #endif /* _OPENMP */
     }
     be[1u] = rdtsc_end(rd);
-    (void)fprintf(stdout, "%15.9Lf", tsc_lap(hz, be[0u], be[1u]));
-    (void)fflush(stdout);
-#ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,cs1,sn1)
-#endif /* _OPENMP */
-    for (size_t i = 0u; i < n; ++i)
-      sn1[i] = dlevd2_pp(cs1[i], sn1[i]);
-    (void)fprintf(stdout, ",");
+    (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
     wide r = W_ZERO;
 #ifdef _OPENMP
@@ -156,7 +149,7 @@ int main(int argc, char *argv[])
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       wide AE = W_ZERO, AN = W_ZERO;
-      const wide RE = wrerf(a11[i], a22[i], a21[i], sn1[i], cs1[i], l1[i], l2[i], &AE, &AN);
+      const wide RE = wrer(a11[i], a22[i], a21[i], cs1[i], sn1[i], l1[i], l2[i], &AE, &AN);
       r = fmaxw(r, RE);
     }
     (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
@@ -174,9 +167,9 @@ int main(int argc, char *argv[])
         ;
       const size_t tnt = mt * n_t;
       const off_t off = (jn + tnt) * sizeof(double);
-      if ((ssize_t)cnt != pread(fk, (sn1 + tnt), cnt, off))
+      if ((ssize_t)cnt != pread(fk, (cs1 + tnt), cnt, off))
         exit(EXIT_FAILURE);
-      if ((ssize_t)cnt != pread(fl, (cs1 + tnt), cnt, off))
+      if ((ssize_t)cnt != pread(fl, (sn1 + tnt), cnt, off))
         exit(EXIT_FAILURE);
     }
     (void)fprintf(stdout, ",");
@@ -188,7 +181,7 @@ int main(int argc, char *argv[])
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       wide AE = W_ZERO, AN = W_ZERO;
-      const wide RE = wlam(l1[i], l2[i], sn1[i], cs1[i], &AE, &AN);
+      const wide RE = wlam(l1[i], l2[i], cs1[i], sn1[i], &AE, &AN);
       r = fmaxw(r, RE);
       x = fmaxw(x, AE);
       m = fmaxw(m, AN);

@@ -29,14 +29,15 @@ ar = _mm512_scalef_pd(ar, es); VDP(ar);                                         
 ai = _mm512_scalef_pd(ai, es); VDP(ai);                                                                                \
 a1 = _mm512_scalef_pd(a1, es); VDP(a1);                                                                                \
 a2 = _mm512_scalef_pd(a2, es); VDP(a2);                                                                                \
-_mm512_store_pd((s + i), es);                                                                                          \
 register VD ar_ = VDABS(ar); VDP(ar_);                                                                                 \
 register VD ai_ = VDABS(ai); VDP(ai_);                                                                                 \
+register const VD as = VDSGN(ar); VDP(as);                                                                             \
 register const VD am = _mm512_min_pd(ar_, ai_); VDP(am);                                                               \
 register const VD aM = _mm512_max_pd(ar_, ai_); VDP(aM);                                                               \
+es = VDNEG(es); VDP(es);                                                                                               \
 register VD aa = _mm512_max_pd(_mm512_div_pd(am, aM), zero); VDP(aa);                                                  \
 aa = _mm512_mul_pd(_mm512_sqrt_pd(_mm512_fmadd_pd(aa, aa, one)), aM); VDP(aa);                                         \
-ar_ = VDOR(_mm512_min_pd(_mm512_div_pd(ar_, aa), one), VDSGN(ar)); VDP(ar_);                                           \
+ar_ = VDOR(_mm512_min_pd(_mm512_div_pd(ar_, aa), one), as); VDP(ar_);                                                  \
 ai_ = _mm512_div_pd(ai, _mm512_max_pd(aa, dtm)); VDP(ai_);                                                             \
 register const VD ab = _mm512_scalef_pd(aa, one); VDP(ab);                                                             \
 register const VD ad = _mm512_sub_pd(a1, a2); VDP(ad);                                                                 \
@@ -48,23 +49,22 @@ register const VD co = _mm512_div_pd(one, s1); VDP(co);                         
 register const VD si = _mm512_div_pd(t1, s1); VDP(si);                                                                 \
 _mm512_store_pd((cs + i), co);                                                                                         \
 ar_ = _mm512_mul_pd(ar_, si); VDP(ar_);                                                                                \
-_mm512_store_pd((sn + i), si);                                                                                         \
 ai_ = _mm512_mul_pd(ai_, si); VDP(ai_);                                                                                \
 _mm512_store_pd((ca + i), ar_);                                                                                        \
-register VD L1 = _mm512_div_pd(_mm512_fmadd_pd(t1, _mm512_fmadd_pd(a2, t1, ab), a1), s2); VDP(L1);                     \
+register const VD L1 = _mm512_div_pd(_mm512_fmadd_pd(t1, _mm512_fmadd_pd(a2, t1, ab), a1), s2); VDP(L1);               \
 _mm512_store_pd((sa + i), ai_);                                                                                        \
-register VD L2 = _mm512_div_pd(_mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2), s2); VDP(L2);                     \
-_mm512_store_pd((l1 + i), L1);                                                                                         \
+register const VD L2 = _mm512_div_pd(_mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2), s2); VDP(L2);               \
+_mm512_store_pd((l1 + i), _mm512_scalef_pd(L1, es));                                                                   \
 register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                                                            \
-_mm512_store_pd((l2 + i), L2);                                                                                         \
+_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es));                                                                   \
 p[i >> VDLlg] = MD2U(P)
 #endif /* ?ZJAC2_LOOP */
 
-fint zjac2s_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21r[static restrict VDL], const double a21i[static restrict VDL], double sn[static restrict VDL], double cs[static restrict VDL], double ca[static restrict VDL], double sa[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1], double s[static restrict VDL])
+fint zjac2s_(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21r[static restrict VDL], const double a21i[static restrict VDL], double cs[static restrict VDL], double ca[static restrict VDL], double sa[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -14;
+    return -12;
   if (*n & VDL_1)
     return -1;
   if (IS_NOT_ALIGNED(a11))
@@ -75,26 +75,22 @@ fint zjac2s_(const fnat n[static restrict 1], const double a11[static restrict V
     return -4;
   if (IS_NOT_ALIGNED(a21i))
     return -5;
-  if (IS_NOT_ALIGNED(sn))
-    return -6;
   if (IS_NOT_ALIGNED(cs))
-    return -7;
+    return -6;
   if (IS_NOT_ALIGNED(ca))
-    return -8;
+    return -7;
   if (IS_NOT_ALIGNED(sa))
-    return -9;
+    return -8;
   if (IS_NOT_ALIGNED(l1))
-    return -10;
+    return -9;
   if (IS_NOT_ALIGNED(l2))
-    return -11;
-  if (IS_NOT_ALIGNED(s))
-    return -13;
+    return -10;
 #endif /* !NDEBUG */
 
 #ifdef _OPENMP
   fint th = 0;
 
-#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,sn,cs,ca,sa,l1,l2,p,s) reduction(max:th)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,cs,ca,sa,l1,l2,p) reduction(max:th)
   for (fnat i = 0u; i < *n; i += VDL) {
     ZJAC2_PARAMS;
     ZJAC2_LOOP;
