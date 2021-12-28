@@ -6,7 +6,7 @@ MKFS=GNUmakefile $(COMPILER).mk
 
 .PHONY: all help clean
 
-all: libvecjac$(SUFX).a bdjac2f$(SUFX).exe bdjac2s$(SUFX).exe bdlevd2$(SUFX).exe bzjac2f$(SUFX).exe bzjac2s$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe tdnorme$(SUFX).exe tpjs$(SUFX).exe mkl_ver$(SUFX).exe
+all: libvecjac$(SUFX).a bdjac2f$(SUFX).exe bdjac2s$(SUFX).exe bdlevd2$(SUFX).exe bsjac2f$(SUFX).exe bsjac2s$(SUFX).exe bslevd2$(SUFX).exe bzjac2f$(SUFX).exe bzjac2s$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe tdnorme$(SUFX).exe tpjs$(SUFX).exe mkl_ver$(SUFX).exe
 
 help:
 	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [all|clean|help]"
@@ -168,6 +168,15 @@ bdjac2s$(SUFX).exe: bdjac2s.c libvecjac$(SUFX).a $(MKFS)
 bdlevd2$(SUFX).exe: bdlevd2.c libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
+bsjac2f$(SUFX).exe: bsjac2f.c libvecjac$(SUFX).a $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
+bsjac2s$(SUFX).exe: bsjac2s.c libvecjac$(SUFX).a $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
+bslevd2$(SUFX).exe: bslevd2.c libvecjac$(SUFX).a $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
 bzjac2f$(SUFX).exe: bzjac2f.c libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
@@ -247,6 +256,9 @@ clean:
 	-$(RM) bdjac2f$(SUFX).exe bdjac2f.optrpt
 	-$(RM) bdjac2s$(SUFX).exe bdjac2s.optrpt
 	-$(RM) bdlevd2$(SUFX).exe bdlevd2.optrpt
+	-$(RM) bsjac2f$(SUFX).exe bsjac2f.optrpt
+	-$(RM) bsjac2s$(SUFX).exe bsjac2s.optrpt
+	-$(RM) bslevd2$(SUFX).exe bslevd2.optrpt
 	-$(RM) bzjac2f$(SUFX).exe bzjac2f.optrpt
 	-$(RM) bzjac2s$(SUFX).exe bzjac2s.optrpt
 	-$(RM) bzlevd2$(SUFX).exe bzlevd2.optrpt

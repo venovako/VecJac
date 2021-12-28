@@ -1,5 +1,4 @@
 #include "zjac2s.h"
-#include "dzjac2.h"
 #include "wnrme.h"
 #include "rnd.h"
 #include "timer.h"
