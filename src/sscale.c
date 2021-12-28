@@ -7,13 +7,13 @@ fint sscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
     return -6;
-  if (*m & VDL_1)
+  if (*m & VSL_1)
     return -1;
   if (IS_NOT_ALIGNED(A))
     return -3;
   if (*ldA < *m)
     return -4;
-  if (*ldA & VDL_1)
+  if (*ldA & VSL_1)
     return -4;
 #endif /* !NDEBUG */
 
