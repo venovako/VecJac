@@ -6,19 +6,25 @@ MKFS=GNUmakefile $(COMPILER).mk
 
 .PHONY: all help clean
 
-all: libvecjac$(SUFX).a bdjac2f$(SUFX).exe bdjac2s$(SUFX).exe bdlevd2$(SUFX).exe bsjac2f$(SUFX).exe bsjac2s$(SUFX).exe bslevd2$(SUFX).exe bzjac2f$(SUFX).exe bzjac2s$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe tdnorme$(SUFX).exe tpjs$(SUFX).exe mkl_ver$(SUFX).exe
+all: libvecjac$(SUFX).a bcjac2f$(SUFX).exe bcjac2s$(SUFX).exe bclevd2$(SUFX).exe bdjac2f$(SUFX).exe bdjac2s$(SUFX).exe bdlevd2$(SUFX).exe bsjac2f$(SUFX).exe bsjac2s$(SUFX).exe bslevd2$(SUFX).exe bzjac2f$(SUFX).exe bzjac2s$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe tdnorme$(SUFX).exe tpjs$(SUFX).exe mkl_ver$(SUFX).exe
 
 help:
 	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [all|clean|help]"
 	@echo "Setting explicitly MKL to sequential (default) turns off OpenMP (otherwise it is turned on, unless debugging)."
 
-libvecjac$(SUFX).a: aalloc$(SUFX).o cdpscl$(SUFX).o cjrot$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cscale$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o djac2f$(SUFX).o djac2s$(SUFX).o djrot$(SUFX).o dnorm2$(SUFX).o dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sdpscl$(SUFX).o sjac2f$(SUFX).o sjac2s$(SUFX).o sjrot$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o sscale$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wdp$(SUFX).o wnrme$(SUFX).o zdpscl$(SUFX).o zjac2f$(SUFX).o zjac2s$(SUFX).o zjrot$(SUFX).o zmerge$(SUFX).o znorme$(SUFX).o znormf$(SUFX).o znorms$(SUFX).o znormx$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o $(MKFS)
-	$(AR) $(ARFLAGS) $@ aalloc$(SUFX).o cdpscl$(SUFX).o cjrot$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cscale$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o djac2f$(SUFX).o djac2s$(SUFX).o djrot$(SUFX).o dnorm2$(SUFX).o dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sdpscl$(SUFX).o sjac2f$(SUFX).o sjac2s$(SUFX).o sjrot$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o sscale$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wdp$(SUFX).o wnrme$(SUFX).o zdpscl$(SUFX).o zjac2f$(SUFX).o zjac2s$(SUFX).o zjrot$(SUFX).o zmerge$(SUFX).o znorme$(SUFX).o znormf$(SUFX).o znorms$(SUFX).o znormx$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
+libvecjac$(SUFX).a: aalloc$(SUFX).o cdpscl$(SUFX).o cjac2f$(SUFX).o cjac2s$(SUFX).o cjrot$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cscale$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o djac2f$(SUFX).o djac2s$(SUFX).o djrot$(SUFX).o dnorm2$(SUFX).o dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sdpscl$(SUFX).o sjac2f$(SUFX).o sjac2s$(SUFX).o sjrot$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o sscale$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wdp$(SUFX).o wnrme$(SUFX).o zdpscl$(SUFX).o zjac2f$(SUFX).o zjac2s$(SUFX).o zjrot$(SUFX).o zmerge$(SUFX).o znorme$(SUFX).o znormf$(SUFX).o znorms$(SUFX).o znormx$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o $(MKFS)
+	$(AR) $(ARFLAGS) $@ aalloc$(SUFX).o cdpscl$(SUFX).o cjac2f$(SUFX).o cjac2s$(SUFX).o cjrot$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cscale$(SUFX).o common$(SUFX).o ddpscl$(SUFX).o djac2f$(SUFX).o djac2s$(SUFX).o djrot$(SUFX).o dnorm2$(SUFX).o dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sdpscl$(SUFX).o sjac2f$(SUFX).o sjac2s$(SUFX).o sjrot$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o sscale$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wdp$(SUFX).o wnrme$(SUFX).o zdpscl$(SUFX).o zjac2f$(SUFX).o zjac2s$(SUFX).o zjrot$(SUFX).o zmerge$(SUFX).o znorme$(SUFX).o znormf$(SUFX).o znorms$(SUFX).o znormx$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
 
 aalloc$(SUFX).o: aalloc.c aalloc.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 cdpscl$(SUFX).o: cdpscl.c cdpscl.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+cjac2f$(SUFX).o: cjac2f.c cjac2f.h scjac2.h vecdef.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+cjac2s$(SUFX).o: cjac2s.c cjac2s.h scjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 cjrot$(SUFX).o: cjrot.c cjrot.h sjrot.h vecdef.h vec.h common.h $(MKFS)
@@ -159,6 +165,15 @@ zsplit$(SUFX).o: zsplit.c zsplit.h vec.h common.h $(MKFS)
 zvjsvd$(SUFX).o: zvjsvd.c zvjsvd.h znormx.h zscale.h znorm2.h dznrm2.h zdpscl.h zjac2f.h zjrot.h vecdef.h defops.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+bcjac2f$(SUFX).exe: bcjac2f.c libvecjac$(SUFX).a $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
+bcjac2s$(SUFX).exe: bcjac2s.c libvecjac$(SUFX).a $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
+bclevd2$(SUFX).exe: bclevd2.c libvecjac$(SUFX).a $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
 bdjac2f$(SUFX).exe: bdjac2f.c libvecjac$(SUFX).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
@@ -207,6 +222,8 @@ mkl_ver$(SUFX).exe: mkl_ver.c libvecjac$(SUFX).a $(MKFS)
 clean:
 	-$(RM) aalloc$(SUFX).o aalloc$(SUFX).optrpt
 	-$(RM) cdpscl$(SUFX).o cdpscl$(SUFX).optrpt
+	-$(RM) cjac2f$(SUFX).o cjac2f$(SUFX).optrpt
+	-$(RM) cjac2s$(SUFX).o cjac2s$(SUFX).optrpt
 	-$(RM) cjrot$(SUFX).o cjrot$(SUFX).optrpt
 	-$(RM) cnorm2$(SUFX).o cnorm2$(SUFX).optrpt
 	-$(RM) cnormx$(SUFX).o cnormx$(SUFX).optrpt
@@ -253,6 +270,9 @@ clean:
 	-$(RM) zsplit$(SUFX).o zsplit$(SUFX).optrpt
 	-$(RM) zvjsvd$(SUFX).o zvjsvd$(SUFX).optrpt
 	-$(RM) libvecjac$(SUFX).a
+	-$(RM) bcjac2f$(SUFX).exe bcjac2f.optrpt
+	-$(RM) bcjac2s$(SUFX).exe bcjac2s.optrpt
+	-$(RM) bclevd2$(SUFX).exe bclevd2.optrpt
 	-$(RM) bdjac2f$(SUFX).exe bdjac2f.optrpt
 	-$(RM) bdjac2s$(SUFX).exe bdjac2s.optrpt
 	-$(RM) bdlevd2$(SUFX).exe bdlevd2.optrpt

@@ -18,21 +18,22 @@ int main(int argc, char *argv[])
 
   if (c == 'C') {
     const int b = set_cbwr();
+    (void)printf("CBWR: %#x; ", (unsigned)b);
     switch (b & ~MKL_CBWR_STRICT) {
     case MKL_CBWR_AVX512_MIC:
-      (void)printf("CBWR: MKL_CBWR_AVX512_MIC");
+      (void)printf("MKL_CBWR_AVX512_MIC");
       break;
     case MKL_CBWR_AVX512:
-      (void)printf("CBWR: MKL_CBWR_AVX512");
+      (void)printf("MKL_CBWR_AVX512");
       break;
     case MKL_CBWR_AVX512_MIC_E1:
-      (void)printf("CBWR: MKL_CBWR_AVX512_MIC_E1");
+      (void)printf("MKL_CBWR_AVX512_MIC_E1");
       break;
     case MKL_CBWR_AVX512_E1:
-      (void)printf("CBWR: MKL_CBWR_AVX512_E1");
+      (void)printf("MKL_CBWR_AVX512_E1");
       break;
     default:
-      (void)printf("CBWR: %d", b);
+      (void)printf("???");
     }
     if (b & MKL_CBWR_STRICT)
       (void)printf(",STRICT");
@@ -54,6 +55,6 @@ int main(int argc, char *argv[])
   return EXIT_SUCCESS;
 
  err:
-  (void)fprintf(stderr, "%s (C|V)\n", *argv);
+  (void)fprintf(stderr, "%s { C | V }\n", *argv);
   return EXIT_FAILURE;
 }
