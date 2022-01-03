@@ -3,11 +3,11 @@
 #include "djrot.h"
 #include "vecdef.h"
 
-double zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], double xi[static restrict VDL], double yr[static restrict VDL], double yi[static restrict VDL], const double t[static restrict 1], const double c[static restrict 1], const double ca[static restrict 1], const double sa[static restrict 1])
+double zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], double xi[static restrict VDL], double yr[static restrict VDL], double yi[static restrict VDL], const double c[static restrict 1], const double cat[static restrict 1], const double sat[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -10.0;
+    return -9.0;
   if (*n & VDL_1)
     return -1.0;
   if (IS_NOT_ALIGNED(xr))
@@ -18,30 +18,25 @@ double zjrot_(const fint n[static restrict 1], double xr[static restrict VDL], d
     return -4.0;
   if (IS_NOT_ALIGNED(yi))
     return -5.0;
-  if ((*t == 0.0) && (*c != 1.0))
-    return -7.0;
 #endif /* !NDEBUG */
 
   if (!*n)
     return 0.0;
 
-  if ((*sa == 0.0) && (fabs(*ca) == 1.0)) {
+  if (*sat == 0.0) {
     // real rotation
-    const double t_ = ((*ca == 1.0) ? *t : -*t);
-    const double r_r = djrot_(n, xr, yr, &t_, c);
+    const double r_r = djrot_(n, xr, yr, c, cat);
     if (!(r_r >= 0.0))
-      return -11.0;
-    const double r_i = djrot_(n, xi, yi, &t_, c);
+      return -10.0;
+    const double r_i = djrot_(n, xi, yi, c, cat);
     if (!(r_i >= 0.0))
-      return -12.0;
+      return -11.0;
     return fmax(r_r, r_i);
   }
 
-  alignas(16) double csta[2u];
-  _mm_store_pd(csta, _mm_mul_pd(_mm_set_pd(*sa, *ca), _mm_set1_pd(*t)));
-  register const VD cta = _mm512_set1_pd(csta[0u]);
-  register const VD sta = _mm512_set1_pd(csta[1u]);
-  register const VD cna = _mm512_set1_pd(-(csta[0u]));
+  register const VD cta = _mm512_set1_pd(*cat);
+  register const VD sta = _mm512_set1_pd(*sat);
+  register const VD cna = _mm512_set1_pd(-*cat);
   register const VD c_ = _mm512_set1_pd(*c);
 
   register const VD _zero = _mm512_set1_pd(-0.0);

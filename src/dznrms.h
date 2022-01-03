@@ -1,6 +1,5 @@
 #ifndef DZNRMS_H
 #define DZNRMS_H
-#ifdef USE_SLEEF
 
 #include "vecdef.h"
 #include "d8sort.h"
@@ -40,5 +39,4 @@ static inline void pquad2ef(const __float128 q[static restrict 1], double e[stat
   }
 }
 
-#endif /* USE_SLEEF */
 #endif /* !DZNRMS_H */

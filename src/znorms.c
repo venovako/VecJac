@@ -15,7 +15,6 @@ double znorms_(const fnat m[static restrict 1], const double zr[static restrict 
     return -3.0;
 #endif /* !NDEBUG */
 
-#ifdef USE_SLEEF
   register const VD _zero = _mm512_set1_pd(-0.0);
   __float128 rq[VDL];
 
@@ -50,9 +49,4 @@ double znorms_(const fnat m[static restrict 1], const double zr[static restrict 
   *rq = __sqrtq(*rq);
   pquad2ef(rq, e0, f0);
   return (double)*rq;
-#else /* !USE_SLEEF */
-  *e1 = *e0 = -HUGE_VAL;
-  *f1 = *f0 = 1.0;
-  return -0.0;
-#endif /* ?USE_SLEEF */
 }

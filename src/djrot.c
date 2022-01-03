@@ -2,7 +2,7 @@
 
 #include "vecdef.h"
 
-double djrot_(const fint n[static restrict 1], double x[static restrict VDL], double y[static restrict VDL], const double t[static restrict 1], const double c[static restrict 1])
+double djrot_(const fint n[static restrict 1], double x[static restrict VDL], double y[static restrict VDL], const double c[static restrict 1], const double at[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -23,7 +23,7 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
 
   if (*n < 0) { // permute
     const fnat n_ = (fnat)-*n;
-    if (*t == 0.0) {
+    if (*at == 0.0) {
       if (*c == 1.0) {
         for (fnat i = 0u; i < n_; i += VDL) {
           double *const xi = x + i;
@@ -37,9 +37,9 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
         return _mm512_reduce_max_pd(mx);
       }
       // should never happen
-      return -5.0;
+      return -4.0;
     }
-    register const VD t_ = _mm512_set1_pd(*t);
+    register const VD t_ = _mm512_set1_pd(*at);
     register const VD c_ = _mm512_set1_pd(*c);
     for (fnat i = 0u; i < n_; i += VDL) {
       double *const xi = x + i;
@@ -55,16 +55,16 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
   }
   else { // no permute
     const fnat n_ = (fnat)*n;
-    if (*t == 0.0) {
+    if (*at == 0.0) {
       if (*c == 1.0) {
         for (fnat i = 0u; i < n_; i += VDL)
           mx = _mm512_max_pd(mx, _mm512_max_pd(VDABS(_mm512_load_pd(x + i)), VDABS(_mm512_load_pd(y + i))));
         return _mm512_reduce_max_pd(mx);
       }
       // should never happen
-      return -5.0;
+      return -4.0;
     }
-    register const VD t_ = _mm512_set1_pd(*t);
+    register const VD t_ = _mm512_set1_pd(*at);
     register const VD c_ = _mm512_set1_pd(*c);
     for (fnat i = 0u; i < n_; i += VDL) {
       double *const xi = x + i;

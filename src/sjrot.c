@@ -2,7 +2,7 @@
 
 #include "vecdef.h"
 
-float sjrot_(const fint n[static restrict 1], float x[static restrict VSL], float y[static restrict VSL], const float t[static restrict 1], const float c[static restrict 1])
+float sjrot_(const fint n[static restrict 1], float x[static restrict VSL], float y[static restrict VSL], const float c[static restrict 1], const float at[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
@@ -23,7 +23,7 @@ float sjrot_(const fint n[static restrict 1], float x[static restrict VSL], floa
 
   if (*n < 0) { // permute
     const fnat n_ = (fnat)-*n;
-    if (*t == 0.0f) {
+    if (*at == 0.0f) {
       if (*c == 1.0f) {
         for (fnat i = 0u; i < n_; i += VSL) {
           float *const xi = x + i;
@@ -37,9 +37,9 @@ float sjrot_(const fint n[static restrict 1], float x[static restrict VSL], floa
         return _mm512_reduce_max_ps(mx);
       }
       // should never happen
-      return -5.0f;
+      return -4.0f;
     }
-    register const VS t_ = _mm512_set1_ps(*t);
+    register const VS t_ = _mm512_set1_ps(*at);
     register const VS c_ = _mm512_set1_ps(*c);
     for (fnat i = 0u; i < n_; i += VSL) {
       float *const xi = x + i;
@@ -55,16 +55,16 @@ float sjrot_(const fint n[static restrict 1], float x[static restrict VSL], floa
   }
   else { // no permute
     const fnat n_ = (fnat)*n;
-    if (*t == 0.0f) {
+    if (*at == 0.0f) {
       if (*c == 1.0f) {
         for (fnat i = 0u; i < n_; i += VSL)
           mx = _mm512_max_ps(mx, _mm512_max_ps(VSABS(_mm512_load_ps(x + i)), VSABS(_mm512_load_ps(y + i))));
         return _mm512_reduce_max_ps(mx);
       }
       // should never happen
-      return -5.0f;
+      return -4.0f;
     }
-    register const VS t_ = _mm512_set1_ps(*t);
+    register const VS t_ = _mm512_set1_ps(*at);
     register const VS c_ = _mm512_set1_ps(*c);
     for (fnat i = 0u; i < n_; i += VSL) {
       float *const xi = x + i;

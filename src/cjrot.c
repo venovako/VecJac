@@ -3,11 +3,11 @@
 #include "sjrot.h"
 #include "vecdef.h"
 
-float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], float xi[static restrict VSL], float yr[static restrict VSL], float yi[static restrict VSL], const float t[static restrict 1], const float c[static restrict 1], const float ca[static restrict 1], const float sa[static restrict 1])
+float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], float xi[static restrict VSL], float yr[static restrict VSL], float yi[static restrict VSL], const float c[static restrict 1], const float cat[static restrict 1], const float sat[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -10.0f;
+    return -9.0f;
   if (*n & VSL_1)
     return -1.0f;
   if (IS_NOT_ALIGNED(xr))
@@ -18,31 +18,25 @@ float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], flo
     return -4.0f;
   if (IS_NOT_ALIGNED(yi))
     return -5.0f;
-  if ((*t == 0.0f) && (*c != 1.0f))
-    return -7.0f;
 #endif /* !NDEBUG */
 
   if (!*n)
     return 0.0f;
 
-  if ((*sa == 0.0f) && (fabsf(*ca) == 1.0f)) {
+  if (*sat == 0.0f) {
     // real rotation
-    const float t_ = ((*ca == 1.0f) ? *t : -*t);
-    const float r_r = sjrot_(n, xr, yr, &t_, c);
+    const float r_r = sjrot_(n, xr, yr, c, cat);
     if (!(r_r >= 0.0f))
-      return -11.0f;
-    const float r_i = sjrot_(n, xi, yi, &t_, c);
+      return -10.0f;
+    const float r_i = sjrot_(n, xi, yi, c, cat);
     if (!(r_i >= 0.0f))
-      return -12.0f;
+      return -11.0f;
     return fmaxf(r_r, r_i);
   }
 
-  const float cat = ((*ca) * (*t));
-  const float sat = ((*sa) * (*t));
-
-  register const VS cta = _mm512_set1_ps(cat);
-  register const VS sta = _mm512_set1_ps(sat);
-  register const VS cna = _mm512_set1_ps(-cat);
+  register const VS cta = _mm512_set1_ps(*cat);
+  register const VS sta = _mm512_set1_ps(*sat);
+  register const VS cna = _mm512_set1_ps(-*cat);
   register const VS c_ = _mm512_set1_ps(*c);
 
   register const VS _zerof = _mm512_set1_ps(-0.0f);

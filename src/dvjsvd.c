@@ -5,7 +5,7 @@
 #include "dnorm2.h"
 #include "dznrm2.h"
 #include "ddpscl.h"
-#include "djac2f.h"
+#include "dbjac2.h"
 #include "djrot.h"
 #include "vecdef.h"
 #include "defops.h"
@@ -69,26 +69,27 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   double *const a11 = work;
   double *const a22 = a11 + n_2;
   double *const a21 = a22 + n_2;
-  double *const t = a21 + n_2;
-  double *const c = t + n_2;
-  double *const s = c + n_2;
-  double *const l1 = s + n_2;
+  double *const c = a22 + n_2;
+  double *const at = c + n_2;
+  double *const l1 = at + n_2;
   double *const l2 = l1 + n_2;
+  double *const w = l2 + n_2;
   unsigned *const p = iwork;
   unsigned *const pc = p + (n_2 >> VDLlg);
 
   if (M == 0.0)
     return 0;
   const double M_m = (DBL_MAX / (*m << 1u));
-  dbl2ef(M_m, t, c);
-  const int DBL_MAX_NRM_EXP = (int)*t;
-  dbl2ef(M, t, c);
-  int eM = (int)*t;
+  double es = 0.0, fs = 0.0;
+  dbl2ef(M_m, &es, &fs);
+  const int DBL_MAX_NRM_EXP = (int)es;
+  dbl2ef(M, &es, &fs);
+  int eM = (int)es;
   int sR = DBL_MAX_ROT_EXP - eM;
   int sN = DBL_MAX_NRM_EXP - eM - 1;
   if (sN) {
-    *(fint*)t = sN;
-    if (dscale_(m, n, G, ldG, (const fint*)t) < 0)
+    *(fint*)&es = sN;
+    if (dscale_(m, n, G, ldG, (const fint*)&es) < 0)
       return -17;
     M = scalbn(M, sN);
   }
@@ -102,15 +103,15 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
       // rescale according to M if necessary and update M
-      dbl2ef(M, t, c);
-      eM = (int)*t;
+      dbl2ef(M, &es, &fs);
+      eM = (int)es;
       sR = DBL_MAX_ROT_EXP - eM;
       sN = DBL_MAX_NRM_EXP - eM - 1;
       if (sR < 0) {
         (void)fprintf(stderr, "Transformations in danger in sweep %u, step %u; rescaling by 2^%d.\n", sw, st, sN);
         (void)fflush(stderr);
-        *(fint*)t = sN;
-        if (dscale_(m, n, G, ldG, (const fint*)t) < 0)
+        *(fint*)&es = sN;
+        if (dscale_(m, n, G, ldG, (const fint*)&es) < 0)
           return -18;
         M = scalbn(M, sN);
         sT += sN;
@@ -121,7 +122,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       bool overflow = false;
       do {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,t,c,l1,l2) reduction(max:nM)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,c,at,l1,l2) reduction(max:nM)
 #endif /* _OPENMP */
         for (fnat pq = 0u; pq < *n; pq += 2u) {
           const fnat _pq = (pq >> 1u);
@@ -134,19 +135,19 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
           double *const Gp = G + _p * (*ldG);
-          nM = fmax(nM, fmin((l1[_pq] = dnorm2_(m, Gp, (eS + _p), (fS + _p), (t + _pq), (c + _pq))), HUGE_VAL));
+          nM = fmax(nM, fmin((l1[_pq] = dnorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VAL));
           if (nM > DBL_MAX) {
             l2[_pq] = NAN;
             continue;
           }
           double *const Gq = G + _q * (*ldG);
-          nM = fmax(nM, fmin((l2[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (t + _pq), (c + _pq))), HUGE_VAL));
+          nM = fmax(nM, fmin((l2[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (c + _pq), (at + _pq))), HUGE_VAL));
         }
         if (overflow = (nM > DBL_MAX)) {
           (void)fprintf(stderr, "Frobenius norm overflow in sweep %u, step %u; rescaling by 2^%d.\n", sw, st, sN);
           (void)fflush(stderr);
-          *(fint*)t = sN;
-          if (dscale_(m, n, G, ldG, (const fint*)t) < 0)
+          *(fint*)&es = sN;
+          if (dscale_(m, n, G, ldG, (const fint*)&es) < 0)
             return -19;
           M = scalbn(M, sN);
           sT += sN;
@@ -155,12 +156,12 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       // scaled dot-products
       nM = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,s) reduction(min:nM)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,w) reduction(min:nM)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat _pq = (pq >> 1u);
         if (nM < 0.0) {
-          s[_pq] = NAN;
+          w[_pq] = NAN;
           continue;
         }
         const fnat pq_ = pq + 1u;
@@ -171,35 +172,35 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const double f2[2u] = { fS[_p], fS[_q] };
         double *const Gp = G + _p * (*ldG);
         double *const Gq = G + _q * (*ldG);
-        s[_pq] = ddpscl_(m, Gp, Gq, e2, f2);
-        if (!(isfinite(s[_pq])))
+        w[_pq] = ddpscl_(m, Gp, Gq, e2, f2);
+        if (!(isfinite(w[_pq])))
           nM = fmin(nM, -20.0);
       }
       if (nM < 0.0)
         return (fint)nM;
       // repack data
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,eS,fS,t,c,l1,l2)
+#pragma omp parallel for default(none) shared(n,r,eS,fS,c,at,l1,l2)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat pq_ = pq + 1u;
         const fnat _pq = (pq >> 1u);
         const size_t _p = r[pq];
         const size_t _q = r[pq_];
-        t[_pq] = eS[_p];
-        c[_pq] = eS[_q];
+        c[_pq] = eS[_p];
+        at[_pq] = eS[_q];
         l1[_pq] = fS[_p];
         l2[_pq] = fS[_q];
       }
       fnat stt = 0u, k = 0u;
       // TODO
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,t,c,s,p,pc,tol,k) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,c,at,w,p,pc,tol,k) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
         // convergence check
-        register VD _a21 = _mm512_load_pd(s + i);
+        register VD _a21 = _mm512_load_pd(w + i);
         register const VD _zero = _mm512_set1_pd(-0.0);
         register const VD _tol = _mm512_set1_pd(tol);
         register const VD _a21_ = VDABS(_a21);
@@ -210,8 +211,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         // Grammian pre-scaling into the double precision range
         register const VD f1 = _mm512_load_pd(l1 + i);
         register const VD f2 = _mm512_load_pd(l2 + i);
-        register const VD e1 = _mm512_load_pd(t + i);
-        register const VD e2 = _mm512_load_pd(c + i);
+        register const VD e1 = _mm512_load_pd(c + i);
+        register const VD e2 = _mm512_load_pd(at + i);
         register VD f12 = _mm512_div_pd(f1, f2);
         register VD e12 = _mm512_sub_pd(e1, e2);
         register VD f21 = _mm512_div_pd(f2, f1);
@@ -245,7 +246,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         continue;
       swt += stt;
       const fnat kk = (k << VDLlg);
-      if (djac2f_(&kk, a11, a22, a21, t, c, l1, l2, p) < 0)
+      if (dbjac2_(&kk, a11, a22, a21, c, at, l1, l2, p) < 0)
         return -21;
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
@@ -270,50 +271,50 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         }
       }
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,s,t,c,kk) reduction(max:M)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,w,kk) reduction(max:M)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < kk; ++i) {
         if (M > DBL_MAX) {
-          s[i] = NAN;
+          w[i] = NAN;
           continue;
         }
         const size_t _p = *(const size_t*)(a11 + i);
         const size_t _q = *(const size_t*)(a22 + i);
-        double _t, _c;
+        double _at, _c;
         fint _m, _n;
         bool triv = false;
         if (a21[i] == -2.0) {
           _m = -(fint)*m;
           _n = -(fint)*n;
-          _t = t[i];
           _c = c[i];
+          _at = at[i];
         }
         else if (a21[i] == -1.0) {
           _m = -(fint)*m;
           _n = -(fint)*n;
-          _t = 0.0;
           _c = 1.0;
+          _at = 0.0;
         }
         else if (a21[i] == 2.0) {
           _m = (fint)*m;
           _n = (fint)*n;
-          _t = t[i];
           _c = c[i];
+          _at = at[i];
         }
         else // no-op
           triv = true;
         if (triv)
           M = fmax(M, 0.0);
         else {
-          s[i] = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_t, &_c);
-          M = fmax(M, (!(s[i] >= 0.0) ? HUGE_VAL : s[i]));
+          w[i] = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_c, &_at);
+          M = fmax(M, (!(w[i] >= 0.0) ? HUGE_VAL : w[i]));
           if (M > DBL_MAX) {
-            s[i] = NAN;
+            w[i] = NAN;
             continue;
           }
-          s[i] = djrot_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_t, &_c);
+          w[i] = djrot_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_c, &_at);
           // V should not overflow but check anyway
-          if (!(s[i] >= 0.0) || !(s[i] <= DBL_MAX))
+          if (!(w[i] >= 0.0) || !(w[i] <= DBL_MAX))
             M = HUGE_VAL;
         }
       }
