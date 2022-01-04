@@ -51,6 +51,11 @@ int main(int argc, char *argv[])
   const uint64_t hz = tsc_get_freq_hz_(rd);
   const uint64_t b = rdtsc_beg(rd);
   LAPACK_D(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &info);
+  while (info > 0) {
+    const fint swp = work[3u];
+    LAPACK_D(gesvj)("G", "U", "A", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &info);
+    work[3u] += swp;
+  }
   const uint64_t e = rdtsc_end(rd);
 
   (void)fprintf(stdout, "%4lld,%4lld,%lld,%15.9Lf,%#.17e,%lld,%lld,%lld,%#.17e,%#.17e\n", m, n, info, tsc_lap(hz, b, e), work[0u], (fint)(work[1u]), (fint)(work[2u]), (fint)(work[3u]), work[4u], work[5u]);
