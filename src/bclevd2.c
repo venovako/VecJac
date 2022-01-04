@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
   assert(l2);
 
   unsigned rd[2u] = { 0u, 0u };
-  uint64_t hz = tsc_get_freq_hz_(rd), be[2u] = { UINT64_C(0), UINT64_C(0) };
+  const uint64_t hz = tsc_get_freq_hz_(rd);
   (void)fprintf(stderr, "TSC frequency: %llu+(%u/%u) Hz.\n", (unsigned long long)hz, rd[0u], rd[1u]);
   (void)fflush(stderr);
 
@@ -142,6 +142,8 @@ int main(int argc, char *argv[])
     }
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
+
+    uint64_t be[2u] = { UINT64_C(0), UINT64_C(0) };
     be[0u] = rdtsc_beg(rd);
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,l1,l2,cs1,snr,sni) reduction(max:th)
