@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
   if (!rwork)
     return EXIT_FAILURE;
 
-  const int gd = open_ro_(bn, ".G");
+  const int gd = open_ro_(bn, "G");
   if (gd < 0)
     return EXIT_FAILURE;
 
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
   free(sva);
 
   *(size_t*)cwork1 = (n * sizeof(wide));
-  const int sd = open_wo_(bn, ".SL");
+  const int sd = open_wo_(bn, "SL");
   if (sd < 0)
     return EXIT_FAILURE;
   if (resizef_(&sd, (const size_t*)cwork1))
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
   free(cwork);
 
   *(size_t*)cwork1 = (ldV * (n * sizeof(double)));
-  const int vd = open_wo_(bn, ".VL");
+  const int vd = open_wo_(bn, "VL");
   if (vd < 0)
     return EXIT_FAILURE;
   if (resizef_(&vd, (const size_t*)cwork1))
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
   free(V);
 
   *(size_t*)cwork1 = (ldG * (n * sizeof(double)));
-  const int ud = open_wo_(bn, ".UL");
+  const int ud = open_wo_(bn, "UL");
   if (ud < 0)
     return EXIT_FAILURE;
   if (resizef_(&ud, (const size_t*)cwork1))
