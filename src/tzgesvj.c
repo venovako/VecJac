@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
   LAPACK_Z(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, cwork, &lwork, rwork, &lrwork, &info);
   const uint64_t e = rdtsc_end(rd);
 
-  (void)fprintf(stdout, "%lld,%15.9Lf,%#.17e,%lld,%lld,%lld,%#.17e,%#.17e\n", info, tsc_lap(hz, b, e), rwork[0u], (fint)(rwork[1u]), (fint)(rwork[2u]), (fint)(rwork[3u]), rwork[4u], rwork[5u]);
+  (void)fprintf(stdout, "%4lld,%4lld,%lld,%15.9Lf,%#.17e,%lld,%lld,%lld,%#.17e,%#.17e\n", m, n, info, tsc_lap(hz, b, e), rwork[0u], (fint)(rwork[1u]), (fint)(rwork[2u]), (fint)(rwork[3u]), rwork[4u], rwork[5u]);
   (void)fflush(stdout);
   *rwork1 = *rwork;
   free(rwork);

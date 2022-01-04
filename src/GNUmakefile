@@ -8,7 +8,7 @@ MKFS=GNUmakefile $(COMPILER).mk
 
 LIBS=libvecjac$(SUFX).a
 
-EXES=bclevd2$(SUFX).exe bdlevd2$(SUFX).exe bslevd2$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tcbjac2$(SUFX).exe tdbjac2$(SUFX).exe tsbjac2$(SUFX).exe tzbjac2$(SUFX).exe tpjs$(SUFX).exe tzgesvj$(SUFX).exe
+EXES=bclevd2$(SUFX).exe bdlevd2$(SUFX).exe bslevd2$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tcbjac2$(SUFX).exe tdbjac2$(SUFX).exe tsbjac2$(SUFX).exe tzbjac2$(SUFX).exe tpjs$(SUFX).exe tdgesvj$(SUFX).exe tzgesvj$(SUFX).exe
 ifdef SLEEF
 EXES += tdnorme$(SUFX).exe
 endif # SLEEF
@@ -215,6 +215,9 @@ endif # SLEEF
 tpjs$(SUFX).exe: tpjs.c $(LIBS) ../../JACSD/libjstrat$(DEBUG).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
+tdgesvj$(SUFX).exe: tdgesvj.c $(LIBS) $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
 tzgesvj$(SUFX).exe: tzgesvj.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
@@ -268,6 +271,7 @@ clean:
 	-$(RM) tsbjac2$(SUFX).exe tsbjac2.optrpt
 	-$(RM) tzbjac2$(SUFX).exe tzbjac2.optrpt
 	-$(RM) tpjs$(SUFX).exe tpjs.optrpt
+	-$(RM) tdgesvj$(SUFX).exe tdgesvj.optrpt
 	-$(RM) tzgesvj$(SUFX).exe tzgesvj.optrpt
 ifdef SLEEF
 	-$(RM) dnormb$(SUFX).o dnormb$(SUFX).optrpt
