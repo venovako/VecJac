@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
   const uint64_t b = rdtsc_beg(rd);
   LAPACK_D(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &info);
   while (info > 0) {
-    const fint swp = work[3u];
+    const fint swp = (fint)(work[3u]);
     LAPACK_D(gesvj)("G", "U", "A", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &info);
     work[3u] += swp;
   }

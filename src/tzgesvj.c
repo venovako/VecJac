@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
   LAPACK_Z(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, cwork, &lwork, rwork, &lrwork, &info);
   while (info > 0) {
     const fint swp = (fint)(rwork[3u]);
-    LAPACK_Z(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, cwork, &lwork, rwork, &lrwork, &info);
+    LAPACK_Z(gesvj)("G", "U", "A", &m, &n, G, &ldG, sva, &mv, V, &ldV, cwork, &lwork, rwork, &lrwork, &info);
     rwork[3u] += swp;
   }
   const uint64_t e = rdtsc_end(rd);
