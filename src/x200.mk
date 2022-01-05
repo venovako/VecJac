@@ -56,9 +56,9 @@ OPTFLAGS=-O0 -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug parallel -debug pubnames -DPRINTOUT=stderr
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
-LIBFLAGS=-DSCNRME_SEQRED -DDZNRME_SEQRED -static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -I. -I../../JACSD/jstrat
+LIBFLAGS=-static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -I. -I../../JACSD/jstrat
 ifdef SLEEF
-LIBFLAGS += -DUSE_SLEEF -I$(SLEEF)/include
+LIBFLAGS += -DSCNRME_SEQRED -DDZNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL
