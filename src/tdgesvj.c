@@ -1,5 +1,6 @@
 #include "mtxio.h"
 #include "timer.h"
+#include "vec.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,20 +20,20 @@ int main(int argc, char *argv[])
     goto err;
 
   const fint ldG = m;
-  double *const G = (double*)aligned_alloc(alignof(double), (ldG * (n * sizeof(double))));
+  double *const G = (double*)aligned_alloc(VA, (ldG * (n * sizeof(double))));
   if (!G)
     return EXIT_FAILURE;
   const fint ldV = n;
-  double *const V = (double*)aligned_alloc(alignof(double), (ldV * (n * sizeof(double))));
+  double *const V = (double*)aligned_alloc(VA, (ldV * (n * sizeof(double))));
   if (!V)
     return EXIT_FAILURE;
-  double *const sva = (double*)calloc((size_t)n, sizeof(double));
+  double *const sva = (double*)aligned_alloc(VA, (n * sizeof(double)));
   if (!sva)
     return EXIT_FAILURE;
   fint mv = n;
   const fint n2 = (n << 1);
   const fint lwork = ((n2 < (fint)6) ? (fint)6 : n2);
-  double *const work = calloc((size_t)lwork, sizeof(double));
+  double *const work = (double*)aligned_alloc(VA, (lwork * sizeof(double)));
   if (!work)
     return EXIT_FAILURE;
   fint info = 0;
@@ -58,16 +59,17 @@ int main(int argc, char *argv[])
   }
   const uint64_t e = rdtsc_end(rd);
 
-  (void)fprintf(stdout, "%4lld,%4lld,%1lld,%15.9Lf,%#.17e,%4lld,%4lld,%2lld,%#.17e,%#.17e\n", m, n, info, tsc_lap(hz, b, e), work[0u], (fint)(work[1u]), (fint)(work[2u]), (fint)(work[3u]), work[4u], work[5u]);
+  (void)fprintf(stdout, "%4lld,%4lld,%1lld,%15.9Lf,%#.17e,%4lld,%4lld,%3lld,%#.17e,%#.17e\n", m, n, info, tsc_lap(hz, b, e), work[0u], (fint)(work[1u]), (fint)(work[2u]), (fint)(work[3u]), work[4u], work[5u]);
   (void)fflush(stdout);
 
+  const double ds = *work;
   size_t l = (n * sizeof(wide));
   wide *const ws = (wide*)memset(work, 0, l);
-  if (*work == 1.0)
+  if (ds == 1.0)
     for (fint i = 0; i < n; ++i)
       ws[i] = sva[i];
   else { // SCALE .NE. ONE
-    const wide s = (wide)*work;
+    const wide s = ds;
     for (fint i = 0; i < n; ++i)
       ws[i] = sva[i] * s;
   }

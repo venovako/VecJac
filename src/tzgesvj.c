@@ -1,5 +1,6 @@
 #include "mtxio.h"
 #include "timer.h"
+#include "vec.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,14 +20,14 @@ int main(int argc, char *argv[])
     goto err;
 
   const fint ldG = m;
-  double complex *const G = (double complex*)aligned_alloc(alignof(double complex), (ldG * (n * sizeof(double complex))));
+  double complex *const G = (double complex*)aligned_alloc(VA, (ldG * (n * sizeof(double complex))));
   if (!G)
     return EXIT_FAILURE;
   const fint ldV = n;
-  double complex *const V = (double complex*)aligned_alloc(alignof(double complex), (ldV * (n * sizeof(double complex))));
+  double complex *const V = (double complex*)aligned_alloc(VA, (ldV * (n * sizeof(double complex))));
   if (!V)
     return EXIT_FAILURE;
-  double *const sva = (double*)calloc((size_t)n, sizeof(double));
+  double *const sva = (double*)aligned_alloc(VA, (n * sizeof(double)));
   if (!sva)
     return EXIT_FAILURE;
   const fint mv = n;
@@ -42,10 +43,10 @@ int main(int argc, char *argv[])
   if (lwork < (m + n))
     return EXIT_FAILURE;
   lrwork = (fint)*rwork1;
-  double complex *const cwork = calloc((size_t)lwork, sizeof(double complex));
+  double complex *const cwork = (double complex*)aligned_alloc(VA, (lwork * sizeof(double complex)));
   if (!cwork)
     return EXIT_FAILURE;
-  double *const rwork = calloc((size_t)lrwork, sizeof(double));
+  double *const rwork = (double complex*)aligned_alloc(VA, (lrwork * sizeof(double)));
   if (!rwork)
     return EXIT_FAILURE;
 
@@ -70,7 +71,7 @@ int main(int argc, char *argv[])
   }
   const uint64_t e = rdtsc_end(rd);
 
-  (void)fprintf(stdout, "%4lld,%4lld,%1lld,%15.9Lf,%#.17e,%4lld,%4lld,%2lld,%#.17e,%#.17e\n", m, n, info, tsc_lap(hz, b, e), rwork[0u], (fint)(rwork[1u]), (fint)(rwork[2u]), (fint)(rwork[3u]), rwork[4u], rwork[5u]);
+  (void)fprintf(stdout, "%4lld,%4lld,%1lld,%15.9Lf,%#.17e,%4lld,%4lld,%3lld,%#.17e,%#.17e\n", m, n, info, tsc_lap(hz, b, e), rwork[0u], (fint)(rwork[1u]), (fint)(rwork[2u]), (fint)(rwork[3u]), rwork[4u], rwork[5u]);
   (void)fflush(stdout);
   *rwork1 = *rwork;
   free(rwork);
