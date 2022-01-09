@@ -60,11 +60,24 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   if (IS_NOT_ALIGNED(work))
     return -16;
 
+#ifdef JTRACE
+  FILE *const jtr = fopen((const char*)work, "w");
+  if (!jtr)
+    return -13;
+  (void)fprintf(jtr, "M=");
+  (void)fflush(jtr);
+#endif /* JTRACE */
+
   double M = znormx_(m, n, Gr, ldGr, Gi, ldGi);
   if (!(M <= DBL_MAX))
     return -19;
   if (copysign(1.0, M) == -1.0)
     return -20;
+
+#ifdef JTRACE
+  (void)fprintf(jtr, "M=%#.17e\n", M);
+  (void)fflush(jtr);
+#endif /* JTRACE */
 
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,Vr,ldVr,Vi,ldVi,eS,fS)
@@ -104,6 +117,10 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   int eM = (int)es;
   int sR = DBL_MAX_ROT_EXP - eM - 1;
   int sN = DBL_MAX_NRM_EXP - eM - 1;
+#ifdef JTRACE
+  (void)fprintf(jtr, "eM=%d, sR=%d, sN=%d, M=", eM, sR, sN);
+  (void)fflush(jtr);
+#endif /* JTRACE */
   if (sN) {
     *(fint*)&es = sN;
     if (zscale_(m, n, Gr, ldGr, Gi, ldGi, (const fint*)&es) < 0)
@@ -111,12 +128,20 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     M = scalbn(M, sN);
   }
   int sT = sN;
+#ifdef JTRACE
+  (void)fprintf(jtr, "%#.17e\n", M);
+  (void)fflush(jtr);
+#endif /* JTRACE */
 
   // see LAPACK's ZGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
   unsigned sw = 0u;
 
   while (sw < *swp) {
+#ifdef JTRACE
+    (void)fprintf(jtr, "Sweep %u\n", sw);
+    (void)fflush(jtr);
+#endif /* JTRACE */
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
       // rescale according to M if necessary and update M
@@ -125,19 +150,26 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       sR = DBL_MAX_ROT_EXP - eM - 1;
       sN = DBL_MAX_NRM_EXP - eM - 1;
       if (sR < 0) {
-        (void)fprintf(stderr, "Transformations in danger in sweep %u, step %u; rescaling by 2^%d.\n", sw, st, sN);
-        (void)fflush(stderr);
+#ifdef JTRACE
+        (void)fprintf(jtr, "step=%u, eM=%d, sR=%d, sN=%d, M=", st, eM, sR, sN);
+        (void)fflush(jtr);
+#endif /* JTRACE */
         *(fint*)&es = sN;
         if (zscale_(m, n, Gr, ldGr, Gi, ldGi, (const fint*)&es) < 0)
           return -22;
         M = scalbn(M, sN);
         sT += sN;
+#ifdef JTRACE
+        (void)fprintf(jtr, "%#.17e\n", M);
+        (void)fflush(jtr);
+#endif /* JTRACE */
       }
       // compute the norms, overflow-aware
       const unsigned *const r = js + st * (size_t)(*n);
+      double nM = -0.0;
       bool overflow = false;
-      double nM = 0.0;
       do {
+        nM = 0.0;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r,m,Gr,ldGr,Gi,ldGi,eS,fS,cat,sat,l1,l2) reduction(max:nM)
 #endif /* _OPENMP */
@@ -163,13 +195,19 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           nM = fmax(nM, fmin((l2[_pq] = znorm2_(m, Grq, Giq, (eS + _q), (fS + _q), (cat + _pq), (sat + _pq))), HUGE_VAL));
         }
         if (overflow = (nM > DBL_MAX)) {
-          (void)fprintf(stderr, "Frobenius norm overflow in sweep %u, step %u; rescaling by 2^%d.\n", sw, st, sN);
-          (void)fflush(stderr);
+#ifdef JTRACE
+          (void)fprintf(jtr, "step=%u, M=", st);
+          (void)fflush(jtr);
+#endif /* JTRACE */
           *(fint*)&es = sN;
           if (zscale_(m, n, Gr, ldGr, Gi, ldGi, (const fint*)&es) < 0)
             return -23;
           M = scalbn(M, sN);
           sT += sN;
+#ifdef JTRACE
+          (void)fprintf(jtr, "%#.17e\n", M);
+          (void)fflush(jtr);
+#endif /* JTRACE */
         }
       } while (overflow);
       // scaled dot-products
@@ -219,7 +257,6 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         sat[_pq] = fS[_q];
       }
       fnat stt = 0u, k = 0u;
-      // TODO
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,c,cat,sat,l1,l2,w,p,pc,tol,k) reduction(+:stt)
 #endif /* _OPENMP */
@@ -359,5 +396,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
   // TODO: normalize U and extract S
 
+#ifdef JTRACE
+  (void)fclose(jtr);
+#endif /* JTRACE */
   return (fint)sw;
 }

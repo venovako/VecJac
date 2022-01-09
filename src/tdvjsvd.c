@@ -72,6 +72,9 @@ int main(int argc, char *argv[])
   double *const fS = eS + n;
   double *const work = fS + n;
   wide *const ws = (wide*)work;
+#ifdef JTRACE
+  (void)sprintf((char*)work, "%s.txt", bn);
+#endif /* JTRACE */
   unsigned *const iwork = (unsigned*)aligned_alloc(VA, ((n >> VDLlg) * sizeof(unsigned)));
   if (!iwork)
     return 9;

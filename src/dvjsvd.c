@@ -48,11 +48,24 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   if (IS_NOT_ALIGNED(work))
     return -12;
 
+#ifdef JTRACE
+  FILE *const jtr = fopen((const char*)work, "w");
+  if (!jtr)
+    return -13;
+  (void)fprintf(jtr, "M=");
+  (void)fflush(jtr);
+#endif /* JTRACE */
+
   double M = dnormx_(m, n, G, ldG);
   if (!(M <= DBL_MAX))
     return -15;
   if (copysign(1.0, M) == -1.0)
     return -16;
+
+#ifdef JTRACE
+  (void)fprintf(jtr, "%#.17e\n", M);
+  (void)fflush(jtr);
+#endif /* JTRACE */
 
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,V,ldV,eS,fS)
@@ -87,6 +100,10 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   int eM = (int)es;
   int sR = DBL_MAX_ROT_EXP - eM;
   int sN = DBL_MAX_NRM_EXP - eM - 1;
+#ifdef JTRACE
+  (void)fprintf(jtr, "eM=%d, sR=%d, sN=%d, M=", eM, sR, sN);
+  (void)fflush(jtr);
+#endif /* JTRACE */
   if (sN) {
     *(fint*)&es = sN;
     if (dscale_(m, n, G, ldG, (const fint*)&es) < 0)
@@ -94,12 +111,20 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     M = scalbn(M, sN);
   }
   int sT = sN;
+#ifdef JTRACE
+  (void)fprintf(jtr, "%#.17e\n", M);
+  (void)fflush(jtr);
+#endif /* JTRACE */
 
   // see LAPACK's DGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
   unsigned sw = 0u;
 
   while (sw < *swp) {
+#ifdef JTRACE
+    (void)fprintf(jtr, "Sweep %u\n", sw);
+    (void)fflush(jtr);
+#endif /* JTRACE */
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
       // rescale according to M if necessary and update M
@@ -108,19 +133,26 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       sR = DBL_MAX_ROT_EXP - eM;
       sN = DBL_MAX_NRM_EXP - eM - 1;
       if (sR < 0) {
-        (void)fprintf(stderr, "Transformations in danger in sweep %u, step %u; rescaling by 2^%d.\n", sw, st, sN);
-        (void)fflush(stderr);
+#ifdef JTRACE
+        (void)fprintf(jtr, "step=%u, eM=%d, sR=%d, sN=%d, M=", st, eM, sR, sN);
+        (void)fflush(jtr);
+#endif /* JTRACE */
         *(fint*)&es = sN;
         if (dscale_(m, n, G, ldG, (const fint*)&es) < 0)
           return -18;
         M = scalbn(M, sN);
         sT += sN;
+#ifdef JTRACE
+        (void)fprintf(jtr, "%#.17e\n", M);
+        (void)fflush(jtr);
+#endif /* JTRACE */
       }
       // compute the norms, overflow-aware
       const unsigned *const r = js + st * (size_t)(*n);
-      double nM = 0.0;
+      double nM = -0.0;
       bool overflow = false;
       do {
+        nM = 0.0;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,c,at,l1,l2) reduction(max:nM)
 #endif /* _OPENMP */
@@ -144,13 +176,19 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           nM = fmax(nM, fmin((l2[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (c + _pq), (at + _pq))), HUGE_VAL));
         }
         if (overflow = (nM > DBL_MAX)) {
-          (void)fprintf(stderr, "Frobenius norm overflow in sweep %u, step %u; rescaling by 2^%d.\n", sw, st, sN);
-          (void)fflush(stderr);
+#ifdef JTRACE
+          (void)fprintf(jtr, "step=%u, M=", st);
+          (void)fflush(jtr);
+#endif /* JTRACE */
           *(fint*)&es = sN;
           if (dscale_(m, n, G, ldG, (const fint*)&es) < 0)
             return -19;
           M = scalbn(M, sN);
           sT += sN;
+#ifdef JTRACE
+          (void)fprintf(jtr, "%#.17e\n", M);
+          (void)fflush(jtr);
+#endif /* JTRACE */
         }
       } while (overflow);
       // scaled dot-products
@@ -193,7 +231,6 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         l2[_pq] = fS[_q];
       }
       fnat stt = 0u, k = 0u;
-      // TODO
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n_2,a11,a22,a21,c,at,w,p,pc,tol,k) reduction(+:stt)
 #endif /* _OPENMP */
@@ -328,5 +365,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
   // TODO: normalize U and extract S
 
+#ifdef JTRACE
+  (void)fclose(jtr);
+#endif /* JTRACE */
   return (fint)sw;
 }
