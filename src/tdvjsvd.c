@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
   (void)set_cbwr();
 
-  if (argc != 4) {
+  if (argc != 5) {
     (void)fprintf(stderr, "%s J M N BaseName\n", *argv);
     return 1;
   }
@@ -96,7 +96,13 @@ int main(int argc, char *argv[])
       ws[i] = fS[i];
   }
 
-  const int sd = open_wo_(bn, ((j == PJS_ME) ? "S2" : "S4"));
+  const int sd = open_wo_(bn,
+#ifdef _OPENMP
+                          ((j == PJS_ME) ? "S2" : "S4")
+#else /* !_OPENMP */
+                          ((j == PJS_ME) ? "S1" : "S3")
+#endif /* ?_OPENMP */
+                          );
   if (sd < 0)
     return 10;
   *(size_t*)js = (n * sizeof(wide));
@@ -109,7 +115,13 @@ int main(int argc, char *argv[])
     return 10;
   free(w);
 
-  const int vd = open_wo_(bn, ((j == PJS_ME) ? "V2" : "V4"));
+  const int vd = open_wo_(bn,
+#ifdef _OPENMP
+                          ((j == PJS_ME) ? "V2" : "V4")
+#else /* !_OPENMP */
+                          ((j == PJS_ME) ? "V1" : "V3")
+#endif /* ?_OPENMP */
+                          );
   if (vd < 0)
     return 11;
   *(size_t*)js = (n * (n * sizeof(double)));
@@ -121,7 +133,13 @@ int main(int argc, char *argv[])
     return 11;
   free(V);
 
-  const int ud = open_wo_(bn, ((j == PJS_ME) ? "U2" : "U4"));
+  const int ud = open_wo_(bn,
+#ifdef _OPENMP
+                          ((j == PJS_ME) ? "U2" : "U4")
+#else /* !_OPENMP */
+                          ((j == PJS_ME) ? "U1" : "U3")
+#endif /* ?_OPENMP */
+                          );
   if (ud < 0)
     return 12;
   *(size_t*)js = (m * (n * sizeof(double)));
