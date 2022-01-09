@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   free(work);
 
-  l = (ldV * (n * sizeof(double)));
+  l = (n * (n * sizeof(double)));
   const int vd = open_wo_(bn, "VL");
   if (vd < 0)
     return EXIT_FAILURE;
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   free(V);
 
-  l = (ldG * (n * sizeof(double)));
+  l = (m * (n * sizeof(double)));
   const int ud = open_wo_(bn, "UL");
   if (ud < 0)
     return EXIT_FAILURE;

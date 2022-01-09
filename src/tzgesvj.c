@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
   double complex *const cwork = (double complex*)aligned_alloc(VA, (lwork * sizeof(double complex)));
   if (!cwork)
     return EXIT_FAILURE;
-  double *const rwork = (double complex*)aligned_alloc(VA, (lrwork * sizeof(double)));
+  double *const rwork = (double*)aligned_alloc(VA, (lrwork * sizeof(double)));
   if (!rwork)
     return EXIT_FAILURE;
 
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   free(cwork);
 
-  *(size_t*)cwork1 = (ldV * (n * sizeof(double)));
+  *(size_t*)cwork1 = (n * (n * sizeof(double complex)));
   const int vd = open_wo_(bn, "VL");
   if (vd < 0)
     return EXIT_FAILURE;
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   free(V);
 
-  *(size_t*)cwork1 = (ldG * (n * sizeof(double)));
+  *(size_t*)cwork1 = (m * (n * sizeof(double complex)));
   const int ud = open_wo_(bn, "UL");
   if (ud < 0)
     return EXIT_FAILURE;

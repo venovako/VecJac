@@ -8,12 +8,12 @@ MKFS=GNUmakefile $(COMPILER).mk
 
 LIBS=libvecjac$(SUFX).a
 
-EXES=bclevd2$(SUFX).exe bdlevd2$(SUFX).exe bslevd2$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tcbjac2$(SUFX).exe tdbjac2$(SUFX).exe tsbjac2$(SUFX).exe tzbjac2$(SUFX).exe tpjs$(SUFX).exe tdgesvj$(SUFX).exe tzgesvj$(SUFX).exe
+EXES=bclevd2$(SUFX).exe bdlevd2$(SUFX).exe bslevd2$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tcbjac2$(SUFX).exe tdbjac2$(SUFX).exe tsbjac2$(SUFX).exe tzbjac2$(SUFX).exe tpjs$(SUFX).exe tdgesvj$(SUFX).exe tzgesvj$(SUFX).exe tzvjsvd$(SUFX).exe
 ifdef SLEEF
 EXES += tdnorme$(SUFX).exe
 endif # SLEEF
 
-OBJS=aalloc$(SUFX).o cbjac2$(SUFX).o cdpscl$(SUFX).o cjrot$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cscale$(SUFX).o common$(SUFX).o dbjac2$(SUFX).o ddpscl$(SUFX).o djrot$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sbjac2$(SUFX).o sdpscl$(SUFX).o sjrot$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o sscale$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o zbjac2$(SUFX).o zdpscl$(SUFX).o zjrot$(SUFX).o zmerge$(SUFX).o znormx$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
+OBJS=aalloc$(SUFX).o cbjac2$(SUFX).o cdpscl$(SUFX).o cjrot$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cscale$(SUFX).o common$(SUFX).o dbjac2$(SUFX).o ddpscl$(SUFX).o djrot$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sbjac2$(SUFX).o sdpscl$(SUFX).o sjrot$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o sscale$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o zbjac2$(SUFX).o zdpscl$(SUFX).o zjrot$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
 ifdef SLEEF
 OBJS += dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o #znorme$(SUFX).o znormf$(SUFX).o znorms$(SUFX).o
 endif # SLEEF
@@ -221,6 +221,9 @@ tdgesvj$(SUFX).exe: tdgesvj.c $(LIBS) $(MKFS)
 tzgesvj$(SUFX).exe: tzgesvj.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
+tzvjsvd$(SUFX).exe: tzvjsvd.c $(LIBS) $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
 clean:
 	-$(RM) aalloc$(SUFX).o aalloc$(SUFX).optrpt
 	-$(RM) cbjac2$(SUFX).o cbjac2$(SUFX).optrpt
@@ -273,6 +276,7 @@ clean:
 	-$(RM) tpjs$(SUFX).exe tpjs.optrpt
 	-$(RM) tdgesvj$(SUFX).exe tdgesvj.optrpt
 	-$(RM) tzgesvj$(SUFX).exe tzgesvj.optrpt
+	-$(RM) tzvjsvd$(SUFX).exe tzvjsvd.optrpt
 ifdef SLEEF
 	-$(RM) dnormb$(SUFX).o dnormb$(SUFX).optrpt
 	-$(RM) dnorme$(SUFX).o dnorme$(SUFX).optrpt
