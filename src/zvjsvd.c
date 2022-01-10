@@ -236,7 +236,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         if (!(isfinite(l1[_pq])))
           nM = fmin(nM, -24.0);
       }
-      if (!(nM > 0.0)) {
+      if (!(nM >= 0.0)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
         (void)fflush(jtr);
