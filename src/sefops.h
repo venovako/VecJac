@@ -21,33 +21,6 @@
 #define VSLSB(x) _mm512_cvtepi32_ps(_mm512_and_si256(_mm512_cvtps_epi32(x),iones))
 #endif /* ?VSLSB */
 
-#ifdef VSEFADD
-#error VSEFADD already defined
-#else /* !VSEFADD */
-#define VSEFADD(e,f,ma,mb)                                                       \
-  {                                                                              \
-    register const VS ae = _mm512_maskz_compress_ps(ma, e); VSP(ae);             \
-    register const VS be = _mm512_maskz_compress_ps(mb, e); VSP(be);             \
-    register const VS af = _mm512_maskz_compress_ps(ma, f); VSP(af);             \
-    register const VS bf = _mm512_maskz_compress_ps(mb, f); VSP(bf);             \
-    f = _mm512_fmadd_ps(_mm512_scalef_ps(onef, VSSUBE(ae, be)), af, bf); VSP(f); \
-    e = _mm512_add_ps(be, _mm512_getexp_ps(f)); VSP(e);                          \
-    f = VSMANT(f); VSP(f);                                                       \
-  }
-#endif /* ?VSEFADD */
-
-#ifdef VSEFRED
-#error VSEFRED already defined
-#else /* !VSEFRED */
-#define VSEFRED(e,f)              \
-  {                               \
-    VSEFADD(e,f,0x5555u,0xAAAAu); \
-    VSEFADD(e,f,0x0055u,0x00AAu); \
-    VSEFADD(e,f,0x0005u,0x000Au); \
-    VSEFADD(e,f,0x0001u,0x0002u); \
-  }
-#endif /* ?VSEFRED */
-
 #ifdef MSOR
 #error MSOR already defined
 #else /* !MSOR */
@@ -103,6 +76,33 @@ static inline void efredf(float e[static restrict VSL], float f[static restrict 
     efsumf(e0, f0, e1, f1, &ef);
   }
 }
-#endif /* SCNRME_SEQRED */
+#else /* !SCNRME_SEQRED */
+#ifdef VSEFADD
+#error VSEFADD already defined
+#else /* !VSEFADD */
+#define VSEFADD(e,f,ma,mb)                                                       \
+  {                                                                              \
+    register const VS ae = _mm512_maskz_compress_ps(ma, e); VSP(ae);             \
+    register const VS be = _mm512_maskz_compress_ps(mb, e); VSP(be);             \
+    register const VS af = _mm512_maskz_compress_ps(ma, f); VSP(af);             \
+    register const VS bf = _mm512_maskz_compress_ps(mb, f); VSP(bf);             \
+    f = _mm512_fmadd_ps(_mm512_scalef_ps(onef, VSSUBE(ae, be)), af, bf); VSP(f); \
+    e = _mm512_add_ps(be, _mm512_getexp_ps(f)); VSP(e);                          \
+    f = VSMANT(f); VSP(f);                                                       \
+  }
+#endif /* ?VSEFADD */
+
+#ifdef VSEFRED
+#error VSEFRED already defined
+#else /* !VSEFRED */
+#define VSEFRED(e,f)              \
+  {                               \
+    VSEFADD(e,f,0x5555u,0xAAAAu); \
+    VSEFADD(e,f,0x0055u,0x00AAu); \
+    VSEFADD(e,f,0x0005u,0x000Au); \
+    VSEFADD(e,f,0x0001u,0x0002u); \
+  }
+#endif /* ?VSEFRED */
+#endif /* ?SCNRME_SEQRED */
 
 #endif /* !SEFOPS_H */
