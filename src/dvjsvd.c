@@ -164,7 +164,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const size_t _q = r[pq_];
           double *const Gp = G + _p * (*ldG);
           nM = fmax(nM, fmin((l1[_pq] = dnorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VAL));
-          if (nM > DBL_MAX) {
+          if (!(nM <= DBL_MAX)) {
             l2[_pq] = NAN;
             continue;
           }
@@ -210,8 +210,13 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         if (!(isfinite(w[_pq])))
           nM = fmin(nM, -20.0);
       }
-      if (!(nM >= 0.0))
+      if (!(nM >= 0.0)) {
+#ifdef JTRACE
+        (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
+        (void)fflush(jtr);
+#endif /* JTRACE */
         return (fint)nM;
+      }
       // repack data
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r,eS,fS,c,at,l1,l2)
@@ -267,15 +272,15 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       if (stt) {
         swt += stt;
 #ifdef JTRACE
-        (void)fprintf(jtr, "sweep=%u, step=%u, trans=%llu\n", sw, st, stt);
-        (void)fflush(jtr);
+        //(void)fprintf(jtr, "sweep=%u, step=%u, trans=%llu\n", sw, st, stt);
+        //(void)fflush(jtr);
 #endif /* JTRACE */
       }
       if (dbjac2_(&n_2, a11, a22, a21, c, at, l1, l2, p) < 0)
         return -21;
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(a11,a22,a21,p,pc,r,n_2) reduction(+:np)
+#pragma omp parallel for default(none) shared(a11,a22,a21,eS,fS,p,pc,r,n_2) reduction(+:np)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
@@ -288,20 +293,29 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const size_t _q = r[pq + 1u];
           *(size_t*)(a11 + l) = _p;
           *(size_t*)(a22 + l) = _q;
-          a21[l] = ((cvg & 1u) ? 2.0 : 1.0);
-          if (prm & 1u) {
-            a21[l] = -a21[l];
+          if (cvg & 1u) {
+            if (prm & 1u) {
+              a21[l] = -2.0;
+              ++np;
+            }
+            else // no swap
+              a21[l] = 2.0;
+          }
+          else if (efcmp((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
+            a21[l] = -1.0;
             ++np;
           }
+          else // no swap
+            a21[l] = 1.0;
           cvg >>= 1u;
           prm >>= 1u;
         }
       }
 #ifdef JTRACE
-      if (np) {
-        (void)fprintf(jtr, "sweep=%u, step=%u, swaps=%llu\n", sw, st, np);
-        (void)fflush(jtr);
-      }
+      //if (np) {
+      //  (void)fprintf(jtr, "sweep=%u, step=%u, swaps=%llu\n", sw, st, np);
+      //  (void)fflush(jtr);
+      //}
 #endif /* JTRACE */
       M = 0.0;
 #ifdef _OPENMP

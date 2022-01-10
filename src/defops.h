@@ -47,10 +47,23 @@
 #define DBL_MAX_FIN_EXP 1023.0
 #endif /* ?DBL_MAX_FIN_EXP */
 
+static inline int efcmp(double e0[static restrict 1], double f0[static restrict 1], double e1[static restrict 1], double f1[static restrict 1])
+{
+  if (*e0 > *e1)
+    return 1;
+  if (*e0 < *e1)
+    return -1;
+  if (*f0 > *f1)
+    return 1;
+  if (*f0 < *f1)
+    return -1;
+  return 0;
+}
+
 #ifdef DZNRME_SEQRED
 static inline void efswp(double e0[static restrict 1], double f0[static restrict 1], double e1[static restrict 1], double f1[static restrict 1])
 {
-  if ((*e0 > *e1) || ((*e0 == *e1) && (*f0 > *f1))) {
+  if (efcmp(e0, f0, e1, f1) > 0) {
     double t = *e1;
     *e1 = *e0;
     *e0 = t;

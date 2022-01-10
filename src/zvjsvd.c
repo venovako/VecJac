@@ -75,7 +75,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     return -20;
 
 #ifdef JTRACE
-  (void)fprintf(jtr, "M=%#.17e\n", M);
+  (void)fprintf(jtr, "%#.17e\n", M);
   (void)fflush(jtr);
 #endif /* JTRACE */
 
@@ -138,10 +138,6 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   unsigned sw = 0u;
 
   while (sw < *swp) {
-#ifdef JTRACE
-    (void)fprintf(jtr, "Sweep %u\n", sw);
-    (void)fflush(jtr);
-#endif /* JTRACE */
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
       // rescale according to M if necessary and update M
@@ -151,7 +147,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       sN = DBL_MAX_NRM_EXP - eM - 1;
       if (sR < 0) {
 #ifdef JTRACE
-        (void)fprintf(jtr, "step=%u, eM=%d, sR=%d, sN=%d, M=", st, eM, sR, sN);
+        (void)fprintf(jtr, "sweep=%u, step=%u, eM=%d, sR=%d, sN=%d, M=", sw, st, eM, sR, sN);
         (void)fflush(jtr);
 #endif /* JTRACE */
         *(fint*)&es = sN;
@@ -175,7 +171,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #endif /* _OPENMP */
         for (fnat pq = 0u; pq < *n; pq += 2u) {
           const fnat _pq = (pq >> 1u);
-          if (nM > DBL_MAX) {
+          if (!(nM <= DBL_MAX)) {
             l1[_pq] = NAN;
             l2[_pq] = NAN;
             continue;
@@ -186,7 +182,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           double *const Grp = Gr + _p * (*ldGr);
           double *const Gip = Gi + _p * (*ldGi);
           nM = fmax(nM, fmin((l1[_pq] = znorm2_(m, Grp, Gip, (eS + _p), (fS + _p), (cat + _pq), (sat + _pq))), HUGE_VAL));
-          if (nM > DBL_MAX) {
+          if (!(nM <= DBL_MAX)) {
             l2[_pq] = NAN;
             continue;
           }
@@ -194,9 +190,9 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           double *const Giq = Gi + _q * (*ldGi);
           nM = fmax(nM, fmin((l2[_pq] = znorm2_(m, Grq, Giq, (eS + _q), (fS + _q), (cat + _pq), (sat + _pq))), HUGE_VAL));
         }
-        if (overflow = (nM > DBL_MAX)) {
+        if (overflow = !(nM <= DBL_MAX)) {
 #ifdef JTRACE
-          (void)fprintf(jtr, "step=%u, M=", st);
+          (void)fprintf(jtr, "sweep=%u, step=%u, M=", sw, st);
           (void)fflush(jtr);
 #endif /* JTRACE */
           *(fint*)&es = sN;
@@ -217,7 +213,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat _pq = (pq >> 1u);
-        if (nM < 0.0) {
+        if (!(nM >= 0.0)) {
           l1[_pq] = NAN;
           l2[_pq] = NAN;
           continue;
@@ -240,8 +236,13 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         if (!(isfinite(l1[_pq])))
           nM = fmin(nM, -24.0);
       }
-      if (nM < 0.0)
+      if (!(nM > 0.0)) {
+#ifdef JTRACE
+        (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
+        (void)fflush(jtr);
+#endif /* JTRACE */
         return (fint)nM;
+      }
       // repack data
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r,eS,fS,c,cat,sat,w)
@@ -256,9 +257,9 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         cat[_pq] = fS[_p];
         sat[_pq] = fS[_q];
       }
-      fnat stt = 0u, k = 0u;
+      fnat stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,c,cat,sat,l1,l2,w,p,pc,tol,k) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,c,cat,sat,l1,l2,w,p,pc,tol) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
@@ -268,9 +269,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         register const VD _tol = _mm512_set1_pd(tol);
         register const VD _a21_ = _mm512_hypot_pd(_a21r, _a21i);
         pc[j] = MD2U(_mm512_cmple_pd_mask(_tol, _a21_));
-        if (!(p[j] = _mm_popcnt_u32(pc[j])))
-          continue;
-        stt += p[j];
+        stt += (p[j] = _mm_popcnt_u32(pc[j]));
         // Grammian pre-scaling into the double precision range
         register const VD f1 = _mm512_load_pd(cat + i);
         register const VD f2 = _mm512_load_pd(sat + i);
@@ -293,53 +292,65 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         register const VD _a22 = _mm512_scalef_pd(f21, e21);
         _a21r = _mm512_scalef_pd(_a21r, d);
         _a21i = _mm512_scalef_pd(_a21i, d);
-        // pack the data and record the translation in pc
-        fnat kk;
-#ifdef _OPENMP
-#pragma omp atomic capture seq_cst
-#endif /* _OPENMP */
-        kk = k++;
-        // lower 8 bits: mask, upper 24 bits: j (assumes n < 2^28)
-        pc[kk] |= (j << VDL);
-        kk <<= VDLlg;
-        _mm512_store_pd((a11 + kk), _a11);
-        _mm512_store_pd((a22 + kk), _a22);
-        _mm512_store_pd((a21r + kk), _a21r);
-        _mm512_store_pd((a21i + kk), _a21i);
+        _mm512_store_pd((a11 + i), _a11);
+        _mm512_store_pd((a22 + i), _a22);
+        _mm512_store_pd((a21r + i), _a21r);
+        _mm512_store_pd((a21i + i), _a21i);
       }
-      if (!stt)
-        continue;
-      swt += stt;
-      const fnat kk = (k << VDLlg);
-      if (zbjac2_(&kk, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
+      if (stt) {
+        swt += stt;
+#ifdef JTRACE
+        //(void)fprintf(jtr, "sweep=%u, step=%u, trans=%llu\n", sw, st, stt);
+        //(void)fflush(jtr);
+#endif /* JTRACE */
+      }
+      if (zbjac2_(&n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
         return -26;
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(a11,a22,a21r,p,pc,r,k) reduction(+:np)
+#pragma omp parallel for default(none) shared(a11,a22,a21r,eS,fS,p,pc,r,n_2) reduction(+:np)
 #endif /* _OPENMP */
-      for (fnat i = 0u; i < k; ++i) {
-        const fnat i_ = (i << VDLlg);
-        const fnat _pq = ((pc[i] >> VDL) << VDLlg);
-        for (unsigned b = (pc[i] & 0xFFu), x = p[i], l_ = 0u; b; (b >>= 1u), (x >>= 1u), ++l_) {
-          const fnat k_ = (i_ + l_);
-          const fnat pq = ((_pq + l_) << 1u);
+      for (fnat i = 0u; i < n_2; i += VDL) {
+        const fnat j = (i >> VDLlg);
+        unsigned cvg = (pc[j] & 0xFFu);
+        unsigned prm = (p[j] & 0xFFu);
+        for (fnat k = 0u; k < VDL; ++k) {
+          const fnat l = (i + k);
+          const fnat pq = (l << 1u);
           const size_t _p = r[pq];
           const size_t _q = r[pq + 1u];
-          *(size_t*)(a11 + k_) = _p;
-          *(size_t*)(a22 + k_) = _q;
-          if (x & 1u) {
-            a21r[k_] = ((b & 1u) ? -2.0 : -1.0);
+          *(size_t*)(a11 + l) = _p;
+          *(size_t*)(a22 + l) = _q;
+          if (cvg & 1u) {
+            if (prm & 1u) {
+              a21r[l] = -2.0;
+              ++np;
+            }
+            else // no swap
+              a21r[l] = 2.0;
+          }
+          else if (efcmp((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
+            a21r[l] = -1.0;
             ++np;
           }
           else // no swap
-            a21r[k_] = ((b & 1u) ? 2.0 : 1.0);
+            a21r[l] = 1.0;
+          cvg >>= 1u;
+          prm >>= 1u;
         }
       }
+#ifdef JTRACE
+      //if (np) {
+      //  (void)fprintf(jtr, "sweep=%u, step=%u, swaps=%llu\n", sw, st, np);
+      //  (void)fflush(jtr);
+      //}
+#endif /* JTRACE */
+      M = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,kk) reduction(max:M)
+#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,n_2) reduction(max:M)
 #endif /* _OPENMP */
-      for (fnat i = 0u; i < kk; ++i) {
-        if (M > DBL_MAX) {
+      for (fnat i = 0u; i < n_2; ++i) {
+        if (!(M <= DBL_MAX)) {
           a21i[i] = NAN;
           continue;
         }
@@ -347,7 +358,6 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const size_t _q = *(const size_t*)(a22 + i);
         double _c, _cat, _sat;
         fint _m, _n;
-        bool triv = false;
         if (a21r[i] == -2.0) {
           _m = -(fint)*m;
           _n = -(fint)*n;
@@ -362,6 +372,13 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           _cat = 1.0;
           _sat = 0.0;
         }
+        else if (a21r[i] == 1.0) {
+          _m = (fint)*m;
+          _n = (fint)*n;
+          _c = 1.0;
+          _cat = 1.0;
+          _sat = 0.0;
+        }
         else if (a21r[i] == 2.0) {
           _m = (fint)*m;
           _n = (fint)*n;
@@ -369,25 +386,31 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           _cat = cat[i];
           _sat = sat[i];
         }
-        else // no-op
-          triv = true;
-        if (triv)
-          M = fmax(M, 0.0);
-        else {
-          a21i[i] = zjrot_(&_m, (Gr + _p * (*ldGr)), (Gi + _p * (*ldGi)), (Gr + _q * (*ldGr)), (Gi + _q * (*ldGi)), &_c, &_cat, &_sat);
-          M = fmax(M, (!(a21i[i] >= 0.0) ? HUGE_VAL : a21i[i]));
-          if (M > DBL_MAX) {
-            a21i[i] = NAN;
-            continue;
-          }
-          a21i[i] = zjrot_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_c, &_cat, &_sat);
-          // V should not overflow but check anyway
-          if (!(a21i[i] >= 0.0) || !(a21i[i] <= DBL_MAX))
-            M = HUGE_VAL;
+        else { // should never happen
+          M = HUGE_VAL;
+          continue;
+        }
+        a21i[i] = zjrot_(&_m, (Gr + _p * (*ldGr)), (Gi + _p * (*ldGi)), (Gr + _q * (*ldGr)), (Gi + _q * (*ldGi)), &_c, &_cat, &_sat);
+        if (!(a21i[i] >= 0.0) || !(a21i[i] <= DBL_MAX)) {
+          M = a21i[i] = HUGE_VAL;
+          continue;
+        }
+        else // all OK
+          M = fmax(M, a21i[i]);
+        a21i[i] = zjrot_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_c, &_cat, &_sat);
+        // V should not overflow but check anyway
+        if (!(a21i[i] >= 0.0) || !(a21i[i] <= DBL_MAX)) {
+          a21i[i] = NAN;
+          M = HUGE_VAL;
         }
       }
-      if (M > DBL_MAX)
+      if (!(M <= DBL_MAX)) {
+#ifdef JTRACE
+        (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
+        (void)fflush(jtr);
+#endif /* JTRACE */
         return -27;
+      }
     }
     if (!swt)
       break;

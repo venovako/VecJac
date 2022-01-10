@@ -39,10 +39,23 @@
 #define FLT_MAX_FIN_EXP 127.0f
 #endif /* ?FLT_MAX_FIN_EXP */
 
+static inline int efcmpf(float e0[static restrict 1], float f0[static restrict 1], float e1[static restrict 1], float f1[static restrict 1])
+{
+  if (*e0 > *e1)
+    return 1;
+  if (*e0 < *e1)
+    return -1;
+  if (*f0 > *f1)
+    return 1;
+  if (*f0 < *f1)
+    return -1;
+  return 0;
+}
+
 #ifdef SCNRME_SEQRED
 static inline void efswpf(float e0[static restrict 1], float f0[static restrict 1], float e1[static restrict 1], float f1[static restrict 1])
 {
-  if ((*e0 > *e1) || ((*e0 == *e1) && (*f0 > *f1))) {
+  if (efcmpf(e0, f0, e1, f1) > 0) {
     float t = *e1;
     *e1 = *e0;
     *e0 = t;
