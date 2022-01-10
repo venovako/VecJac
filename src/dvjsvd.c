@@ -284,8 +284,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
-        unsigned cvg = (pc[j] & 0xFFu);
-        unsigned prm = (p[j] & 0xFFu);
+        unsigned trans = (pc[j] & 0xFFu);
+        unsigned perm = (p[j] & 0xFFu);
         for (fnat k = 0u; k < VDL; ++k) {
           const fnat l = (i + k);
           const fnat pq = (l << 1u);
@@ -293,8 +293,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const size_t _q = r[pq + 1u];
           *(size_t*)(a11 + l) = _p;
           *(size_t*)(a22 + l) = _q;
-          if (cvg & 1u) {
-            if (prm & 1u) {
+          if (trans & 1u) {
+            if (perm & 1u) {
               a21[l] = -2.0;
               ++np;
             }
@@ -302,13 +302,19 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
               a21[l] = 2.0;
           }
           else if (efcmp((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
+            a21[l] = eS[_p];
+            eS[_p] = eS[_q];
+            eS[_q] = a21[l];
+            a21[l] = fS[_p];
+            fS[_p] = fS[_q];
+            fS[_q] = a21[l];
             a21[l] = -1.0;
             ++np;
           }
           else // no swap
             a21[l] = 1.0;
-          cvg >>= 1u;
-          prm >>= 1u;
+          trans >>= 1u;
+          perm >>= 1u;
         }
       }
 #ifdef JTRACE
@@ -385,9 +391,24 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     ++sw;
   }
 
-  // TODO: normalize U and extract S
+  if (sw < *swp) {
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(m,n,G,ldG,eS,fS,sT)
+#endif /* _OPENMP */
+    for (fnat j = 0u; j < *n; ++j) {
+      double *const Gj = G + j * (size_t)(*ldG);
+      register const VD _f = _mm512_set1_pd(fS[j]);
+      register const VD _s = _mm512_set1_pd(-(eS[j]));
+      for (fnat i = 0u; i < *m; i += VDL) {
+        double *const Gij = Gj + i;
+        _mm512_store_pd(Gij, _mm512_scalef_pd(_mm512_div_pd(_mm512_load_pd(Gij), _f), _s));
+      }
+      eS[j] -= sT;
+    }
+  }
 
 #ifdef JTRACE
+  (void)fprintf(jtr, "sT=%d, M=%#.17e\n", sT, M);
   (void)fclose(jtr);
 #endif /* JTRACE */
   return (fint)sw;
