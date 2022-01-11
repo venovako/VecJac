@@ -58,9 +58,6 @@ int main(int argc, char *argv[])
   if (close(gd))
     return 5;
 
-  (void)fprintf(stdout, "%4llu,%4llu,", m, n);
-  (void)fflush(stdout);
-
   double *V = (double*)NULL;
   if (dalloc2_(&n, &n, &V, &ldV) < 0)
     return 7;
@@ -73,7 +70,13 @@ int main(int argc, char *argv[])
   double *const work = fS + n;
   wide *const ws = (wide*)work;
 #ifdef JTRACE
-  (void)sprintf((char*)work, "%s.txt", bn);
+  (void)sprintf((char*)work, "%s.%ld", bn,
+#ifdef _OPENMP
+                j
+#else /* !_OPENMP */
+                (j - 1l)
+#endif /* ?_OPENMP */
+                );
 #endif /* JTRACE */
   unsigned *const iwork = (unsigned*)aligned_alloc(VA, ((n >> VDLlg) * sizeof(unsigned)));
   if (!iwork)
@@ -85,7 +88,13 @@ int main(int argc, char *argv[])
   const uint64_t b = rdtsc_beg(rd);
   const fint o = dvjsvd_(&m, &n, G, &ldG, V, &ldV, eS, fS, js, &stp, &swp, work, iwork);
   const uint64_t e = rdtsc_end(rd);
-  (void)fprintf(stdout, "%15.9Lf,%3lld\n", tsc_lap(hz, b, e), o);
+  (void)fprintf(stdout, "\"%ld\",%4llu,%4llu,%15.9Lf,%3lld\n",
+#ifdef _OPENMP
+                j
+#else /* !_OPENMP */
+                (j - 1l)
+#endif /* ?_OPENMP */
+                , m, n, tsc_lap(hz, b, e), o);
   (void)fflush(stdout);
   free(iwork);
 

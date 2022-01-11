@@ -62,9 +62,6 @@ int main(int argc, char *argv[])
   if (close(gd))
     return 5;
 
-  (void)fprintf(stdout, "%4llu,%4llu,", m, n);
-  (void)fflush(stdout);
-
   unsigned rd[2u] = { 0u, 0u };
   const uint64_t hz = tsc_get_freq_hz_(rd);
 
@@ -72,8 +69,7 @@ int main(int argc, char *argv[])
   if (zsplit_(&m, &n, G, &ldG, Gr, &ldGr, Gi, &ldGi) < 0)
     return 6;
   uint64_t e = rdtsc_end(rd);
-  (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, b, e));
-  (void)fflush(stdout);
+  const long double ts = tsc_lap(hz, b, e);
 
   double complex *V = (double complex*)NULL;
   double *Vr = (double*)NULL;
@@ -89,7 +85,13 @@ int main(int argc, char *argv[])
   double *const work = fS + n;
   wide *const ws = (wide*)work;
 #ifdef JTRACE
-  (void)sprintf((char*)work, "%s.txt", bn);
+  (void)sprintf((char*)work, "%s.%ld", bn,
+#ifdef _OPENMP
+                j
+#else /* !_OPENMP */
+                (j - 1l)
+#endif /* ?_OPENMP */
+                );
 #endif /* JTRACE */
   unsigned *const iwork = (unsigned*)aligned_alloc(VA, ((n >> VDLlg) * sizeof(unsigned)));
   if (!iwork)
@@ -99,8 +101,7 @@ int main(int argc, char *argv[])
   b = rdtsc_beg(rd);
   const fint o = zvjsvd_(&m, &n, Gr, &ldGr, Gi, &ldGi, Vr, &ldVr, Vi, &ldVi, eS, fS, js, &stp, &swp, work, iwork);
   e = rdtsc_end(rd);
-  (void)fprintf(stdout, "%15.9Lf,%3lld,", tsc_lap(hz, b, e), o);
-  (void)fflush(stdout);
+  const long double tj = tsc_lap(hz, b, e);
   free(iwork);
 
 #ifdef _OPENMP
@@ -136,8 +137,7 @@ int main(int argc, char *argv[])
   if (zmerge_(&n, &n, Vr, &ldVr, Vi, &ldVi, V, &ldV) < 0)
     return 11;
   e = rdtsc_end(rd);
-  (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, b, e));
-  (void)fflush(stdout);
+  const long double tv = tsc_lap(hz, b, e);
   free(Vi);
   free(Vr);
 
@@ -163,8 +163,7 @@ int main(int argc, char *argv[])
   if (zmerge_(&m, &n, Gr, &ldGr, Gi, &ldGi, G, &ldG) < 0)
     return 13;
   e = rdtsc_end(rd);
-  (void)fprintf(stdout, "%15.9Lf\n", tsc_lap(hz, b, e));
-  (void)fflush(stdout);
+  const long double tg = tsc_lap(hz, b, e);
   free(Gi);
   free(Gr);
 
@@ -185,6 +184,15 @@ int main(int argc, char *argv[])
   if (close(ud))
     return 14;
   free(G);
+
+  (void)fprintf(stdout, "\"%ld\",%4llu,%4llu,%15.9Lf,%15.9Lf,%3lld,%15.9Lf,%15.9Lf\n",
+#ifdef _OPENMP
+                j
+#else /* !_OPENMP */
+                (j - 1l)
+#endif /* ?_OPENMP */
+                , m, n, ts, tj, o, tv, tg);
+  (void)fflush(stdout);
 
   free(js);
   return EXIT_SUCCESS;
