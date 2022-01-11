@@ -31,8 +31,6 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     return -2;
   if (n_2 & VDL_1)
     return -2;
-  if (*n >= 0x10000000u) // 2^28
-    return -2;
   if (IS_NOT_ALIGNED(Gr))
     return -3;
   if (*ldGr < *m)
@@ -264,10 +262,14 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
         // convergence check
+        register const VD _zero = _mm512_set1_pd(-0.0);
+        register const VD zero = _mm512_setzero_pd();
+        register const VD one = _mm512_set1_pd(1.0);
         register VD _a21r = _mm512_load_pd(l1 + i);
         register VD _a21i = _mm512_load_pd(l2 + i);
         register const VD _tol = _mm512_set1_pd(tol);
-        register const VD _a21_ = _mm512_hypot_pd(_a21r, _a21i);
+        register VD _a21_ /* = _mm512_hypot_pd(_a21r, _a21i) */;
+        VDHYPOT(_a21_, _a21r, _a21i);
         pc[j] = MD2U(_mm512_cmple_pd_mask(_tol, _a21_));
         stt += (p[j] = _mm_popcnt_u32(pc[j]));
         // Grammian pre-scaling into the double precision range
@@ -284,8 +286,9 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         e21 = _mm512_add_pd(e21, _mm512_getexp_pd(f21));
         f21 = VDMANT(f21);
         register const MD c12 = VDEFLE(e12,e21,f12,f21);
+        register const VD mxe = _mm512_set1_pd(DBL_MAX_FIN_EXP);
         register const VD E = _mm512_mask_blend_pd(c12, e12, e21);
-        register const VD d = _mm512_min_pd(_mm512_sub_pd(_mm512_set1_pd(DBL_MAX_FIN_EXP), E), _mm512_setzero_pd());
+        register const VD d = _mm512_min_pd(_mm512_sub_pd(mxe, E), zero);
         e12 = _mm512_add_pd(e12, d);
         e21 = _mm512_add_pd(e21, d);
         register const VD _a11 = _mm512_scalef_pd(f12, e12);
@@ -317,10 +320,10 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         for (fnat k = 0u; k < VDL; ++k) {
           const fnat l = (i + k);
           const fnat pq = (l << 1u);
-          const size_t _p = r[pq];
-          const size_t _q = r[pq + 1u];
-          *(size_t*)(a11 + l) = _p;
-          *(size_t*)(a22 + l) = _q;
+          const uint64_t _p = r[pq];
+          const uint64_t _q = r[pq + 1u];
+          *(uint64_t*)(a11 + l) = _p;
+          *(uint64_t*)(a22 + l) = _q;
           if (trans & 1u) {
             if (perm & 1u) {
               a21r[l] = -2.0;
@@ -360,8 +363,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           a21i[i] = NAN;
           continue;
         }
-        const size_t _p = *(const size_t*)(a11 + i);
-        const size_t _q = *(const size_t*)(a22 + i);
+        const size_t _p = *(const uint64_t*)(a11 + i);
+        const size_t _q = *(const uint64_t*)(a22 + i);
         double _c, _cat, _sat;
         fint _m, _n;
         if (a21r[i] == -2.0) {
