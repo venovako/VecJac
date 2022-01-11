@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
   }
   const uint64_t e = rdtsc_end(rd);
 
-  (void)fprintf(stdout, "%4lld,%4lld,%1lld,%15.9Lf,%#.17e,%4lld,%4lld,%3lld,%#.17e,%#.17e\n", m, n, info, tsc_lap(hz, b, e), rwork[0u], (fint)(rwork[1u]), (fint)(rwork[2u]), (fint)(rwork[3u]), rwork[4u], rwork[5u]);
+  (void)fprintf(stdout, "\"%s\",%4lld,%4lld,%1lld,%15.9Lf,%#.17e,%4lld,%4lld,%3lld,%#.17e,%#.17e\n", bn, m, n, info, tsc_lap(hz, b, e), rwork[0u], (fint)(rwork[1u]), (fint)(rwork[2u]), (fint)(rwork[3u]), rwork[4u], rwork[5u]);
   (void)fflush(stdout);
   *rwork1 = *rwork;
   free(rwork);
