@@ -31,8 +31,8 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
           register const VD x_ = _mm512_load_pd(xi);
           register const VD y_ = _mm512_load_pd(yi);
           mx = _mm512_max_pd(mx, _mm512_max_pd(VDABS(x_), VDABS(y_)));
-          _mm512_store_pd(xi, y_);
           _mm512_store_pd(yi, x_);
+          _mm512_store_pd(xi, y_);
         }
         return _mm512_reduce_max_pd(mx);
       }

@@ -27,17 +27,21 @@ fint zmerge_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
     return -8;
 #endif /* !NDEBUG */
 
+  const fnat m_ = (*m << 1u);
+
 #ifdef _OPENMP
   fint t = 0;
 
-#pragma omp parallel for default(none) shared(m,n,A,ldA,Ar,ldAr,Ai,ldAi) reduction(max:t)
+#pragma omp parallel for default(none) shared(m_,n,A,ldA,Ar,ldAr,Ai,ldAi) reduction(max:t)
   for (fnat j = 0u; j < *n; ++j) {
     register const VI idx = _mm512_set_epi64(7, 3, 6, 2, 5, 1, 4, 0);
     double complex *const Aj = A + j * (size_t)(*ldA);
     const double *const Arj = Ar + j * (size_t)(*ldAr);
     const double *const Aij = Ai + j * (size_t)(*ldAi);
-    for (fnat i = 0u; i < *m; i += VDL_2)
-      _mm512_store_pd((Aj + i), _mm512_permutexvar_pd(idx, _mm512_insertf64x4(_mm512_zextpd256_pd512(_mm256_load_pd(Arj + i)), _mm256_load_pd(Aij + i), 0x01u)));
+    for (fnat i = 0u; i < m_; i += VDL) {
+      const fnat _i = (i >> 1u);
+      _mm512_store_pd((Aj + i), _mm512_permutexvar_pd(idx, _mm512_insertf64x4(_mm512_zextpd256_pd512(_mm256_load_pd(Arj + _i)), _mm256_load_pd(Aij + _i), 0x01u)));
+    }
     t = imax(t, omp_get_thread_num());
   }
 
@@ -49,8 +53,10 @@ fint zmerge_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
     double complex *const Aj = A + j * (size_t)(*ldA);
     const double *const Arj = Ar + j * (size_t)(*ldAr);
     const double *const Aij = Ai + j * (size_t)(*ldAi);
-    for (fnat i = 0u; i < *m; i += VDL_2)
-      _mm512_store_pd((Aj + i), _mm512_permutexvar_pd(idx, _mm512_insertf64x4(_mm512_zextpd256_pd512(_mm256_load_pd(Arj + i)), _mm256_load_pd(Aij + i), 0x01u)));
+    for (fnat i = 0u; i < m_; i += VDL) {
+      const fnat _i = (i >> 1u);
+      _mm512_store_pd((Aj + i), _mm512_permutexvar_pd(idx, _mm512_insertf64x4(_mm512_zextpd256_pd512(_mm256_load_pd(Arj + _i)), _mm256_load_pd(Aij + _i), 0x01u)));
+    }
   }
 
   return 0;

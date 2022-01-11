@@ -6,7 +6,9 @@
 #include "dznrm2.h"
 #include "zdpscl.h"
 #include "zbjac2.h"
+#include "zjrotf.h"
 #include "zjrot.h"
+#include "dswp.h"
 #include "vecdef.h"
 #include "defops.h"
 
@@ -354,12 +356,12 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       //  (void)fflush(jtr);
       //}
 #endif /* JTRACE */
-      M = 0.0;
+      nM = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,n_2) reduction(max:M)
+#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,n_2) reduction(max:nM)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
-        if (!(M <= DBL_MAX)) {
+        if (!(nM <= DBL_MAX)) {
           a21i[i] = NAN;
           continue;
         }
@@ -375,18 +377,40 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           _sat = sat[i];
         }
         else if (a21r[i] == -1.0) {
-          _m = -(fint)*m;
-          _n = -(fint)*n;
-          _c = 1.0;
-          _cat = 1.0;
-          _sat = 0.0;
+          double *const Gr_p = Gr + _p * (*ldGr);
+          double *const Gr_q = Gr + _q * (*ldGr);
+          if (_m = dswp_(m, Gr_p, Gr_q)) {
+            a21i[i] = _m;
+            nM = HUGE_VAL;
+            continue;
+          }
+          double *const Gi_p = Gi + _p * (*ldGi);
+          double *const Gi_q = Gi + _q * (*ldGi);
+          if (_m = dswp_(m, Gi_p, Gi_q)) {
+            a21i[i] = _m;
+            nM = HUGE_VAL;
+            continue;
+          }
+          double *const Vr_p = Vr + _p * (*ldVr);
+          double *const Vr_q = Vr + _q * (*ldVr);
+          if (_n = dswp_(n, Vr_p, Vr_q)) {
+            a21i[i] = _n;
+            nM = HUGE_VAL;
+            continue;
+          }
+          double *const Vi_p = Vi + _p * (*ldVi);
+          double *const Vi_q = Vi + _q * (*ldVi);
+          if (_n = dswp_(n, Vi_p, Vi_q)) {
+            a21i[i] = _n;
+            nM = HUGE_VAL;
+            continue;
+          }
+          nM = fmax(nM, (a21i[i] = 0.0));
+          continue;
         }
         else if (a21r[i] == 1.0) {
-          _m = (fint)*m;
-          _n = (fint)*n;
-          _c = 1.0;
-          _cat = 1.0;
-          _sat = 0.0;
+          nM = fmax(nM, (a21i[i] = 0.0));
+          continue;
         }
         else if (a21r[i] == 2.0) {
           _m = (fint)*m;
@@ -396,23 +420,23 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           _sat = sat[i];
         }
         else { // should never happen
-          M = HUGE_VAL;
+          a21i[i] = NAN;
+          nM = HUGE_VAL;
           continue;
         }
         a21i[i] = zjrot_(&_m, (Gr + _p * (*ldGr)), (Gi + _p * (*ldGi)), (Gr + _q * (*ldGr)), (Gi + _q * (*ldGi)), &_c, &_cat, &_sat);
         if (!(a21i[i] >= 0.0) || !(a21i[i] <= DBL_MAX)) {
-          M = a21i[i] = HUGE_VAL;
+          nM = a21i[i] = HUGE_VAL;
           continue;
         }
-        else // all OK
-          M = fmax(M, a21i[i]);
-        a21i[i] = zjrot_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_c, &_cat, &_sat);
-        // V should not overflow but check anyway
-        if (!(a21i[i] >= 0.0) || !(a21i[i] <= DBL_MAX)) {
-          a21i[i] = NAN;
-          M = HUGE_VAL;
+        else // no overflow
+          nM = fmax(nM, a21i[i]);
+        if (_m = zjrot_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_c, &_cat, &_sat)) {
+          a21i[i] = _m;
+          nM = HUGE_VAL;
         }
       }
+      M = fmax(M, nM);
       if (!(M <= DBL_MAX)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);

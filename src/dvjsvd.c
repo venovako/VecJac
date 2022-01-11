@@ -6,7 +6,9 @@
 #include "dznrm2.h"
 #include "ddpscl.h"
 #include "dbjac2.h"
+#include "djrotf.h"
 #include "djrot.h"
+#include "dswp.h"
 #include "vecdef.h"
 #include "defops.h"
 
@@ -323,12 +325,12 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       //  (void)fflush(jtr);
       //}
 #endif /* JTRACE */
-      M = 0.0;
+      nM = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,w,n_2) reduction(max:M)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,w,n_2) reduction(max:nM)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
-        if (!(M <= DBL_MAX)) {
+        if (!(nM <= DBL_MAX)) {
           w[i] = NAN;
           continue;
         }
@@ -343,16 +345,26 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           _at = at[i];
         }
         else if (a21[i] == -1.0) {
-          _m = -(fint)*m;
-          _n = -(fint)*n;
-          _c = 1.0;
-          _at = 0.0;
+          double *const Gp = G + _p * (*ldG);
+          double *const Gq = G + _q * (*ldG);
+          if (_m = dswp_(m, Gp, Gq)) {
+            w[i] = _m;
+            nM = HUGE_VAL;
+            continue;
+          }
+          double *const Vp = V + _p * (*ldV);
+          double *const Vq = V + _q * (*ldV);
+          if (_n = dswp_(n, Vp, Vq)) {
+            w[i] = _n;
+            nM = HUGE_VAL;
+            continue;
+          }
+          nM = fmax(nM, (w[i] = 0.0));
+          continue;
         }
         else if (a21[i] == 1.0) {
-          _m = (fint)*m;
-          _n = (fint)*n;
-          _c = 1.0;
-          _at = 0.0;
+          nM = fmax(nM, (w[i] = 0.0));
+          continue;
         }
         else if (a21[i] == 2.0) {
           _m = (fint)*m;
@@ -361,23 +373,23 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           _at = at[i];
         }
         else { // should never happen
-          M = HUGE_VAL;
+          w[i] = NAN;
+          nM = HUGE_VAL;
           continue;
         }
         w[i] = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_c, &_at);
         if (!(w[i] >= 0.0) || !(w[i] <= DBL_MAX)) {
-          M = w[i] = HUGE_VAL;
+          nM = w[i] = HUGE_VAL;
           continue;
         }
-        else // all OK
-          M = fmax(M, w[i]);
-        w[i] = djrot_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_c, &_at);
-        // V should not overflow but check anyway
-        if (!(w[i] >= 0.0) || !(w[i] <= DBL_MAX)) {
-          w[i] = NAN;
-          M = HUGE_VAL;
+        else // no overflow
+          nM = fmax(nM, w[i]);
+        if (_m = djrotf_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_c, &_at)) {
+          w[i] = _m;
+          nM = HUGE_VAL;
         }
       }
+      M = fmax(M, nM);
       if (!(M <= DBL_MAX)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
