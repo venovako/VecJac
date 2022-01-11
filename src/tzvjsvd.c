@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
     return 14;
   free(G);
 
-  (void)fprintf(stdout, "\"%ld\",%4llu,%4llu,%15.9Lf,%15.9Lf,%3lld,%15.9Lf,%15.9Lf\n",
+  (void)fprintf(stdout, "\"%s\",%1ld,%4llu,%4llu,%15.9Lf,%15.9Lf,%3lld,%15.9Lf,%15.9Lf\n", bn,
 #ifdef _OPENMP
                 j
 #else /* !_OPENMP */

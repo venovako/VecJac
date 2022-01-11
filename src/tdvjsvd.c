@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
   const uint64_t b = rdtsc_beg(rd);
   const fint o = dvjsvd_(&m, &n, G, &ldG, V, &ldV, eS, fS, js, &stp, &swp, work, iwork);
   const uint64_t e = rdtsc_end(rd);
-  (void)fprintf(stdout, "\"%ld\",%4llu,%4llu,%15.9Lf,%3lld\n",
+  (void)fprintf(stdout, "\"%s\",%1ld,%4llu,%4llu,%15.9Lf,%3lld\n", bn,
 #ifdef _OPENMP
                 j
 #else /* !_OPENMP */
