@@ -13,8 +13,6 @@ ifdef SLEEF
 EXES += tdnorme$(SUFX).exe
 endif # SLEEF
 
-#cdpscl$(SUFX).o cjrot$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cscale$(SUFX).o
-#sdpscl$(SUFX).o sjrot$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o sscale$(SUFX).o
 OBJS=aalloc$(SUFX).o cbjac2$(SUFX).o common$(SUFX).o dbjac2$(SUFX).o ddpscl$(SUFX).o djrot$(SUFX).o djrotf$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dswp$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sbjac2$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o zbjac2$(SUFX).o zdpscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
 ifdef SLEEF
 OBJS += dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o #znorme$(SUFX).o znormf$(SUFX).o znorms$(SUFX).o
@@ -32,22 +30,7 @@ libvecjac$(SUFX).a: $(OBJS) $(MKFS)
 aalloc$(SUFX).o: aalloc.c aalloc.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-cdpscl$(SUFX).o: cdpscl.c cdpscl.h vec.h common.h $(MKFS)
-	$(CC) $(CFLAGS) -c $< -o $@
-
 cbjac2$(SUFX).o: cbjac2.c cbjac2.h scjac2.h vecdef.h vec.h common.h $(MKFS)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-cjrot$(SUFX).o: cjrot.c cjrot.h sjrot.h vecdef.h vec.h common.h $(MKFS)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-cnorm2$(SUFX).o: cnorm2.c cnorm2.h scnrm2.h common.h $(MKFS)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-cnormx$(SUFX).o: cnormx.c cnormx.h scnrmx.h vecdef.h vec.h common.h $(MKFS)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-cscale$(SUFX).o: cscale.c cscale.h scscal.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 common$(SUFX).o: common.c common.h $(MKFS)
@@ -109,21 +92,6 @@ rnd$(SUFX).o: rnd.c rnd.h common.h $(MKFS)
 sbjac2$(SUFX).o: sbjac2.c sbjac2.h scjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-sdpscl$(SUFX).o: sdpscl.c sdpscl.h vec.h common.h $(MKFS)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-sjrot$(SUFX).o: sjrot.c sjrot.h vecdef.h vec.h common.h $(MKFS)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-snorm2$(SUFX).o: snorm2.c snorm2.h scnrm2.h common.h $(MKFS)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-snormx$(SUFX).o: snormx.c snormx.h scnrmx.h vecdef.h vec.h common.h $(MKFS)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-sscale$(SUFX).o: sscale.c sscale.h scscal.h vec.h common.h $(MKFS)
-	$(CC) $(CFLAGS) -c $< -o $@
-
 timer$(SUFX).o: timer.c timer.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -158,17 +126,6 @@ zmerge$(SUFX).o: zmerge.c zmerge.h vec.h common.h $(MKFS)
 
 znorm2$(SUFX).o: znorm2.c znorm2.h dznrm2.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
-
-# ifdef SLEEF
-# znorme$(SUFX).o: znorme.c znorme.h dznrme.h dkvsrt.h d8sort.h defops.h vecdef.h vec.h common.h $(MKFS)
-# 	$(CC) $(CFLAGS) -c $< -o $@
-
-# znormf$(SUFX).o: znormf.c znormf.h dznrmf.h common.h $(MKFS)
-# 	$(CC) $(CFLAGS) -c $< -o $@
-
-# znorms$(SUFX).o: znorms.c znorms.h dznrms.h d8sort.h vecdef.h vec.h common.h $(MKFS)
-# 	$(CC) $(CFLAGS) -c $< -o $@
-# endif # SLEEF
 
 znormx$(SUFX).o: znormx.c znormx.h dznrmx.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -241,11 +198,6 @@ tzvjsvd$(SUFX).exe: tzvjsvd.c $(LIBS) $(MKFS)
 clean:
 	-$(RM) aalloc$(SUFX).o aalloc$(SUFX).optrpt
 	-$(RM) cbjac2$(SUFX).o cbjac2$(SUFX).optrpt
-	-$(RM) cdpscl$(SUFX).o cdpscl$(SUFX).optrpt
-	-$(RM) cjrot$(SUFX).o cjrot$(SUFX).optrpt
-	-$(RM) cnorm2$(SUFX).o cnorm2$(SUFX).optrpt
-	-$(RM) cnormx$(SUFX).o cnormx$(SUFX).optrpt
-	-$(RM) cscale$(SUFX).o cscale$(SUFX).optrpt
 	-$(RM) common$(SUFX).o common$(SUFX).optrpt
 	-$(RM) dbjac2$(SUFX).o dbjac2$(SUFX).optrpt
 	-$(RM) ddpscl$(SUFX).o ddpscl$(SUFX).optrpt
@@ -261,11 +213,6 @@ clean:
 	-$(RM) pjs$(SUFX).o pjs$(SUFX).optrpt
 	-$(RM) rnd$(SUFX).o rnd$(SUFX).optrpt
 	-$(RM) sbjac2$(SUFX).o sbjac2$(SUFX).optrpt
-	-$(RM) sdpscl$(SUFX).o sdpscl$(SUFX).optrpt
-	-$(RM) sjrot$(SUFX).o sjrot$(SUFX).optrpt
-	-$(RM) snorm2$(SUFX).o snorm2$(SUFX).optrpt
-	-$(RM) snormx$(SUFX).o snormx$(SUFX).optrpt
-	-$(RM) sscale$(SUFX).o sscale$(SUFX).optrpt
 	-$(RM) timer$(SUFX).o timer$(SUFX).optrpt
 	-$(RM) vec$(SUFX).o vec$(SUFX).optrpt
 	-$(RM) vecjac$(SUFX).o vecjac$(SUFX).optrpt vecjac.mod
@@ -304,8 +251,3 @@ ifdef SLEEF
 	-$(RM) psort$(SUFX).o psort$(SUFX).optrpt psort$(SUFX).opt.yaml
 	-$(RM) tdnorme$(SUFX).exe tdnorme$(SUFX).o tdnorme$(SUFX).optrpt
 endif # SLEEF
-# ifdef SLEEF
-# 	-$(RM) znorme$(SUFX).o znorme$(SUFX).optrpt
-# 	-$(RM) znormf$(SUFX).o znormf$(SUFX).optrpt
-# 	-$(RM) znorms$(SUFX).o znorms$(SUFX).optrpt
-# endif # SLEEF
