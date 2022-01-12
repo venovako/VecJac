@@ -34,19 +34,21 @@ double complex zdpscl_(const fnat m[static restrict 1], const double xr[static r
   register const VD ye = _mm512_set1_pd(-(e[1u]));
 
   register VD pr = _mm512_setzero_pd();
-  for (fnat i = 0u; i < *m; i += VDL) {
-    pr = _mm512_fmadd_pd(_mm512_scalef_pd(_mm512_load_pd(xr + i), xe), _mm512_scalef_pd(_mm512_load_pd(yr + i), ye), pr); VDP(pr);
-  }
-  for (fnat i = 0u; i < *m; i += VDL) {
-    pr = _mm512_fmadd_pd(_mm512_scalef_pd(_mm512_load_pd(xi + i), xe), _mm512_scalef_pd(_mm512_load_pd(yi + i), ye), pr); VDP(pr);
-  }
-
   register VD pi = _mm512_setzero_pd();
+
   for (fnat i = 0u; i < *m; i += VDL) {
-    pi = _mm512_fmadd_pd(_mm512_scalef_pd(_mm512_load_pd(xr + i), xe), _mm512_scalef_pd(_mm512_load_pd(yi + i), ye), pi); VDP(pi);
-  }
-  for (fnat i = 0u; i < *m; i += VDL) {
-    pi = _mm512_fnmadd_pd(_mm512_scalef_pd(_mm512_load_pd(xi + i), xe), _mm512_scalef_pd(_mm512_load_pd(yr + i), ye), pi); VDP(pi);
+    register VD xri = _mm512_load_pd(xr + i);
+    register VD yri = _mm512_load_pd(yr + i);
+    register VD yii = _mm512_load_pd(yi + i);
+    register VD xii = _mm512_load_pd(xi + i);
+    xri = _mm512_scalef_pd(xri, xe); VDP(xri);
+    yri = _mm512_scalef_pd(yri, ye); VDP(yri);
+    yii = _mm512_scalef_pd(yii, ye); VDP(yii);
+    xii = _mm512_scalef_pd(xii, xe); VDP(xii);
+    pr = _mm512_fmadd_pd(xri, yri, pr); VDP(pr);
+    pi = _mm512_fmadd_pd(xri, yii, pi); VDP(pi);
+    pr = _mm512_fmadd_pd(xii, yii, pr); VDP(pr);
+    pi = _mm512_fnmadd_pd(xii, yri, pi); VDP(pi);
   }
 
   alignas(16u) double complex z

@@ -31,7 +31,11 @@ double ddpscl_(const fnat m[static restrict 1], const double x[static restrict V
   register VD p = _mm512_setzero_pd();
 
   for (fnat i = 0u; i < *m; i += VDL) {
-    p = _mm512_fmadd_pd(_mm512_scalef_pd(_mm512_load_pd(x + i), xe), _mm512_scalef_pd(_mm512_load_pd(y + i), ye), p); VDP(p);
+    register VD xi = _mm512_load_pd(x + i);
+    register VD yi = _mm512_load_pd(y + i);
+    xi = _mm512_scalef_pd(xi, xe); VDP(xi);
+    yi = _mm512_scalef_pd(yi, ye); VDP(yi);
+    p = _mm512_fmadd_pd(xi, yi, p); VDP(p);
   }
 
   return (_mm512_reduce_add_pd(p) / (f[0u] * f[1u]));

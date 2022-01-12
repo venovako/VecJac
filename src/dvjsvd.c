@@ -206,7 +206,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const double f2[2u] = { fS[_p], fS[_q] };
         double *const Gp = G + _p * (*ldG);
         double *const Gq = G + _q * (*ldG);
-        w[_pq] = ddpscl_(m, Gp, Gq, e2, f2);
+        w[_pq] = ddpscl_(m, Gq, Gp, e2, f2);
         if (!(isfinite(w[_pq])))
           nM = fmin(nM, -20.0);
       }

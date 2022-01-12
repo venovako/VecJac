@@ -228,7 +228,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         double *const Gip = Gi + _p * (*ldGi);
         double *const Grq = Gr + _q * (*ldGr);
         double *const Giq = Gi + _q * (*ldGi);
-        const double complex z = zdpscl_(m, Grp, Gip, Grq, Giq, e2, f2);
+        const double complex z = zdpscl_(m, Grq, Giq, Grp, Gip, e2, f2);
         l1[_pq] = creal(z);
         l2[_pq] = cimag(z);
         if (!(isfinite(l2[_pq])))
@@ -264,11 +264,11 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
         // convergence check
+        register VD _a21r = _mm512_load_pd(l1 + i);
+        register VD _a21i = _mm512_load_pd(l2 + i);
         register const VD _zero = _mm512_set1_pd(-0.0);
         register const VD zero = _mm512_setzero_pd();
         register const VD one = _mm512_set1_pd(1.0);
-        register VD _a21r = _mm512_load_pd(l1 + i);
-        register VD _a21i = _mm512_load_pd(l2 + i);
         register const VD _tol = _mm512_set1_pd(tol);
         register VD _a21_ /* = _mm512_hypot_pd(_a21r, _a21i) */;
         VDHYPOT(_a21_, _a21r, _a21i);
