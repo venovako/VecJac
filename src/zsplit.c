@@ -35,7 +35,7 @@ fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
 #pragma omp parallel for default(none) shared(m_,n,A,ldA,Ar,ldAr,Ai,ldAi) reduction(max:t)
   for (fnat j = 0u; j < *n; ++j) {
     register const VI idx = _mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0);
-    const double complex *const Aj = A + j * (size_t)(*ldA);
+    const double *const Aj = (const double*)(A + j * (size_t)(*ldA));
     double *const Arj = Ar + j * (size_t)(*ldAr);
     double *const Aij = Ai + j * (size_t)(*ldAi);
     for (fnat i = 0u; i < m_; i += VDL) {
@@ -52,7 +52,7 @@ fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
   register const VI idx = _mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0);
 
   for (fnat j = 0u; j < *n; ++j) {
-    const double complex *const Aj = A + j * (size_t)(*ldA);
+    const double *const Aj = (const double*)(A + j * (size_t)(*ldA));
     double *const Arj = Ar + j * (size_t)(*ldAr);
     double *const Aij = Ai + j * (size_t)(*ldAi);
     for (fnat i = 0u; i < m_; i += VDL) {
