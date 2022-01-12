@@ -222,8 +222,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const size_t _p = r[pq];
         const size_t _q = r[pq_];
         // pack the norms
-        const double e2[2u] = { eS[_p], eS[_q] };
-        const double f2[2u] = { fS[_p], fS[_q] };
+        const double e2[2u] = { eS[_q], eS[_p] };
+        const double f2[2u] = { fS[_q], fS[_p] };
         double *const Grp = Gr + _p * (*ldGr);
         double *const Gip = Gi + _p * (*ldGi);
         double *const Grq = Gr + _q * (*ldGr);
@@ -302,13 +302,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         _mm512_store_pd((a21r + i), _a21r);
         _mm512_store_pd((a21i + i), _a21i);
       }
-      if (stt) {
-        swt += stt;
-#ifdef JTRACE
-        //(void)fprintf(jtr, "sweep=%u, step=%u, trans=%llu\n", sw, st, stt);
-        //(void)fflush(jtr);
-#endif /* JTRACE */
-      }
+      swt += stt;
       if (zbjac2_(&n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
         return -26;
       fnat np = 0u; // number of swaps
@@ -350,12 +344,6 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           perm >>= 1u;
         }
       }
-#ifdef JTRACE
-      //if (np) {
-      //  (void)fprintf(jtr, "sweep=%u, step=%u, swaps=%llu\n", sw, st, np);
-      //  (void)fflush(jtr);
-      //}
-#endif /* JTRACE */
       nM = 0.0;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,n_2) reduction(max:nM)
