@@ -273,34 +273,36 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         register VD _a21_ /* = _mm512_hypot_pd(_a21r, _a21i) */;
         VDHYPOT(_a21_, _a21r, _a21i);
         pc[j] = MD2U(_mm512_cmple_pd_mask(_tol, _a21_));
-        stt += (p[j] = _mm_popcnt_u32(pc[j]));
-        // Grammian pre-scaling into the double precision range
-        register const VD f1 = _mm512_load_pd(cat + i);
-        register const VD f2 = _mm512_load_pd(sat + i);
-        register const VD e1 = _mm512_load_pd(c + i);
-        register const VD e2 = _mm512_load_pd(w + i);
-        register VD f12 = _mm512_div_pd(f1, f2);
-        register VD e12 = _mm512_sub_pd(e1, e2);
-        register VD f21 = _mm512_div_pd(f2, f1);
-        register VD e21 = _mm512_sub_pd(e2, e1);
-        e12 = _mm512_add_pd(e12, _mm512_getexp_pd(f12));
-        f12 = VDMANT(f12);
-        e21 = _mm512_add_pd(e21, _mm512_getexp_pd(f21));
-        f21 = VDMANT(f21);
-        register const MD c12 = VDEFLE(e12,e21,f12,f21);
-        register const VD mxe = _mm512_set1_pd(DBL_MAX_FIN_EXP);
-        register const VD E = _mm512_mask_blend_pd(c12, e12, e21);
-        register const VD d = _mm512_min_pd(_mm512_sub_pd(mxe, E), zero);
-        e12 = _mm512_add_pd(e12, d);
-        e21 = _mm512_add_pd(e21, d);
-        register const VD _a11 = _mm512_scalef_pd(f12, e12);
-        register const VD _a22 = _mm512_scalef_pd(f21, e21);
-        _a21r = _mm512_scalef_pd(_a21r, d);
-        _a21i = _mm512_scalef_pd(_a21i, d);
-        _mm512_store_pd((a11 + i), _a11);
-        _mm512_store_pd((a22 + i), _a22);
-        _mm512_store_pd((a21r + i), _a21r);
-        _mm512_store_pd((a21i + i), _a21i);
+        if (p[j] = _mm_popcnt_u32(pc[j])) {
+          stt += p[j];
+          // Grammian pre-scaling into the double precision range
+          register const VD f1 = _mm512_load_pd(cat + i);
+          register const VD f2 = _mm512_load_pd(sat + i);
+          register const VD e1 = _mm512_load_pd(c + i);
+          register const VD e2 = _mm512_load_pd(w + i);
+          register VD f12 = _mm512_div_pd(f1, f2);
+          register VD e12 = _mm512_sub_pd(e1, e2);
+          register VD f21 = _mm512_div_pd(f2, f1);
+          register VD e21 = _mm512_sub_pd(e2, e1);
+          e12 = _mm512_add_pd(e12, _mm512_getexp_pd(f12));
+          f12 = VDMANT(f12);
+          e21 = _mm512_add_pd(e21, _mm512_getexp_pd(f21));
+          f21 = VDMANT(f21);
+          register const MD c12 = VDEFLE(e12,e21,f12,f21);
+          register const VD mxe = _mm512_set1_pd(DBL_MAX_FIN_EXP);
+          register const VD E = _mm512_mask_blend_pd(c12, e12, e21);
+          register const VD d = _mm512_min_pd(_mm512_sub_pd(mxe, E), zero);
+          e12 = _mm512_add_pd(e12, d);
+          e21 = _mm512_add_pd(e21, d);
+          register const VD _a11 = _mm512_scalef_pd(f12, e12);
+          register const VD _a22 = _mm512_scalef_pd(f21, e21);
+          _a21r = _mm512_scalef_pd(_a21r, d);
+          _a21i = _mm512_scalef_pd(_a21i, d);
+          _mm512_store_pd((a11 + i), _a11);
+          _mm512_store_pd((a22 + i), _a22);
+          _mm512_store_pd((a21r + i), _a21r);
+          _mm512_store_pd((a21i + i), _a21i);
+        }
       }
       swt += stt;
       if (zbjac2_(&n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
