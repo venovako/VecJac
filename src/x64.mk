@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 ARCH=$(shell uname)
 ifndef ABI
-ABI=lp64
+ABI=ilp64
 endif # !ABI
 ifdef NDEBUG
 DEBUG=

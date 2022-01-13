@@ -15,13 +15,13 @@ endif # SLEEF
 
 OBJS=aalloc$(SUFX).o cbjac2$(SUFX).o common$(SUFX).o dbjac2$(SUFX).o ddpscl$(SUFX).o djrot$(SUFX).o djrotf$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dscale$(SUFX).o dswp$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sbjac2$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o zbjac2$(SUFX).o zdpscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
 ifdef SLEEF
-OBJS += dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o #znorme$(SUFX).o znormf$(SUFX).o znorms$(SUFX).o
+OBJS += dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o
 endif # SLEEF
 
 all: $(LIBS) $(EXES)
 
 help:
-	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=lp64|ilp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [all|clean|help]"
+	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [all|clean|help]"
 	@echo "Setting explicitly MKL to sequential (default) turns off OpenMP (otherwise it is turned on, unless debugging)."
 
 libvecjac$(SUFX).a: $(OBJS) $(MKFS)
