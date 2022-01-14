@@ -107,3 +107,57 @@ fint zbjac2_(const fnat n[static restrict 1], const double a11[static restrict V
   return 0;
 #endif /* ?_OPENMP */
 }
+
+// for internal use only
+fint zbjac2i(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21r[static restrict VDL], const double a21i[static restrict VDL], double c[static restrict VDL], double cat[static restrict VDL], double sat[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
+{
+#ifndef NDEBUG
+  if (IS_NOT_VFPENV)
+    return -12;
+  if (*n & VDL_1)
+    return -1;
+  if (IS_NOT_ALIGNED(a11))
+    return -2;
+  if (IS_NOT_ALIGNED(a22))
+    return -3;
+  if (IS_NOT_ALIGNED(a21r))
+    return -4;
+  if (IS_NOT_ALIGNED(a21i))
+    return -5;
+  if (IS_NOT_ALIGNED(c))
+    return -6;
+  if (IS_NOT_ALIGNED(cat))
+    return -7;
+  if (IS_NOT_ALIGNED(sat))
+    return -8;
+  if (IS_NOT_ALIGNED(l1))
+    return -9;
+  if (IS_NOT_ALIGNED(l2))
+    return -10;
+#endif /* !NDEBUG */
+
+#ifdef _OPENMP
+  fint th = 0;
+
+#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,c,cat,sat,l1,l2,p) reduction(max:th)
+  for (fnat i = 0u; i < *n; i += VDL) {
+    if (p[i >> VDLlg]) {
+      Z8JAC2_PARAMS;
+      Z8JAC2_LOOP;
+    }
+    th = imax(th, omp_get_thread_num());
+  }
+
+  return (th + 1);
+#else /* !_OPENMP */
+  Z8JAC2_PARAMS;
+
+  for (fnat i = 0u; i < *n; i += VDL) {
+    if (p[i >> VDLlg]) {
+      Z8JAC2_LOOP;
+    }
+  }
+
+  return 0;
+#endif /* ?_OPENMP */
+}

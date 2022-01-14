@@ -89,3 +89,53 @@ fint dbjac2_(const fnat n[static restrict 1], const double a11[static restrict V
   return 0;
 #endif /* ?_OPENMP */
 }
+
+// for internal use only
+fint dbjac2i(const fnat n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21[static restrict VDL], double c[static restrict VDL], double at[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
+{
+#ifndef NDEBUG
+  if (IS_NOT_VFPENV)
+    return -10;
+  if (*n & VDL_1)
+    return -1;
+  if (IS_NOT_ALIGNED(a11))
+    return -2;
+  if (IS_NOT_ALIGNED(a22))
+    return -3;
+  if (IS_NOT_ALIGNED(a21))
+    return -4;
+  if (IS_NOT_ALIGNED(c))
+    return -5;
+  if (IS_NOT_ALIGNED(at))
+    return -6;
+  if (IS_NOT_ALIGNED(l1))
+    return -7;
+  if (IS_NOT_ALIGNED(l2))
+    return -8;
+#endif /* !NDEBUG */
+
+#ifdef _OPENMP
+  fint th = 0;
+
+#pragma omp parallel for default(none) shared(n,a11,a22,a21,c,at,l1,l2,p) reduction(max:th)
+  for (fnat i = 0u; i < *n; i += VDL) {
+    if (p[i >> VDLlg]) {
+      D8JAC2_PARAMS;
+      D8JAC2_LOOP;
+    }
+    th = imax(th, omp_get_thread_num());
+  }
+
+  return (th + 1);
+#else /* !_OPENMP */
+  D8JAC2_PARAMS;
+
+  for (fnat i = 0u; i < *n; i += VDL) {
+    if (p[i >> VDLlg]) {
+      D8JAC2_LOOP;
+    }
+  }
+
+  return 0;
+#endif /* ?_OPENMP */
+}

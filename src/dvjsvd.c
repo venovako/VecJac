@@ -274,7 +274,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         }
       }
       swt += stt;
-      if (dbjac2_(&n_2, a11, a22, a21, c, at, l1, l2, p) < 0)
+      if (dbjac2i(&n_2, a11, a22, a21, c, at, l1, l2, p) < 0)
         return -21;
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP

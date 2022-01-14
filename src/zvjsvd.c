@@ -305,7 +305,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         }
       }
       swt += stt;
-      if (zbjac2_(&n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
+      if (zbjac2i(&n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
         return -26;
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
