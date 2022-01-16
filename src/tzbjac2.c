@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
   (void)fprintf(stderr, "TSC frequency: %llu+(%u/%u) Hz.\n", (unsigned long long)hz, rd[0u], rd[1u]);
   (void)fflush(stderr);
 
-  (void)fprintf(stdout, "\"B\",\"Ts\",\"REN\",\"RLN\",\"RLX\",\"RLM\"\n");
+  (void)fprintf(stdout, "\"B\",\"Ts\",\"ORT\",\"REN\",\"RLN\",\"RLX\",\"RLM\"\n");
   (void)fflush(stdout);
   const char *bf = (const char*)NULL;
   if (b <= 10u)
@@ -152,18 +152,19 @@ int main(int argc, char *argv[])
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
-    wide r = W_ZERO;
+    wide o = W_ZERO, r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,c,cat,sat,l1,l2) reduction(max:r)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,c,cat,sat,l1,l2) reduction(max:o,r)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       const wide CS = (wide)(c[i]);
       const wide SNR = (CS * cat[i]);
       const wide SNI = (CS * sat[i]);
       wide AE = W_ZERO, AN = W_ZERO;
-      const wide RE = wrec(a11[i], a22[i], a21r[i], a21i[i], CS, SNR, SNI, l1[i], l2[i], &AE, &AN);
-      r = fmaxw(r, RE);
+      o = fmaxw(o, worc(CS, SNR, SNI));
+      r = fmaxw(r, wrec(a11[i], a22[i], a21r[i], a21i[i], CS, SNR, SNI, l1[i], l2[i], &AE, &AN));
     }
+    (void)fprintf(stdout, "%s,", xtoa(a, (long double)o));
     (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
     (void)fflush(stdout);
 #ifdef _OPENMP

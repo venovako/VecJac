@@ -1,5 +1,7 @@
 #include "wnrme.h"
 
+// Frobenius norm of A
+
 // return || A ||_F
 wide wnrmer(const wide a11, const wide a22, const wide a21)
 {
@@ -10,6 +12,21 @@ wide wnrmer(const wide a11, const wide a22, const wide a21)
 wide wnrmec(const wide a11, const wide a22, const wide a21r, const wide a21i)
 {
   return hypotw(hypotw(a11, a22), (W_SQRT2 * hypotw(a21r, a21i)));
+}
+
+// orthogonality checkers
+
+// return cos^2 + sin^2 - 1
+wide worr(const wide cs, const wide sn)
+{
+  return fmaw((sn + W_ONE), (sn - W_ONE), (cs * cs));
+}
+
+// return cos^2 + |sin|^2 - 1
+wide worc(const wide cs, const wide ca, const wide sa)
+{
+  const wide _s = hypotw(ca, sa);
+  return fmaw((_s + W_ONE), (_s - W_ONE), (cs * cs));
 }
 
 // absolute error checkers
@@ -41,26 +58,6 @@ static wide waec(const wide a11, const wide a22, const wide a21r, const wide a21
   return wnrmec(fmaw(c2, fmaw(l2, t2, l1), -a11), fmaw(c2, fmaw(l1, t2, l2), -a22), fmaw(c2, (ca * tl), -a21r), fmaw(c2, (sa * tl), -a21i));
 }
 
-// return || U L U^T - A ||_F
-static wide waerf(const wide a11, const wide a22, const wide a21, const wide t, const wide c, const wide l1, const wide l2)
-{
-  const wide l = l1 - l2;
-  const wide t2 = t * t;
-  const wide c2 = c * c;
-  const wide tl = t * l;
-  return wnrmer(fmaw(c2, fmaw(l2, t2, l1), -a11), fmaw(c2, fmaw(l1, t2, l2), -a22), fmaw(c2, tl, -a21));
-}
-
-// return || U L U^H - A ||_F
-static wide waecf(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide t, const wide c, const wide ca, const wide sa, const wide l1, const wide l2)
-{
-  const wide l = l1 - l2;
-  const wide t2 = t * t;
-  const wide c2 = c * c;
-  const wide tl = t * l;
-  return wnrmec(fmaw(c2, fmaw(l2, t2, l1), -a11), fmaw(c2, fmaw(l1, t2, l2), -a22), fmaw(c2, (ca * tl), -a21r), fmaw(c2, (sa * tl), -a21i));
-}
-
 // relative error checkers
 
 // return || U L U^T - A ||_F / || A ||_F
@@ -75,22 +72,6 @@ wide wrer(const wide a11, const wide a22, const wide a21, const wide cs, const w
 wide wrec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide cs, const wide ca, const wide sa, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1])
 {
   *ae = waec(a11, a22, a21r, a21i, cs, ca, sa, l1, l2);
-  *an = wnrmec(a11, a22, a21r, a21i);
-  return fmaxw((*ae / *an), W_ZERO);
-}
-
-// return || U L U^T - A ||_F / || A ||_F
-wide wrerf(const wide a11, const wide a22, const wide a21, const wide t, const wide c, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1])
-{
-  *ae = waerf(a11, a22, a21, t, c, l1, l2);
-  *an = wnrmer(a11, a22, a21);
-  return fmaxw((*ae / *an), W_ZERO);
-}
-
-// return || U L U^H - A ||_F / || A ||_F
-wide wrecf(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide t, const wide c, const wide ca, const wide sa, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1])
-{
-  *ae = waecf(a11, a22, a21r, a21i, t, c, ca, sa, l1, l2);
   *an = wnrmec(a11, a22, a21r, a21i);
   return fmaxw((*ae / *an), W_ZERO);
 }
