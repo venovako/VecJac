@@ -118,11 +118,13 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   unsigned *const p = iwork;
   unsigned *const pc = p + n_16;
 
+  if (*swp) {
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(l1,n)
 #endif /* _OPENMP */
-  for (fnat i = 0u; i < *n; ++i)
-    l1[i] = 1.0;
+    for (fnat i = 0u; i < *n; ++i)
+      l1[i] = 1.0;
+  }
 
   // see LAPACK's DGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
@@ -395,6 +397,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         if (_m = djrotf_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_c, &_at)) {
           w[i] = _m;
           nM = HUGE_VAL;
+          continue;
         }
         l1[_q] = l1[_p] = 1.0;
       }
