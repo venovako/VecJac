@@ -94,19 +94,6 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     eS[j] = -HUGE_VAL;
   }
 
-  double *const a11 = work;
-  double *const a22 = a11 + n_2;
-  double *const a21r = a22 + n_2;
-  double *const a21i = a21r + n_2;
-  double *const c = a21i + n_2;
-  double *const cat = c + n_2;
-  double *const sat = cat + n_2;
-  double *const l1 = sat + n_2;
-  double *const l2 = l1 + n_2;
-  double *const w = l2 + n_2;
-  unsigned *const p = iwork;
-  unsigned *const pc = p + (n_2 >> VDLlg);
-
   if (M == 0.0)
     return 0;
   const double M_m = (DBL_MAX / ((*m << 2u) * M_SQRT2));
@@ -132,6 +119,27 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   (void)fprintf(jtr, "%#.17e\n", M);
   (void)fflush(jtr);
 #endif /* JTRACE */
+
+  const fnat n_16 = (n_2 >> VDLlg);
+
+  double *const a11 = work;
+  double *const a22 = a11 + n_2;
+  double *const a21r = a22 + n_2;
+  double *const a21i = a21r + n_2;
+  double *const c = a21i + n_2;
+  double *const cat = c + n_2;
+  double *const sat = cat + n_2;
+  double *const l1 = sat + n_2;
+  double *const l2 = l1 + n_2;
+  double *const w = l2 + n_2;
+  unsigned *const p = iwork;
+  unsigned *const pc = p + n_16;
+
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(l1,n)
+#endif /* _OPENMP */
+  for (fnat i = 0u; i < *n; ++i)
+    l1[i] = 1.0;
 
   // see LAPACK's ZGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
@@ -167,28 +175,32 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       do {
         nM = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,Gr,ldGr,Gi,ldGi,eS,fS,cat,sat,l1,l2) reduction(max:nM)
+#pragma omp parallel for default(none) shared(n,r,m,Gr,ldGr,Gi,ldGi,eS,fS,a11,a22,cat,sat,l1) reduction(max:nM)
 #endif /* _OPENMP */
         for (fnat pq = 0u; pq < *n; pq += 2u) {
           const fnat _pq = (pq >> 1u);
           if (!(nM <= DBL_MAX)) {
-            l1[_pq] = NAN;
-            l2[_pq] = NAN;
+            a11[_pq] = NAN;
+            a22[_pq] = NAN;
             continue;
           }
           const fnat pq_ = pq + 1u;
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
-          double *const Grp = Gr + _p * (*ldGr);
-          double *const Gip = Gi + _p * (*ldGi);
-          nM = fmax(nM, fmin((l1[_pq] = znorm2_(m, Grp, Gip, (eS + _p), (fS + _p), (cat + _pq), (sat + _pq))), HUGE_VAL));
-          if (!(nM <= DBL_MAX)) {
-            l2[_pq] = NAN;
-            continue;
+          if (l1[_p] == 1.0) {
+            double *const Grp = Gr + _p * (*ldGr);
+            double *const Gip = Gi + _p * (*ldGi);
+            nM = fmax(nM, fmin((a11[_pq] = znorm2_(m, Grp, Gip, (eS + _p), (fS + _p), (cat + _pq), (sat + _pq))), HUGE_VAL));
+            if (!(nM <= DBL_MAX)) {
+              a22[_pq] = NAN;
+              continue;
+            }
           }
-          double *const Grq = Gr + _q * (*ldGr);
-          double *const Giq = Gi + _q * (*ldGi);
-          nM = fmax(nM, fmin((l2[_pq] = znorm2_(m, Grq, Giq, (eS + _q), (fS + _q), (cat + _pq), (sat + _pq))), HUGE_VAL));
+          if (l1[_q] == 1.0) {
+            double *const Grq = Gr + _q * (*ldGr);
+            double *const Giq = Gi + _q * (*ldGi);
+            nM = fmax(nM, fmin((a22[_pq] = znorm2_(m, Grq, Giq, (eS + _q), (fS + _q), (cat + _pq), (sat + _pq))), HUGE_VAL));
+          }
         }
         if (overflow = !(nM <= DBL_MAX)) {
 #ifdef JTRACE
@@ -200,6 +212,11 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             return -23;
           M = scalbn(M, sN);
           sT += sN;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(l1,n)
+#endif /* _OPENMP */
+          for (fnat i = 0u; i < *n; ++i)
+            l1[i] = 1.0;
 #ifdef JTRACE
           (void)fprintf(jtr, "%#.17e\n", M);
           (void)fflush(jtr);
@@ -348,15 +365,16 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       }
       nM = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,n_2) reduction(max:nM)
+#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,l1,n_2) reduction(max:nM)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
+        const size_t _p = *(const uint64_t*)(a11 + i);
+        const size_t _q = *(const uint64_t*)(a22 + i);
+        l1[_q] = l1[_p] = 0.0;
         if (!(nM <= DBL_MAX)) {
           a21i[i] = NAN;
           continue;
         }
-        const size_t _p = *(const uint64_t*)(a11 + i);
-        const size_t _q = *(const uint64_t*)(a22 + i);
         double _c, _cat, _sat;
         fint _m, _n;
         if (a21r[i] == -2.0) {
@@ -421,10 +439,11 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         }
         else // no overflow
           nM = fmax(nM, a21i[i]);
-        if (_m = zjrot_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_c, &_cat, &_sat)) {
+        if (_m = zjrotf_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_c, &_cat, &_sat)) {
           a21i[i] = _m;
           nM = HUGE_VAL;
         }
+        l1[_q] = l1[_p] = 1.0;
       }
       M = fmax(M, nM);
       if (!(M <= DBL_MAX)) {

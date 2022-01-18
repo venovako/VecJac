@@ -21,13 +21,16 @@ double ddpscl_(const fnat m[static restrict 1], const double x[static restrict V
     return NAN;
 #endif /* !NDEBUG */
 
-  if (!(e[0u] > -HUGE_VAL))
-    return 0.0;
-  if (!(e[1u] > -HUGE_VAL))
+  const double ex = e[0u];
+  if (!(ex > -HUGE_VAL))
     return 0.0;
 
-  register const VD xe = _mm512_set1_pd(-(e[0u]));
-  register const VD ye = _mm512_set1_pd(-(e[1u]));
+  const double ey = e[1u];
+  if (!(ey > -HUGE_VAL))
+    return 0.0;
+
+  register const VD xe = _mm512_set1_pd(-ex);
+  register const VD ye = _mm512_set1_pd(-ey);
   register VD p = _mm512_setzero_pd();
 
   for (fnat i = 0u; i < *m; i += VDL) {
@@ -38,5 +41,7 @@ double ddpscl_(const fnat m[static restrict 1], const double x[static restrict V
     p = _mm512_fmadd_pd(xi, yi, p); VDP(p);
   }
 
-  return (_mm512_reduce_add_pd(p) / (f[0u] * f[1u]));
+  const double fx = f[0u];
+  const double fy = f[1u];
+  return (_mm512_reduce_add_pd(p) / (fx * fy));
 }

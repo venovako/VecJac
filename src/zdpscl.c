@@ -25,13 +25,16 @@ double complex zdpscl_(const fnat m[static restrict 1], const double xr[static r
     return NAN;
 #endif /* !NDEBUG */
 
-  if (!(e[0u] > -HUGE_VAL))
-    return 0.0;
-  if (!(e[1u] > -HUGE_VAL))
+  const double ex = e[0u];
+  if (!(ex > -HUGE_VAL))
     return 0.0;
 
-  register const VD xe = _mm512_set1_pd(-(e[0u]));
-  register const VD ye = _mm512_set1_pd(-(e[1u]));
+  const double ey = e[1u];
+  if (!(ey > -HUGE_VAL))
+    return 0.0;
+
+  register const VD xe = _mm512_set1_pd(-ex);
+  register const VD ye = _mm512_set1_pd(-ey);
 
   register VD pr = _mm512_setzero_pd();
   register VD pi = _mm512_setzero_pd();
@@ -51,11 +54,13 @@ double complex zdpscl_(const fnat m[static restrict 1], const double xr[static r
     pi = _mm512_fnmadd_pd(xii, yri, pi); VDP(pi);
   }
 
+  const double fx = f[0u];
+  const double fy = f[1u];
   alignas(16u) double complex z
 #ifndef NDEBUG
     = CMPLX(0.0, 0.0)
 #endif /* !NDEBUG */
     ;
-  _mm_store_pd((double*)&z, _mm_div_pd(_mm_set_pd(_mm512_reduce_add_pd(pi), _mm512_reduce_add_pd(pr)), _mm_set1_pd(f[0u] * f[1u])));
+  _mm_store_pd((double*)&z, _mm_div_pd(_mm_set_pd(_mm512_reduce_add_pd(pi), _mm512_reduce_add_pd(pr)), _mm_set1_pd(fx * fy)));
   return z;
 }

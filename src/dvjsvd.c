@@ -79,17 +79,6 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
     eS[j] = -HUGE_VAL;
   }
 
-  double *const a11 = work;
-  double *const a22 = a11 + n_2;
-  double *const a21 = a22 + n_2;
-  double *const c = a21 + n_2;
-  double *const at = c + n_2;
-  double *const l1 = at + n_2;
-  double *const l2 = l1 + n_2;
-  double *const w = l2 + n_2;
-  unsigned *const p = iwork;
-  unsigned *const pc = p + (n_2 >> VDLlg);
-
   if (M == 0.0)
     return 0;
   const double M_m = (DBL_MAX / (*m << 1u));
@@ -115,6 +104,25 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   (void)fprintf(jtr, "%#.17e\n", M);
   (void)fflush(jtr);
 #endif /* JTRACE */
+
+  const fnat n_16 = (n_2 >> VDLlg);
+
+  double *const a11 = work;
+  double *const a22 = a11 + n_2;
+  double *const a21 = a22 + n_2;
+  double *const c = a21 + n_2;
+  double *const at = c + n_2;
+  double *const l1 = at + n_2;
+  double *const l2 = l1 + n_2;
+  double *const w = l2 + n_2;
+  unsigned *const p = iwork;
+  unsigned *const pc = p + n_16;
+
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(l1,n)
+#endif /* _OPENMP */
+  for (fnat i = 0u; i < *n; ++i)
+    l1[i] = 1.0;
 
   // see LAPACK's DGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
@@ -150,26 +158,30 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       do {
         nM = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,c,at,l1,l2) reduction(max:nM)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,c,at,l1) reduction(max:nM)
 #endif /* _OPENMP */
         for (fnat pq = 0u; pq < *n; pq += 2u) {
           const fnat _pq = (pq >> 1u);
           if (!(nM <= DBL_MAX)) {
-            l1[_pq] = NAN;
-            l2[_pq] = NAN;
+            a11[_pq] = NAN;
+            a22[_pq] = NAN;
             continue;
           }
           const fnat pq_ = pq + 1u;
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
-          double *const Gp = G + _p * (*ldG);
-          nM = fmax(nM, fmin((l1[_pq] = dnorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VAL));
-          if (!(nM <= DBL_MAX)) {
-            l2[_pq] = NAN;
-            continue;
+          if (l1[_p] == 1.0) {
+            double *const Gp = G + _p * (*ldG);
+            nM = fmax(nM, fmin((a11[_pq] = dnorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VAL));
+            if (!(nM <= DBL_MAX)) {
+              a22[_pq] = NAN;
+              continue;
+            }
           }
-          double *const Gq = G + _q * (*ldG);
-          nM = fmax(nM, fmin((l2[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (c + _pq), (at + _pq))), HUGE_VAL));
+          if (l1[_q] == 1.0) {
+            double *const Gq = G + _q * (*ldG);
+            nM = fmax(nM, fmin((a22[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (c + _pq), (at + _pq))), HUGE_VAL));
+          }
         }
         if (overflow = !(nM <= DBL_MAX)) {
 #ifdef JTRACE
@@ -181,6 +193,11 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             return -19;
           M = scalbn(M, sN);
           sT += sN;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(l1,n)
+#endif /* _OPENMP */
+          for (fnat i = 0u; i < *n; ++i)
+            l1[i] = 1.0;
 #ifdef JTRACE
           (void)fprintf(jtr, "%#.17e\n", M);
           (void)fflush(jtr);
@@ -317,15 +334,16 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       }
       nM = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,w,n_2) reduction(max:nM)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,l1,w,n_2) reduction(max:nM)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
+        const size_t _p = *(const uint64_t*)(a11 + i);
+        const size_t _q = *(const uint64_t*)(a22 + i);
+        l1[_q] = l1[_p] = 0.0;
         if (!(nM <= DBL_MAX)) {
           w[i] = NAN;
           continue;
         }
-        const size_t _p = *(const uint64_t*)(a11 + i);
-        const size_t _q = *(const uint64_t*)(a22 + i);
         double _at, _c;
         fint _m, _n;
         if (a21[i] == -2.0) {
@@ -378,6 +396,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           w[i] = _m;
           nM = HUGE_VAL;
         }
+        l1[_q] = l1[_p] = 1.0;
       }
       M = fmax(M, nM);
       if (!(M <= DBL_MAX)) {

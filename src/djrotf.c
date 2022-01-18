@@ -33,38 +33,64 @@ fint djrotf_(const fint n[static restrict 1], double x[static restrict VDL], dou
       // should never happen
       return -4;
     }
-    register const VD t_ = _mm512_set1_pd(*at);
-    register const VD c_ = _mm512_set1_pd(*c);
-    for (fnat i = 0u; i < n_; i += VDL) {
-      double *const xi = x + i;
-      double *const yi = y + i;
-      register const VD x_ = _mm512_load_pd(xi);
-      register const VD y_ = _mm512_load_pd(yi);
-      register const VD x_r = _mm512_mul_pd(_mm512_fnmadd_pd(x_, t_, y_), c_);
-      register const VD y_r = _mm512_mul_pd(_mm512_fmadd_pd(y_, t_, x_), c_);
-      _mm512_store_pd(xi, x_r);
-      _mm512_store_pd(yi, y_r);
+    if (*c == 1.0) {
+      register const VD t_ = _mm512_set1_pd(*at);
+      for (fnat i = 0u; i < n_; i += VDL) {
+        double *const xi = x + i;
+        double *const yi = y + i;
+        register const VD x_ = _mm512_load_pd(xi);
+        register const VD y_ = _mm512_load_pd(yi);
+        register const VD x_r = _mm512_fnmadd_pd(x_, t_, y_);
+        register const VD y_r = _mm512_fmadd_pd(y_, t_, x_);
+        _mm512_store_pd(xi, x_r);
+        _mm512_store_pd(yi, y_r);
+      }
+    }
+    else { // cos < 1
+      register const VD t_ = _mm512_set1_pd(*at);
+      register const VD c_ = _mm512_set1_pd(*c);
+      for (fnat i = 0u; i < n_; i += VDL) {
+        double *const xi = x + i;
+        double *const yi = y + i;
+        register const VD x_ = _mm512_load_pd(xi);
+        register const VD y_ = _mm512_load_pd(yi);
+        register const VD x_r = _mm512_mul_pd(_mm512_fnmadd_pd(x_, t_, y_), c_);
+        register const VD y_r = _mm512_mul_pd(_mm512_fmadd_pd(y_, t_, x_), c_);
+        _mm512_store_pd(xi, x_r);
+        _mm512_store_pd(yi, y_r);
+      }
     }
   }
   else { // no permute
     const fnat n_ = (fnat)*n;
-    if (*at == 0.0) {
-      if (*c == 1.0)
-        return 0;
-      // should never happen
-      return -4;
+    if (*at == 0.0)
+      return ((*c == 1.0) ? 0 : -4);
+    if (*c == 1.0) {
+      register const VD t_ = _mm512_set1_pd(*at);
+      for (fnat i = 0u; i < n_; i += VDL) {
+        double *const xi = x + i;
+        double *const yi = y + i;
+        register const VD x_ = _mm512_load_pd(xi);
+        register const VD y_ = _mm512_load_pd(yi);
+        register const VD x_r = _mm512_fmadd_pd(y_, t_, x_);
+        register const VD y_r = _mm512_fnmadd_pd(x_, t_, y_);
+        _mm512_store_pd(xi, x_r);
+        _mm512_store_pd(yi, y_r);
+      }
     }
-    register const VD t_ = _mm512_set1_pd(*at);
-    register const VD c_ = _mm512_set1_pd(*c);
-    for (fnat i = 0u; i < n_; i += VDL) {
-      double *const xi = x + i;
-      double *const yi = y + i;
-      register const VD x_ = _mm512_load_pd(xi);
-      register const VD y_ = _mm512_load_pd(yi);
-      register const VD x_r = _mm512_mul_pd(_mm512_fmadd_pd(y_, t_, x_), c_);
-      register const VD y_r = _mm512_mul_pd(_mm512_fnmadd_pd(x_, t_, y_), c_);
-      _mm512_store_pd(xi, x_r);
-      _mm512_store_pd(yi, y_r);
+    else { // cos < 1
+      register const VD t_ = _mm512_set1_pd(*at);
+      register const VD c_ = _mm512_set1_pd(*c);
+      for (fnat i = 0u; i < n_; i += VDL) {
+        double *const xi = x + i;
+        double *const yi = y + i;
+        register const VD x_ = _mm512_load_pd(xi);
+        register const VD y_ = _mm512_load_pd(yi);
+        register const VD x_r = _mm512_mul_pd(_mm512_fmadd_pd(y_, t_, x_), c_);
+        register const VD y_r = _mm512_mul_pd(_mm512_fnmadd_pd(x_, t_, y_), c_);
+        _mm512_store_pd(xi, x_r);
+        _mm512_store_pd(yi, y_r);
+      }
     }
   }
 
