@@ -12,6 +12,10 @@
 #include "vecdef.h"
 #include "defops.h"
 
+#ifdef JTRACE
+#include "timer.h"
+#endif /* JTRACE */
+
 #ifdef DBL_MAX_ROT_EXP
 #error DBL_MAX_ROT_EXP already defined
 #else /* !DBL_MAX_ROT_EXP */
@@ -130,6 +134,14 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
   unsigned sw = 0u;
 
+#ifdef JTRACE
+  unsigned rd[2u] = { 0u, 0u };
+  const uint64_t hz = tsc_get_freq_hz_(rd);
+
+  long double Tn = 0.0L, Tp = 0.0L, Ta = 0.0L, Te = 0.0L, Tr = 0.0L;
+  uint64_t T = UINT64_C(0);
+#endif /* JTRACE */
+
   while (sw < *swp) {
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
@@ -158,6 +170,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       double nM = -0.0;
       bool overflow = false;
       do {
+#ifdef JTRACE
+        T = rdtsc_beg(rd);
+#endif /* JTRACE */
         nM = 0.0;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,c,at,l1) reduction(max:nM)
@@ -185,6 +200,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             nM = fmax(nM, fmin((a22[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (c + _pq), (at + _pq))), HUGE_VAL));
           }
         }
+#ifdef JTRACE
+        Tn += tsc_lap(hz, T, rdtsc_end(rd));
+#endif /* JTRACE */
         if (overflow = !(nM <= DBL_MAX)) {
 #ifdef JTRACE
           (void)fprintf(jtr, "sweep=%u, step=%u, M=", sw, st);
@@ -207,6 +225,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         }
       } while (overflow);
       // scaled dot-products
+#ifdef JTRACE
+      T = rdtsc_beg(rd);
+#endif /* JTRACE */
       nM = 0.0;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,w) reduction(min:nM)
@@ -229,6 +250,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         if (!(isfinite(w[_pq])))
           nM = fmin(nM, -20.0);
       }
+#ifdef JTRACE
+      Tp += tsc_lap(hz, T, rdtsc_end(rd));
+#endif /* JTRACE */
       if (!(nM >= 0.0)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
@@ -237,6 +261,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         return (fint)nM;
       }
       // repack data
+#ifdef JTRACE
+      T = rdtsc_beg(rd);
+#endif /* JTRACE */
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,r,eS,fS,c,at,l1,l2)
 #endif /* _OPENMP */
@@ -293,8 +320,16 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         }
       }
       swt += stt;
+#ifdef JTRACE
+      Ta += tsc_lap(hz, T, rdtsc_end(rd));
+      T = rdtsc_beg(rd);
+#endif /* JTRACE */
       if (dbjac2i(&n_2, a11, a22, a21, c, at, l1, l2, p) < 0)
         return -21;
+#ifdef JTRACE
+      Te += tsc_lap(hz, T, rdtsc_end(rd));
+      T = rdtsc_beg(rd);
+#endif /* JTRACE */
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(a11,a22,a21,eS,fS,p,pc,r,n_2) reduction(+:np)
@@ -402,6 +437,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         l1[_q] = l1[_p] = 1.0;
       }
       M = fmax(M, nM);
+#ifdef JTRACE
+      Tr += tsc_lap(hz, T, rdtsc_end(rd));
+#endif /* JTRACE */
       if (!(M <= DBL_MAX)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
@@ -433,6 +471,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
 #ifdef JTRACE
   (void)fprintf(jtr, "sT=%d, M=%#.17e\n", sT, M);
+  (void)fprintf(jtr, "Tn=%15.9Lf, Tp=%15.9Lf, Ta=%15.9Lf, Te=%15.9Lf, Tr=%15.9Lf\n", Tn, Tp, Ta, Te, Tr);
   (void)fclose(jtr);
 #endif /* JTRACE */
   return (fint)sw;
