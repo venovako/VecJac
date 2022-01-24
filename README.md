@@ -19,8 +19,15 @@ make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|stri
 ```
 where ``COMPILER`` should be set to ``x64`` for Xeons (not tested), or to ``x200`` for Xeon Phi KNLs, respectively.
 Here, ``NDEBUG`` should be set to the desired optimization level (``3`` is a sensible choice).
-As a hack, setting *explicitly* ``MKL`` to ``sequential`` turns off OpenMP (otherwise it is turned on, unless debugging).
-Other options should not be used unless the consequences are fully understood.
+As a hack, setting ``MKL`` *explicitly* to ``sequential`` turns off OpenMP (otherwise it is turned on, unless debugging).
+Other options should not be used unless their consequences are fully understood.
 For example, ``make COMPILER=x200 NDEBUG=3 clean all`` will trigger a full, release-mode rebuild for the KNLs.
+
+## Running
+
+The ``etc`` subdirectory contains a script that should be sourced *before* launching the executables.
+The script should be modified for any Linux distribution different from RedHat/CentOS 7.
+On newer Intel Xeon CPUs it should probably be sufficient to query the CPUID leaf ``0x15`` for the TSC frequency in run-time.
+The OpenMP-enabled executables require setting ``OMP_NUM_THREADS`` environment variable for the upper bound on the number of threads to be used.
 
 This work has been supported in part by Croatian Science Foundation under the project IP-2014-09-3670 ([MFBDA](https://web.math.pmf.unizg.hr/mfbda/)).

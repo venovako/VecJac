@@ -3,7 +3,7 @@ if [ -n "${TSC_FREQ_kHZ}" ]
 then
     unset TSC_FREQ_kHZ
 fi
-# A dirty hack to get the TSC frequency (works on CentOS 7)...
+# A dirty hack to get the TSC frequency on KNLs (works on CentOS 7)...
 if [ `if [ -r /etc/redhat-release ]; then grep -c 'release 7' /etc/redhat-release; else echo 0; fi` = 1 ]
 then
     TSC_FREQ_kHZ=`dmesg | grep 'TSC clocksource calibration' | cut -d':' -f3 | cut -d' ' -f2 | sed 's/\.//g'`
