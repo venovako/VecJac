@@ -177,6 +177,11 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           return -22;
         M = scalbn(M, sN);
         sT += sN;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(l1,n)
+#endif /* _OPENMP */
+        for (fnat i = 0u; i < *n; ++i)
+          l1[i] = 1.0;
 #ifdef JTRACE
         (void)fprintf(jtr, "%#.17e\n", M);
         (void)fflush(jtr);
@@ -425,28 +430,28 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           double *const Gr_p = Gr + _p * (*ldGr);
           double *const Gr_q = Gr + _q * (*ldGr);
           if (_m = dswp_(m, Gr_p, Gr_q)) {
-            a21i[i] = _m;
+            a21i[i] = (double)_m;
             nM = HUGE_VAL;
             continue;
           }
           double *const Gi_p = Gi + _p * (*ldGi);
           double *const Gi_q = Gi + _q * (*ldGi);
           if (_m = dswp_(m, Gi_p, Gi_q)) {
-            a21i[i] = _m;
+            a21i[i] = (double)_m;
             nM = HUGE_VAL;
             continue;
           }
           double *const Vr_p = Vr + _p * (*ldVr);
           double *const Vr_q = Vr + _q * (*ldVr);
           if (_n = dswp_(n, Vr_p, Vr_q)) {
-            a21i[i] = _n;
+            a21i[i] = (double)_n;
             nM = HUGE_VAL;
             continue;
           }
           double *const Vi_p = Vi + _p * (*ldVi);
           double *const Vi_q = Vi + _q * (*ldVi);
           if (_n = dswp_(n, Vi_p, Vi_q)) {
-            a21i[i] = _n;
+            a21i[i] = (double)_n;
             nM = HUGE_VAL;
             continue;
           }
@@ -477,7 +482,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         else // no overflow
           nM = fmax(nM, a21i[i]);
         if (_m = zjrotf_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_c, &_cat, &_sat)) {
-          a21i[i] = _m;
+          a21i[i] = (double)_m;
           nM = HUGE_VAL;
           continue;
         }

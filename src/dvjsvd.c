@@ -160,6 +160,11 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           return -18;
         M = scalbn(M, sN);
         sT += sN;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(l1,n)
+#endif /* _OPENMP */
+        for (fnat i = 0u; i < *n; ++i)
+          l1[i] = 1.0;
 #ifdef JTRACE
         (void)fprintf(jtr, "%#.17e\n", M);
         (void)fflush(jtr);
@@ -393,14 +398,14 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           double *const Gp = G + _p * (*ldG);
           double *const Gq = G + _q * (*ldG);
           if (_m = dswp_(m, Gp, Gq)) {
-            w[i] = _m;
+            w[i] = (double)_m;
             nM = HUGE_VAL;
             continue;
           }
           double *const Vp = V + _p * (*ldV);
           double *const Vq = V + _q * (*ldV);
           if (_n = dswp_(n, Vp, Vq)) {
-            w[i] = _n;
+            w[i] = (double)_n;
             nM = HUGE_VAL;
             continue;
           }
@@ -430,7 +435,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         else // no overflow
           nM = fmax(nM, w[i]);
         if (_m = djrotf_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_c, &_at)) {
-          w[i] = _m;
+          w[i] = (double)_m;
           nM = HUGE_VAL;
           continue;
         }
