@@ -2,11 +2,13 @@
 #include "timer.h"
 #include "vec.h"
 
+extern void dnssvj_(const char *const, const char *const, const char *const, const fint *const, const fint *const, double *const, const fint *const, double *const, const fint *const, double *const, const fint *const, double *const, const fint *const, const fint *const, fint *const);
+
 int main(int argc, char *argv[])
 {
   (void)set_cbwr();
 
-  if (argc != 4)
+  if ((argc < 4) || (argc > 5))
     goto err;
 
   const fint m = (fint)atoz(argv[1u]);
@@ -18,6 +20,7 @@ int main(int argc, char *argv[])
   const char *const bn = argv[3u];
   if (!*bn)
     goto err;
+  const fint nsweep = ((argc == 5) ? (fint)atoz(argv[4u]) : (fint)0);
 
   const fint ldG = m;
   double *const G = (double*)aligned_alloc(VA, (ldG * (n * sizeof(double))));
@@ -51,12 +54,10 @@ int main(int argc, char *argv[])
   unsigned rd[2u] = { 0u, 0u };
   const uint64_t hz = tsc_get_freq_hz_(rd);
   const uint64_t b = rdtsc_beg(rd);
-  LAPACK_D(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &info);
-  while (info > 0) {
-    const fint swp = (fint)(work[3u]);
-    LAPACK_D(gesvj)("G", "U", "A", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &info);
-    work[3u] += swp;
-  }
+  if (nsweep)
+    dnssvj_("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &nsweep, &info);
+  else
+    LAPACK_D(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &info);
   const uint64_t e = rdtsc_end(rd);
 
   (void)fprintf(stdout, "\"%s\",%4lld,%4lld,%1lld,%15.9Lf,%#.17e,%4lld,%4lld,%3lld,%#.17e,%#.17e\n", bn, m, n, info, tsc_lap(hz, b, e), work[0u], (fint)(work[1u]), (fint)(work[2u]), (fint)(work[3u]), work[4u], work[5u]);
@@ -114,6 +115,6 @@ int main(int argc, char *argv[])
   return EXIT_SUCCESS;
 
  err:
-  (void)fprintf(stderr, "%s M N BaseName\n", *argv);
+  (void)fprintf(stderr, "%s M N BaseName [NSWEEP]\n", *argv);
   return EXIT_FAILURE;
 }
