@@ -5,7 +5,7 @@
 #include "dnorm2.h"
 #include "dznrm2.h"
 #include "ddpscl.h"
-#include "dgsscl.h"
+//#include "dgsscl.h"
 #include "dbjac2.h"
 #include "djrotf.h"
 #include "djrot.h"
@@ -317,7 +317,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           register const VD _gst = _mm512_set1_pd(gst);
           // might not yet be sorted, so check both cases
           pc[j] |= (MD2U(_mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a22), _a11)) << VDL);
-          pc[j] |= (MD2U(_mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a11), _a22)) << VDL);
+          pc[j] |= (MD2U(_mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a11), _a22)) << VDL2);
 #endif /* DGSSCL_H */
           // Grammian pre-scaling into the double precision range
           register const VD f1 = _mm512_load_pd(l1 + i);
@@ -368,7 +368,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
-        unsigned gs = ((pc[j] & 0xFF00u) >> VDL);
+        unsigned gsp = ((pc[j] & 0xFF0000u) >> VDL2);
+        unsigned gsn = ((pc[j] & 0xFF00u) >> VDL);
         unsigned trans = (pc[j] & 0xFFu);
         unsigned perm = (p[j] & 0xFFu);
         for (fnat k = 0u; k < VDL; ++k) {
@@ -378,14 +379,12 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const uint64_t _q = r[pq + 1u];
           *(uint64_t*)(a11 + l) = _p;
           *(uint64_t*)(a22 + l) = _q;
-          if (gs & 1u) {
-            if (perm & 1u) {
-              a21[l] = -3.0;
-              ++np;
-            }
-            else // no swap
-              a21[l] = 3.0;
+          if (gsp & 1u) {
+            a21[l] = -3.0;
+            ++np;
           }
+          else if (gsn & 1u)
+            a21[l] = 3.0;
           else if (trans & 1u) {
             if (perm & 1u) {
               a21[l] = -2.0;
@@ -406,7 +405,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           }
           else // no swap
             a21[l] = 1.0;
-          gs >>= 1u;
+          gsp >>= 1u;
+          gsn >>= 1u;
           trans >>= 1u;
           perm >>= 1u;
         }

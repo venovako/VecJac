@@ -124,6 +124,12 @@
 #define VDL 8u
 #endif /* ?VDL */
 
+#ifdef VDL2
+#error VDL2 already defined
+#else /* !VDL2 */
+#define VDL2 16u
+#endif /* ?VDL2 */
+
 /* VDL - 1 */
 #ifdef VDL_1
 #error VDL_1 already defined
