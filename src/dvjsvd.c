@@ -135,7 +135,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
   // see LAPACK's DGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
-  const double gst = scalbn(tol, 1) * DBL_MAX;
+  const double gst = scalbn(tol, DBL_MAX_EXP);
   unsigned sw = 0u;
 
 #ifdef JTRACE
