@@ -5,7 +5,7 @@
 #include "dnorm2.h"
 #include "dznrm2.h"
 #include "ddpscl.h"
-//#include "dgsscl.h"
+#include "dgsscl.h"
 #include "dbjac2.h"
 #include "djrotf.h"
 #include "djrot.h"
@@ -135,7 +135,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
   // see LAPACK's DGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
-  const double gst = scalbn(tol, DBL_MAX_EXP);
+  const double gst = scalb(tol, DBL_MAX_FIN_EXP);
   unsigned sw = 0u;
 
 #ifdef JTRACE
