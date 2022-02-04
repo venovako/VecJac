@@ -315,7 +315,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           register VD _a11 = _mm512_load_pd(a11 + i);
           register VD _a22 = _mm512_load_pd(a22 + i);
           register const VD _gst = _mm512_set1_pd(gst);
+          // might not yet be sorted, so check both cases
           pc[j] |= (MD2U(_mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a22), _a11)) << VDL);
+          pc[j] |= (MD2U(_mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a11), _a22)) << VDL);
 #endif /* DGSSCL_H */
           // Grammian pre-scaling into the double precision range
           register const VD f1 = _mm512_load_pd(l1 + i);
