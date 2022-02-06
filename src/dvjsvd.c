@@ -441,11 +441,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           }
           else // no overflow
             nM = fmax(nM, w[i]);
-          _c = dgsscl_(&_n, &_at, (V + _p * (*ldV)), (V + _q * (*ldV)), e, f);
-          if (!(_c >= 0.0) || !(_c <= DBL_MAX)) {
-            w[i] = _c;
-            nM = HUGE_VAL;
-          }
+          // TODO: should V be transformed and how (very small \tan)?
           continue;
         }
         else
@@ -498,11 +494,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           }
           else // no overflow
             nM = fmax(nM, w[i]);
-          _c = dgsscl_(&_n, &_at, (V + _p * (*ldV)), (V + _q * (*ldV)), e, f);
-          if (!(_c >= 0.0) || !(_c <= DBL_MAX)) {
-            w[i] = _c;
-            nM = HUGE_VAL;
-          }
+          // TODO: should V be transformed and how (very small \tan)?          
           continue;
         }
 #endif /* DGSSCL_H */
