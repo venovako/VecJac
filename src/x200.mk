@@ -61,12 +61,11 @@ ifdef SLEEF
 LIBFLAGS += -DSCNRME_SEQRED -DDZNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF
 ifndef LAPACK
-LIBFLAGS += -DUSE_MKL
+LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
+endif # MKL
 ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
-LIBFLAGS += -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
-endif # MKL
 LDFLAGS=-L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
 ifdef SLEEF
 LDFLAGS += -L$(SLEEF)/lib64 -Wl,-rpath=$(SLEEF)/lib64 -lsleefquad
@@ -78,14 +77,14 @@ LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_inte
 endif # ?LAPACK
 LDFLAGS += $(LDG) -lpthread -lm -ldl -lmemkind
 CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
-FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads -assume ieee_fpe_flags
+FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads
 CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(subst -debug pubnames,,$(DBGFLAGS)) $(LIBFLAGS) $(CPUFLAGS) $(subst -no-ftz,,$(FPUFLAGS))
 ifdef NDEBUG
 CFLAGS += -w3
 CXXFLAGS += -w3
 else # DEBUG
 CFLAGS += -check=stack,uninit -w3
-FFLAGS += -check all
+FFLAGS += -check all -assume ieee_fpe_flags
 CXXFLAGS += -fcheck=stack,uninit -w3
 endif # ?NDEBUG
 ifeq ($(ABI),ilp64)

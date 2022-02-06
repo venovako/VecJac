@@ -1,5 +1,12 @@
 #include "laev2.h"
 
+#ifndef USE_MKL
+extern void LAPACK_S(laev2)(const float *const A, const float *const B, const float *const C, float *const RT1, float *const RT2, float *const CS1, float *const SN1);
+extern void LAPACK_D(laev2)(const double *const A, const double *const B, const double *const C, double *const RT1, double *const RT2, double *const CS1, double *const SN1);
+extern void LAPACK_C(laev2)(const float complex *const A, const float complex *const B, const float complex *const C, float *const RT1, float *const RT2, float *const CS1, float complex *const SN1);
+extern void LAPACK_Z(laev2)(const double complex *const A, const double complex *const B, const double complex *const C, double *const RT1, double *const RT2, double *const CS1, double complex *const SN1);
+#endif /* !USE_MKL */
+
 void slevd2(const float a11, const float a22, const float a21, float l1[static restrict 1], float l2[static restrict 1], float cs1[static restrict 1], float sn1[static restrict 1])
 {
   LAPACK_S(laev2)(&a11, &a21, &a22, l1, l2, cs1, sn1);

@@ -68,12 +68,11 @@ ifdef SLEEF
 LIBFLAGS += -DSCNRME_SEQRED -DDZNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF
 ifndef LAPACK
-LIBFLAGS += -DUSE_MKL
+LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
+endif # MKL
 ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
-LIBFLAGS += -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
-endif # MKL
 LDFLAGS=-L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
 ifdef SLEEF
 ifdef ($(ARCH),Darwin)
@@ -97,7 +96,7 @@ LIBFLAGS += -static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
 endif # Linux
 LDFLAGS += $(LDG) -lpthread -lm -ldl
 CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
-FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads -assume ieee_fpe_flags
+FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads
 CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS)
 ifeq ($(ARCH),Darwin)
 CXXFLAGS += $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
@@ -109,7 +108,7 @@ CFLAGS += -w3
 CXXFLAGS += -w3
 else # DEBUG
 CFLAGS += -check=stack,uninit -w3
-FFLAGS += -check all
+FFLAGS += -check all -assume ieee_fpe_flags
 ifeq ($(ARCH),Darwin)
 CXXFLAGS += -check=stack,uninit -w3
 else # Linux

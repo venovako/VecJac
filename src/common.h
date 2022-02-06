@@ -12,7 +12,7 @@ extern __float128 __frexpq(__float128, int*);
 extern __float128 __hypotq(__float128, __float128);
 extern __float128 __scalbq(__float128, __float128);
 extern __float128 __invsqrtq(__float128);
-extern __float128 __sincosq(__float128, __float128*, __float128*);
+extern void __sincosq(__float128, __float128*, __float128*);
 extern __float128 __sqrtq(__float128);
 #endif /* !USE_EXTENDED */
 #else /* !__ICC */

@@ -2,6 +2,9 @@
 #include "timer.h"
 #include "vec.h"
 
+#ifndef USE_MKL
+extern void zgesvj_(const char *const, const char *const, const char *const, const fint *const, const fint *const, double complex *const, const fint *const, double *const, const fint *const, double complex *const, const fint *const, double complex *const, const fint *const, double *const, const fint *const, fint *const);
+#endif /* !USE_MKL */
 extern void znssvj_(const char *const, const char *const, const char *const, const fint *const, const fint *const, double complex *const, const fint *const, double *const, const fint *const, double complex *const, const fint *const, double complex *const, const fint *const, double *const, const fint *const, const fint *const, fint *const);
 
 int main(int argc, char *argv[])

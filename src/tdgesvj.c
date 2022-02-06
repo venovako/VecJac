@@ -2,6 +2,9 @@
 #include "timer.h"
 #include "vec.h"
 
+#ifndef USE_MKL
+extern void dgesvj_(const char *const, const char *const, const char *const, const fint *const, const fint *const, double *const, const fint *const, double *const, const fint *const, double *const, const fint *const, double *const, const fint *const, fint *const);
+#endif /* !USE_MKL */
 extern void dnssvj_(const char *const, const char *const, const char *const, const fint *const, const fint *const, double *const, const fint *const, double *const, const fint *const, double *const, const fint *const, double *const, const fint *const, const fint *const, fint *const);
 
 int main(int argc, char *argv[])
