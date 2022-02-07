@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       const wide CS = (wide)(c[i]);
-      const wide SN = (CS * at[i]);
+      const wide SN = (c[i] * at[i]);
       wide AE = W_ZERO, AN = W_ZERO;
       o = fmaxw(o, worr(CS, SN));
       r = fmaxw(r, wrer(a11[i], a22[i], a21[i], CS, SN, l1[i], l2[i], &AE, &AN));

@@ -158,8 +158,8 @@ int main(int argc, char *argv[])
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       const wide CS = (wide)(c[i]);
-      const wide SNR = (CS * cat[i]);
-      const wide SNI = (CS * sat[i]);
+      const wide SNR = (c[i] * cat[i]);
+      const wide SNI = (c[i] * sat[i]);
       wide AE = W_ZERO, AN = W_ZERO;
       o = fmaxw(o, worc(CS, SNR, SNI));
       r = fmaxw(r, wrec(a11[i], a22[i], a21r[i], a21i[i], CS, SNR, SNI, l1[i], l2[i], &AE, &AN));
