@@ -59,9 +59,9 @@ int main(int argc, char *argv[])
     (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
     return EXIT_FAILURE;
   }
-  fn[nl1] = 'r';
-  const int fr = open(fn, fm);
-  if (-1 >= fr) {
+  fn[nl1] = 'h';
+  const int fh = open(fn, fm);
+  if (-1 >= fh) {
     (void)fprintf(stderr, "Cannot open %s for reading!\n", fn);
     return EXIT_FAILURE;
   }
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
     const size_t jn = j * n;
 #ifdef _OPENMP
-#pragma omp parallel default(none) shared(ff,fg,fr,a11,a22,a21,n,n_t,cnt,jn)
+#pragma omp parallel default(none) shared(ff,fg,fh,a11,a22,a21,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
       const fint mt =
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
       if ((ssize_t)cnt != pread(fg, (a22 + tnt), cnt, off))
         exit(EXIT_FAILURE);
-      if ((ssize_t)cnt != pread(fr, (a21 + tnt), cnt, off))
+      if ((ssize_t)cnt != pread(fh, (a21 + tnt), cnt, off))
         exit(EXIT_FAILURE);
     }
     (void)fprintf(stdout, ",");
@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
   (void)fprintf(stderr, "max(#threads) = %u\n", (unsigned)th);
   (void)fflush(stderr);
 
-  (void)close(fr);
+  (void)close(fh);
   (void)close(fg);
   (void)close(ff);
   (void)close(fl);

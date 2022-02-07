@@ -150,40 +150,42 @@ void dsym2rand_(const size_t n[static restrict 1], double l1[static restrict 1],
   }
 }
 
-void cher2rand_(const size_t n[static restrict 1], float l1[static restrict 1], float l2[static restrict 1], float f[static restrict 1], float g[static restrict 1], float hr[static restrict 1], float hi[static restrict 1])
+void cher2rand_(const size_t n[static restrict 1], float l1[static restrict 1], float l2[static restrict 1], float f[static restrict 1], float g[static restrict 1], float hr[static restrict 1], float hi[static restrict 1], float hs[static restrict 1])
 {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,caub,l1,l2,f,g,hr,hi)
+#pragma omp parallel for default(none) shared(n,caub,l1,l2,f,g,hr,hi,hs)
 #endif /* _OPENMP */
   for (size_t i = (size_t)0u; i < *n; ++i) {
-    wide w1, w2, t, c, r, j, h;
-    w1 = l1[i] = sfrand(caub);
-    w2 = l2[i] = sfrand(caub);
-    wu2rand(&t, &c, &r, &j);
-    h = (t * (w1 - w2)) / c;
+    wide t, c, r, j;
+    const wide w1 = l1[i] = sfrand(caub);
+    const wide w2 = l2[i] = sfrand(caub);
+    const double m = wu2rand(&t, &c, &r, &j);
+    const wide h = (t * (w1 - w2)) / c;
     hr[i] = (float)(r * h);
     hi[i] = (float)(j * h);
     t *= t;
     f[i] = (float)(fmaw(w2, t, w1) / c);
     g[i] = (float)(fmaw(w1, t, w2) / c);
+    hs[i] = (m ? -(float)h : (float)h);
   }
 }
 
-void zher2rand_(const size_t n[static restrict 1], double l1[static restrict 1], double l2[static restrict 1], double f[static restrict 1], double g[static restrict 1], double hr[static restrict 1], double hi[static restrict 1])
+void zher2rand_(const size_t n[static restrict 1], double l1[static restrict 1], double l2[static restrict 1], double f[static restrict 1], double g[static restrict 1], double hr[static restrict 1], double hi[static restrict 1], double hd[static restrict 1])
 {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,zaub,l1,l2,f,g,hr,hi)
+#pragma omp parallel for default(none) shared(n,zaub,l1,l2,f,g,hr,hi,hd)
 #endif /* _OPENMP */
   for (size_t i = (size_t)0u; i < *n; ++i) {
-    wide w1, w2, t, c, r, j, h;
-    w1 = l1[i] = dfrand(zaub);
-    w2 = l2[i] = dfrand(zaub);
-    wu2rand(&t, &c, &r, &j);
-    h = (t * (w1 - w2)) / c;
+    wide t, c, r, j;
+    const wide w1 = l1[i] = dfrand(zaub);
+    const wide w2 = l2[i] = dfrand(zaub);
+    const bool m = wu2rand(&t, &c, &r, &j);
+    const wide h = (t * (w1 - w2)) / c;
     hr[i] = (double)(r * h);
     hi[i] = (double)(j * h);
     t *= t;
     f[i] = (double)(fmaw(w2, t, w1) / c);
     g[i] = (double)(fmaw(w1, t, w2) / c);
+    hd[i] = (m ? -(double)h : (double)h);
   }
 }

@@ -96,12 +96,22 @@ static inline void wo2rand(wide t[static restrict 1], wide c[static restrict 1])
   *c = fmaw(*t, *t, W_ONE);
 }
 
-/* returns a tangent in [-1,1) and the corresponding secant squared */
+/* returns a tangent in [0,1) and the corresponding secant squared */
 /* r + I*j = cos(alpha) + I*sin(alpha); alpha in [-pi,pi) */
-static inline void wu2rand(wide t[static restrict 1], wide c[static restrict 1], wide r[static restrict 1], wide j[static restrict 1])
+static inline bool wu2rand(wide t[static restrict 1], wide c[static restrict 1], wide r[static restrict 1], wide j[static restrict 1])
 {
   wo2rand(t, c);
-  sincosw((w2rand() * W_PI), j, r);
+  // reduce the precision in the hope of getting 1-cos(alpha)^2 exact
+  *r = (double)w2rand();
+  *j = sqrtw(fmaw(-*r, *r, W_ONE));
+  // absorb the negative sign of tan(phi) into e^(alpha*I)
+  if (copysignw(W_ONE, *t) != W_ONE) {
+    *t = -*t;
+    *r = -*r;
+    *j = -*j;
+    return true;
+  }
+  return false;
 }
 
 extern fint gen_rand_(const size_t n[static restrict 1], const size_t s[static restrict 1], void *restrict r);
@@ -117,7 +127,7 @@ extern void dsym2rand_(const size_t n[static restrict 1], double l1[static restr
 /*                                                                       _   */
 /* [          c -exp(-a*I)s ] [ l1 0 ] [           c exp(-a*I)*s ] = [ f h ] */
 /* [ exp(a*I)*s           c ] [ 0 l2 ] [ -exp(a*I)*s           c ]   [ h g ] */
-extern void cher2rand_(const size_t n[static restrict 1], float l1[static restrict 1], float l2[static restrict 1], float f[static restrict 1], float g[static restrict 1], float hr[static restrict 1], float hi[static restrict 1]);
-extern void zher2rand_(const size_t n[static restrict 1], double l1[static restrict 1], double l2[static restrict 1], double f[static restrict 1], double g[static restrict 1], double hr[static restrict 1], double hi[static restrict 1]);
+extern void cher2rand_(const size_t n[static restrict 1], float l1[static restrict 1], float l2[static restrict 1], float f[static restrict 1], float g[static restrict 1], float hr[static restrict 1], float hi[static restrict 1], float hs[static restrict 1]);
+extern void zher2rand_(const size_t n[static restrict 1], double l1[static restrict 1], double l2[static restrict 1], double f[static restrict 1], double g[static restrict 1], double hr[static restrict 1], double hi[static restrict 1], double hd[static restrict 1]);
 
 #endif /* !RND_H */
