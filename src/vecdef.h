@@ -46,9 +46,9 @@
 #error VSMULDIV already defined
 #else /* !VSMULDIV */
 #ifdef USE_SECANTS
-#define VSMULDIV(x,y) _mm512_mul_ps((x),(y))
-#else /* !USE_SECANTS */
 #define VSMULDIV(x,y) _mm512_div_ps((x),(y))
+#else /* !USE_SECANTS */
+#define VSMULDIV(x,y) _mm512_mul_ps((x),(y))
 #endif /* ?USE_SECANTS */
 #endif /* ?VSMULDIV */
 
@@ -95,9 +95,9 @@
 #error VDMULDIV already defined
 #else /* !VDMULDIV */
 #ifdef USE_SECANTS
-#define VDMULDIV(x,y) _mm512_mul_pd((x),(y))
-#else /* !USE_SECANTS */
 #define VDMULDIV(x,y) _mm512_div_pd((x),(y))
+#else /* !USE_SECANTS */
+#define VDMULDIV(x,y) _mm512_mul_pd((x),(y))
 #endif /* ?USE_SECANTS */
 #endif /* ?VDMULDIV */
 
