@@ -148,7 +148,8 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, ",");
     (void)fflush(stdout);
     be[0u] = rdtsc_beg(rd);
-    th = imax(th, zbjac2_((const fnat*)&n, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p));
+    const fint _n = -(fint)n;
+    th = imax(th, zbjac2_(&_n, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p));
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
@@ -158,8 +159,8 @@ int main(int argc, char *argv[])
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       const wide CS = (wide)(c[i]);
-      const wide SNR = (c[i] * cat[i]);
-      const wide SNI = (c[i] * sat[i]);
+      const wide SNR = (wide)(cat[i]);
+      const wide SNI = (wide)(sat[i]);
       wide AE = W_ZERO, AN = W_ZERO;
       o = fmaxw(o, worc(CS, SNR, SNI));
       r = fmaxw(r, wrec(a11[i], a22[i], a21r[i], a21i[i], CS, SNR, SNI, l1[i], l2[i], &AE, &AN));
