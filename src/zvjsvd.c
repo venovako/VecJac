@@ -360,7 +360,14 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       Ta += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
-      if (zbjac2i(&n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
+      const fint _n_2 =
+#ifdef USE_SECANTS
+        -(fint)n_2
+#else /* !USE_SECANTS */
+        (fint)n_2
+#endif /* ?USE_SECANTS */
+        ;
+      if (zbjac2i(&_n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
         return -26;
 #ifdef JTRACE
       Te += tsc_lap(hz, T, rdtsc_end(rd));

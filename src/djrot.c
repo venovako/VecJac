@@ -60,8 +60,8 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
         double *const yi = y + i;
         register const VD x_ = _mm512_load_pd(xi);
         register const VD y_ = _mm512_load_pd(yi);
-        register const VD x_r = _mm512_mul_pd(_mm512_fnmadd_pd(x_, t_, y_), c_);
-        register const VD y_r = _mm512_mul_pd(_mm512_fmadd_pd(y_, t_, x_), c_);
+        register const VD x_r = VDMULDIV(_mm512_fnmadd_pd(x_, t_, y_), c_);
+        register const VD y_r = VDMULDIV(_mm512_fmadd_pd(y_, t_, x_), c_);
         mx = _mm512_max_pd(mx, _mm512_max_pd(VDABS(x_r), VDABS(y_r)));
         _mm512_store_pd(xi, x_r);
         _mm512_store_pd(yi, y_r);
@@ -94,8 +94,8 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
         double *const yi = y + i;
         register const VD x_ = _mm512_load_pd(xi);
         register const VD y_ = _mm512_load_pd(yi);
-        register const VD x_r = _mm512_mul_pd(_mm512_fmadd_pd(y_, t_, x_), c_);
-        register const VD y_r = _mm512_mul_pd(_mm512_fnmadd_pd(x_, t_, y_), c_);
+        register const VD x_r = VDMULDIV(_mm512_fmadd_pd(y_, t_, x_), c_);
+        register const VD y_r = VDMULDIV(_mm512_fnmadd_pd(x_, t_, y_), c_);
         mx = _mm512_max_pd(mx, _mm512_max_pd(VDABS(x_r), VDABS(y_r)));
         _mm512_store_pd(xi, x_r);
         _mm512_store_pd(yi, y_r);

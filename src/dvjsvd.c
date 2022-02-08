@@ -356,7 +356,14 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       Ta += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
-      if (dbjac2i(&n_2, a11, a22, a21, c, at, l1, l2, p) < 0)
+      const fint _n_2 =
+#ifdef USE_SECANTS
+        -(fint)n_2
+#else /* !USE_SECANTS */
+        (fint)n_2
+#endif /* ?USE_SECANTS */
+        ;
+      if (dbjac2i(&_n_2, a11, a22, a21, c, at, l1, l2, p) < 0)
         return -21;
 #ifdef JTRACE
       Te += tsc_lap(hz, T, rdtsc_end(rd));

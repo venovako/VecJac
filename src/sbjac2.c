@@ -45,6 +45,7 @@ _mm512_store_ps((l2 + i), _mm512_scalef_ps(L2, es));                            
 p[i >> VSLlg] = MS2U(P)
 #endif /* ?S8JAC2_LOOP */
 
+// return the sines instead of the tangents
 #ifdef S8JACL_LOOP
 #error S8JACL_LOOP already defined
 #else /* !S8JACL_LOOP */

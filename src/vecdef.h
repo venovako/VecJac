@@ -42,6 +42,15 @@
     z = _mm512_mul_ps(z,M_);            \
   }
 #endif /* ?VSHYPOT */
+#ifdef VSMULDIV
+#error VSMULDIV already defined
+#else /* !VSMULDIV */
+#ifdef USE_SECANTS
+#define VSMULDIV(x,y) _mm512_mul_ps((x),(y))
+#else /* !USE_SECANTS */
+#define VSMULDIV(x,y) _mm512_div_ps((x),(y))
+#endif /* ?USE_SECANTS */
+#endif /* ?VSMULDIV */
 
 // assumes _zero = _mm512_set1_pd(-0.0)
 #ifdef VDABS
@@ -82,5 +91,14 @@
     z = _mm512_mul_pd(z,M_);            \
   }
 #endif /* ?VDHYPOT */
+#ifdef VDMULDIV
+#error VDMULDIV already defined
+#else /* !VDMULDIV */
+#ifdef USE_SECANTS
+#define VDMULDIV(x,y) _mm512_mul_pd((x),(y))
+#else /* !USE_SECANTS */
+#define VDMULDIV(x,y) _mm512_div_pd((x),(y))
+#endif /* ?USE_SECANTS */
+#endif /* ?VDMULDIV */
 
 #endif /* !VECDEF_H */
