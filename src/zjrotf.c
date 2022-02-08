@@ -84,14 +84,14 @@ fint zjrotf_(const fint n[static restrict 1], double xr[static restrict VDL], do
         register const VD y_i = _mm512_load_pd(yii);
 
         VZFMA(_r,_i,y_r,y_i,cta,sta,x_r,x_i);
-        register const VD yr_ = _mm512_mul_pd(_r, c_);
-        register const VD yi_ = _mm512_mul_pd(_i, c_);
+        register const VD yr_ = VDMULDIV(_r, c_);
+        register const VD yi_ = VDMULDIV(_i, c_);
         _mm512_store_pd(yri, yr_);
         _mm512_store_pd(yii, yi_);
 
         VZFMA(_r,_i,x_r,x_i,cna,sta,y_r,y_i);
-        register const VD xr_ = _mm512_mul_pd(_r, c_);
-        register const VD xi_ = _mm512_mul_pd(_i, c_);
+        register const VD xr_ = VDMULDIV(_r, c_);
+        register const VD xi_ = VDMULDIV(_i, c_);
         _mm512_store_pd(xri, xr_);
         _mm512_store_pd(xii, xi_);
       }
@@ -133,14 +133,14 @@ fint zjrotf_(const fint n[static restrict 1], double xr[static restrict VDL], do
         register const VD y_i = _mm512_load_pd(yii);
 
         VZFMA(_r,_i,y_r,y_i,cta,sta,x_r,x_i);
-        register const VD xr_ = _mm512_mul_pd(_r, c_);
-        register const VD xi_ = _mm512_mul_pd(_i, c_);
+        register const VD xr_ = VDMULDIV(_r, c_);
+        register const VD xi_ = VDMULDIV(_i, c_);
         _mm512_store_pd(xri, xr_);
         _mm512_store_pd(xii, xi_);
 
         VZFMA(_r,_i,x_r,x_i,cna,sta,y_r,y_i);
-        register const VD yr_ = _mm512_mul_pd(_r, c_);
-        register const VD yi_ = _mm512_mul_pd(_i, c_);
+        register const VD yr_ = VDMULDIV(_r, c_);
+        register const VD yi_ = VDMULDIV(_i, c_);
         _mm512_store_pd(yri, yr_);
         _mm512_store_pd(yii, yi_);
       }
