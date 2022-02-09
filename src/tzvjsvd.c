@@ -191,9 +191,9 @@ int main(int argc, char *argv[])
 #else /* !_OPENMP */
                 (j - 1l)
 #endif /* ?_OPENMP */
-                , m, n, ts, tj, o, tv, tg);
+                , (unsigned long long)m, (unsigned long long)n, ts, tj, (long long)o, tv, tg);
   (void)fflush(stdout);
 
-  free(js);
+  free((void*)js);
   return EXIT_SUCCESS;
 }

@@ -28,9 +28,7 @@ fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
 #endif /* !NDEBUG */
 
 #ifdef _OPENMP
-  fint t = 0;
-
-#pragma omp parallel for default(none) shared(m,n,A,ldA,Ar,ldAr,Ai,ldAi) reduction(max:t)
+#pragma omp parallel for default(none) shared(m,n,A,ldA,Ar,ldAr,Ai,ldAi)
   for (fnat j = 0u; j < *n; ++j) {
     register const VI idx = _mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0);
     const double complex *const Aj = A + j * (size_t)(*ldA);
@@ -41,13 +39,10 @@ fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
       _mm256_store_pd((Arj + i), _mm512_extractf64x4_pd(ri, 0x00u));
       _mm256_store_pd((Aij + i), _mm512_extractf64x4_pd(ri, 0x01u));
     }
-    t = imax(t, omp_get_thread_num());
   }
-
-  return (t + 1);
+  return 1;
 #else /* !_OPENMP */
   register const VI idx = _mm512_set_epi64(7, 5, 3, 1, 6, 4, 2, 0);
-
   for (fnat j = 0u; j < *n; ++j) {
     const double complex *const Aj = A + j * (size_t)(*ldA);
     double *const Arj = Ar + j * (size_t)(*ldAr);
@@ -58,7 +53,6 @@ fint zsplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
       _mm256_store_pd((Aij + i), _mm512_extractf64x4_pd(ri, 0x01u));
     }
   }
-
   return 0;
 #endif /* ?_OPENMP */
 }

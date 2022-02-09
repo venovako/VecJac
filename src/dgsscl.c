@@ -45,7 +45,7 @@ double dgsscl_(const fint m[static restrict 1], const double t[static restrict 1
   register VD M = _mm512_setzero_pd();
 
   if (*m < 0) { // transform x and permute
-    register const VD tf = _mm512_set1_pd(*t * (fx / fy));
+    register const VD tf = _mm512_set1_pd(-*t * (fx / fy));
     register const VD xe = _mm512_set1_pd(ex);
     const fnat _m = (fnat)-*m;
 

@@ -142,6 +142,9 @@ typedef __float128  wide;
 #include <omp.h>
 #endif /* _OPENMP */
 
+#ifdef BLAS_I
+#error BLAS_I already defined
+#endif /* BLAS_I */
 #ifdef BLAS_S
 #error BLAS_S already defined
 #endif /* BLAS_S */
@@ -173,24 +176,32 @@ typedef MKL_UINT fnat;
 #else /* !MKL_UINT */
 #error MKL_UINT not defined
 #endif /* !MKL_UINT */
+#define BLAS_I(name) i##name
 #define BLAS_S(name) s##name
 #define BLAS_D(name) d##name
 #define BLAS_C(name) c##name
 #define BLAS_Z(name) z##name
 #else /* some other Fortran-compatible BLAS */
+// take the same definitions as MKL
 #ifdef MKL_ILP64
-typedef  int64_t fint;
-typedef uint64_t fnat;
+typedef          long long fint;
+typedef unsigned long long fnat;
 #else /* LP64 */
-typedef  int32_t fint;
-typedef uint32_t fnat;
+typedef      int fint;
+typedef unsigned fnat;
 #endif /* ?MKL_ILP64 */
+#define BLAS_I(name) i##name##_
 #define BLAS_S(name) s##name##_
 #define BLAS_D(name) d##name##_
 #define BLAS_C(name) c##name##_
 #define BLAS_Z(name) z##name##_
 #endif /* ?USE_MKL */
 
+#ifdef LAPACK_I
+#error LAPACK_I already defined
+#else /* !LAPACK_I */
+#define LAPACK_I(name) i##name##_
+#endif /* ?LAPACK_I */
 #ifdef LAPACK_S
 #error LAPACK_S already defined
 #else /* !LAPACK_S */

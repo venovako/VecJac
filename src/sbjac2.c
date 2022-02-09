@@ -106,46 +106,34 @@ fint sbjac2_(const fint n[static restrict 1], const float a11[static restrict VS
   if (*n < 0) {
     const fnat _n = (fnat)-*n;
 #ifdef _OPENMP
-    fint th = 0;
-
-#pragma omp parallel for default(none) shared(_n,a11,a22,a21,c,at,l1,l2,p) reduction(max:th)
+#pragma omp parallel for default(none) shared(_n,a11,a22,a21,c,at,l1,l2,p)
     for (fnat i = 0u; i < _n; i += VSL) {
       S8JAC2_PARAMS;
       S8JACL_LOOP;
-      th = imax(th, omp_get_thread_num());
     }
-
-    return (th + 1);
+    return 1;
 #else /* !_OPENMP */
     S8JAC2_PARAMS;
-
     for (fnat i = 0u; i < _n; i += VSL) {
       S8JACL_LOOP;
     }
-
     return 0;
 #endif /* ?_OPENMP */
   }
   else {
     const fnat _n = (fnat)*n;
 #ifdef _OPENMP
-    fint th = 0;
-
-#pragma omp parallel for default(none) shared(_n,a11,a22,a21,c,at,l1,l2,p) reduction(max:th)
+#pragma omp parallel for default(none) shared(_n,a11,a22,a21,c,at,l1,l2,p)
     for (fnat i = 0u; i < _n; i += VSL) {
       S8JAC2_PARAMS;
       S8JAC2_LOOP;
-      th = imax(th, omp_get_thread_num());
     }
-
-    return (th + 1);
+    return 1;
 #else /* !_OPENMP */
     S8JAC2_PARAMS;
-
     for (fnat i = 0u; i < _n; i += VSL) {
       S8JAC2_LOOP;
     }
-
     return 0;
 #endif /* ?_OPENMP */
   }

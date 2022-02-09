@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 #else /* !_OPENMP */
                 (j - 1l)
 #endif /* ?_OPENMP */
-                , m, n, tsc_lap(hz, b, e), o);
+                , (unsigned long long)m, (unsigned long long)n, tsc_lap(hz, b, e), (long long)o);
   (void)fflush(stdout);
   free(iwork);
 
@@ -163,6 +163,6 @@ int main(int argc, char *argv[])
     return 12;
   free(G);
 
-  free(js);
+  free((void*)js);
   return EXIT_SUCCESS;
 }

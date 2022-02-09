@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
   fint lwork = -1;
   fint lrwork = -1;
   fint info = 0;
-  double complex cwork1[1u] = { CMPLX(0.0, 0.0) };
+  double complex cwork1[1u] = { 0.0 };
   double rwork1[1u] = { 1.0 };
   LAPACK_Z(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, cwork1, &lwork, rwork1, &lrwork, &info);
   if (info)
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     LAPACK_Z(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, cwork, &lwork, rwork, &lrwork, &info);
   const uint64_t e = rdtsc_end(rd);
 
-  (void)fprintf(stdout, "\"%s\",%4lld,%4lld,%1lld,%15.9Lf,%#.17e,%4lld,%4lld,%3lld,%#.17e,%#.17e\n", bn, m, n, info, tsc_lap(hz, b, e), rwork[0u], (fint)(rwork[1u]), (fint)(rwork[2u]), (fint)(rwork[3u]), rwork[4u], rwork[5u]);
+  (void)fprintf(stdout, "\"%s\",%4lld,%4lld,%1lld,%15.9Lf,%#.17e,%4lld,%4lld,%3lld,%#.17e,%#.17e\n", bn, (long long)m, (long long)n, (long long)info, tsc_lap(hz, b, e), rwork[0u], (long long)(rwork[1u]), (long long)(rwork[2u]), (long long)(rwork[3u]), rwork[4u], rwork[5u]);
   (void)fflush(stdout);
   *rwork1 = *rwork;
   free(rwork);

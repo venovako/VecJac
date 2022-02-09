@@ -10,8 +10,13 @@
   char * Platform;
  */
 
+#ifndef USE_MKL
+extern void LAPACK_I(laver)(fint major[static restrict 1], fint minor[static restrict 1], fint patch[static restrict 1]);
+#endif /* !USE_MKL */
+
 int main(int argc, char *argv[])
 {
+#ifdef USE_MKL
   if (argc != 2)
     goto err;
   const char c = (char)toupper(argv[1u][0u]);
@@ -57,4 +62,14 @@ int main(int argc, char *argv[])
  err:
   (void)fprintf(stderr, "%s { C | V }\n", *argv);
   return EXIT_FAILURE;
+#else /* LAPACK */
+  if (argc != 1) {
+    (void)fprintf(stderr, "%s\n", *argv);
+    return EXIT_FAILURE;
+  }
+  fint major = 0, minor = 0, patch = 0;
+  LAPACK_I(laver)(&major, &minor, &patch);
+  (void)printf("LAPACK %lld.%lld.%lld\n", (long long)major, (long long)minor, (long long)patch);
+  return EXIT_SUCCESS;
+#endif /* ?USE_MKL */
 }

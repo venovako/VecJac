@@ -28,20 +28,15 @@ fint zscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   const double e_ = (double)*e;
 
 #ifdef _OPENMP
-  fint t = 0;
-
-#pragma omp parallel for default(none) shared(m,n,Ar,ldAr,e_) reduction(max:t)
+#pragma omp parallel for default(none) shared(m,n,Ar,ldAr,e_)
   DZSCAL_LOOP(Ar,ldAr);
-#pragma omp parallel for default(none) shared(m,n,Ai,ldAi,e_) reduction(max:t)
+#pragma omp parallel for default(none) shared(m,n,Ai,ldAi,e_)
   DZSCAL_LOOP(Ai,ldAi);
-
-  return (t + 1);
+  return 1;
 #else /* !_OPENMP */
   register const VD s = _mm512_set1_pd(e_);
-
   DZSCAL_LOOP(Ar,ldAr);
   DZSCAL_LOOP(Ai,ldAi);
-
   return 0;
 #endif /* ?_OPENMP */
 }

@@ -56,11 +56,7 @@ double complex zdpscl_(const fnat m[static restrict 1], const double xr[static r
 
   const double fx = f[0u];
   const double fy = f[1u];
-  alignas(16u) double complex z
-#ifndef NDEBUG
-    = CMPLX(0.0, 0.0)
-#endif /* !NDEBUG */
-    ;
+  alignas(16u) double complex z;
   _mm_store_pd((double*)&z, _mm_div_pd(_mm_set_pd(_mm512_reduce_add_pd(pi), _mm512_reduce_add_pd(pr)), _mm_set1_pd(fx * fy)));
   return z;
 }

@@ -13,7 +13,6 @@
       double *const Aij = Aj + i;                                     \
       _mm512_store_pd(Aij, _mm512_scalef_pd(_mm512_load_pd(Aij), s)); \
     }                                                                 \
-    t = imax(t, omp_get_thread_num());                                \
   }
 #else /* !_OPENMP */
 #define DZSCAL_LOOP(A,ldA)                                            \

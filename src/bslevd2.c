@@ -13,11 +13,11 @@ int main(int argc, char *argv[])
   }
 
   const size_t n = ((size_t)1u << atoz(argv[2u]));
-  fint th = 0;
+  int th = 0;
 #ifdef _OPENMP
   th = omp_get_max_threads();
   if (n % th) {
-    (void)fprintf(stderr, "batch_size has to be a multiple of %d.\n", (int)th);
+    (void)fprintf(stderr, "batch_size has to be a multiple of %d.\n", th);
     return EXIT_FAILURE;
   }
 #endif /* _OPENMP */
@@ -102,7 +102,6 @@ int main(int argc, char *argv[])
   const size_t n_t = n / imax(th, 1);
   const size_t cnt = n_t * sizeof(float);
   char a[31u] = { '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0' };
-  th = 0;
 
   for (size_t j = 0u; j < b; ++j) {
     (void)fprintf(stdout, bf, j);
@@ -112,7 +111,7 @@ int main(int argc, char *argv[])
 #pragma omp parallel default(none) shared(ff,fg,fh,a11,a22,a21,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
-      const fint mt =
+      const int mt =
 #ifdef _OPENMP
         omp_get_thread_num()
 #else /* !_OPENMP */
@@ -134,14 +133,10 @@ int main(int argc, char *argv[])
     uint64_t be[2u] = { UINT64_C(0), UINT64_C(0) };
     be[0u] = rdtsc_beg(rd);
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,a11,a22,a21,l1,l2,cs1,sn1) reduction(max:th)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21,l1,l2,cs1,sn1)
 #endif /* _OPENMP */
-    for (size_t i = 0u; i < n; ++i) {
-      slevd2(a11[i], a22[i], a21[i], (l1 + i), (l2 + i), (cs1 + i), (sn1 + i));
-#ifdef _OPENMP
-      th = imax(th, (omp_get_thread_num() + 1));
-#endif /* _OPENMP */
-    }
+    for (size_t i = 0u; i < n; ++i)
+      LAPACK_S(laev2)((a11 + i), (a22 + i), (a21 + i), (l1 + i), (l2 + i), (cs1 + i), (sn1 + i));
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
@@ -161,7 +156,7 @@ int main(int argc, char *argv[])
 #pragma omp parallel default(none) shared(fk,fl,cs1,sn1,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
-      const fint mt =
+      const int mt =
 #ifdef _OPENMP
         omp_get_thread_num()
 #else /* !_OPENMP */
@@ -194,8 +189,6 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, "%s\n", xtoa(a, (long double)m));
     (void)fflush(stdout);
   }
-  (void)fprintf(stderr, "max(#threads) = %u\n", (unsigned)th);
-  (void)fflush(stderr);
 
   (void)close(fh);
   (void)close(fg);

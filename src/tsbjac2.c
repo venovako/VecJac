@@ -15,11 +15,11 @@ int main(int argc, char *argv[])
     (void)fprintf(stderr, "batch_size has to be a multiple of %u.\n", VSL);
     return EXIT_FAILURE;
   }
-  fint th = 0;
+  int th = 0;
 #ifdef _OPENMP
   th = omp_get_max_threads();
   if (n % th) {
-    (void)fprintf(stderr, "batch_size has to be a multiple of %d.\n", (int)th);
+    (void)fprintf(stderr, "batch_size has to be a multiple of %d.\n", th);
     return EXIT_FAILURE;
   }
 #endif /* _OPENMP */
@@ -107,7 +107,6 @@ int main(int argc, char *argv[])
   const size_t n_t = n / imax(th, 1);
   const size_t cnt = n_t * sizeof(float);
   char a[31u] = { '\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0','\0' };
-  th = 0;
 
   for (size_t j = 0u; j < b; ++j) {
     (void)fprintf(stdout, bf, j);
@@ -117,7 +116,7 @@ int main(int argc, char *argv[])
 #pragma omp parallel default(none) shared(ff,fg,fh,a11,a22,a21,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
-      const fint mt =
+      const int mt =
 #ifdef _OPENMP
         omp_get_thread_num()
 #else /* !_OPENMP */
@@ -137,7 +136,7 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
     be[0u] = rdtsc_beg(rd);
     const fint _n = -(fint)n;
-    th = imax(th, sbjac2_(&_n, a11, a22, a21, c, at, l1, l2, p));
+    (void)sbjac2_(&_n, a11, a22, a21, c, at, l1, l2, p);
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);
@@ -159,7 +158,7 @@ int main(int argc, char *argv[])
 #pragma omp parallel default(none) shared(fk,fl,c,at,n,n_t,cnt,jn)
 #endif /* _OPENMP */
     {
-      const fint mt =
+      const int mt =
 #ifdef _OPENMP
         omp_get_thread_num()
 #else /* !_OPENMP */
@@ -192,8 +191,6 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, "%s\n", xtoa(a, (long double)m));
     (void)fflush(stdout);
   }
-  (void)fprintf(stderr, "max(#threads) = %u\n", (unsigned)th);
-  (void)fflush(stderr);
 
   (void)close(fh);
   (void)close(fg);

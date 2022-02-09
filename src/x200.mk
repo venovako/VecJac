@@ -19,7 +19,9 @@ AR=xiar
 ARFLAGS=-qnoipo -lib rsv
 CC=icc
 FC=ifort
+ifdef SLEEF
 CXX=icpx
+endif # SLEEF
 CPUFLAGS=-DKNL -fPIC -fexceptions -fno-omit-frame-pointer -rdynamic
 ifdef NDEBUG
 ifdef MKL
@@ -31,11 +33,6 @@ CPUFLAGS += -qopenmp
 endif # ?MKL
 SUFX=-$(ABI)_$(NDEBUG)$(WP)
 else # DEBUG
-ifdef MKL
-ifeq ($(MKL),intel_thread)
-LDG=-liomp5
-endif # intel_thread
-endif # MKL
 SUFX=-$(ABI)_$(DEBUG)$(WP)
 endif # ?NDEBUG
 ifndef MKL
@@ -58,7 +55,7 @@ FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
 LIBFLAGS=-static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -I. -I../../JACSD/jstrat
 ifdef SLEEF
-LIBFLAGS += -DSCNRME_SEQRED -DDZNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
+LIBFLAGS += -DDZNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
@@ -75,18 +72,30 @@ LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas -lifcoremt
 else # MKL
 LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_intel_$(ABI) -lmkl_sequential -lmkl_core
 endif # ?LAPACK
-LDFLAGS += $(LDG) -lpthread -lm -ldl -lmemkind
+ifdef MKL
+ifeq ($(MKL),intel_thread)
+ifeq ($(findstring qopenmp,$(CPUFLAGS)),)
+LDFLAGS += -liomp5
+endif # ?qopenmp
+endif # intel_thread
+endif # MKL
+LDFLAGS += -lpthread -lm -ldl -lmemkind
 CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
 FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads
-CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(subst -debug pubnames,,$(DBGFLAGS)) $(LIBFLAGS) $(CPUFLAGS) $(subst -no-ftz,,$(FPUFLAGS))
 ifdef NDEBUG
 CFLAGS += -w3
-CXXFLAGS += -w3
 else # DEBUG
 CFLAGS += -check=stack,uninit -w3
 FFLAGS += -check all -assume ieee_fpe_flags
+endif # ?NDEBUG
+ifdef SLEEF
+CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(subst -debug pubnames,,$(DBGFLAGS)) $(LIBFLAGS) $(CPUFLAGS) $(subst -no-ftz,,$(FPUFLAGS))
+ifdef NDEBUG
+CXXFLAGS += -w3
+else # DEBUG
 CXXFLAGS += -fcheck=stack,uninit -w3
 endif # ?NDEBUG
+endif # SLEEF
 ifeq ($(ABI),ilp64)
 FFLAGS += -i8
 endif # ilp64

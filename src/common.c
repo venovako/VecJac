@@ -9,18 +9,18 @@ static_assert(sizeof(fint) == 4, "sizeof(fint) != 4");
 static_assert(sizeof(fnat) == 4, "sizeof(fnat) != 4");
 #endif /* ?MKL_ILP64 */
 static_assert(sizeof(float) == 4, "sizeof(float) != 4");
+static_assert(sizeof(float complex) == 8, "sizeof(float complex) != 8");
+static_assert(alignof(float complex) == alignof(float), "alignof(float complex) != alignof(float)");
 static_assert(sizeof(double) == 8, "sizeof(double) != 8");
+static_assert(sizeof(double complex) == 16, "sizeof(double complex) != 16");
+static_assert(alignof(double complex) == alignof(double), "alignof(double complex) != alignof(double)");
 static_assert(sizeof(long double) >= 8, "sizeof(long double) < 8");
-#ifndef NDEBUG
-static_assert(sizeof(float _Complex) == 8, "sizeof(float _Complex) != 8");
-static_assert(sizeof(double _Complex) == 16, "sizeof(double _Complex) != 16");
-static_assert(sizeof(long double _Complex) >= 16, "sizeof(long double _Complex) < 16");
-#endif /* !NDEBUG */
+static_assert(sizeof(long double complex) >= 16, "sizeof(long double complex) < 16");
+static_assert(alignof(long double complex) == alignof(long double), "alignof(long double complex) != alignof(long double)");
 #ifndef USE_EXTENDED
 static_assert(sizeof(__float128) == 16, "sizeof(__float128) != 16");
-#ifndef NDEBUG
-static_assert(sizeof(__float128 _Complex) == 32, "sizeof(__float128 _Complex) != 32");
-#endif /* !NDEBUG */
+static_assert(sizeof(__float128 complex) == 32, "sizeof(__float128 complex) != 32");
+static_assert(alignof(__float128 complex) == alignof(__float128), "alignof(__float128 complex) != alignof(__float128)");
 #endif /* !USE_EXTENDED */
 
 size_t atoz(const char *const s)
