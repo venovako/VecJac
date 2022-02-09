@@ -22,7 +22,7 @@ fint dscale_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   const double e_ = (double)*e;
 
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,A,ldA,e_) reduction(max:t)
+#pragma omp parallel for default(none) shared(m,n,A,ldA,e_)
   DZSCAL_LOOP(A,ldA);
   return 1;
 #else /* !_OPENMP */
