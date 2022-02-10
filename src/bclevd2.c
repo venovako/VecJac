@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
     (void)fflush(stdout);
 #ifdef TEST_ORT
-    size_t ix = 0u;
+    size_t ix = n;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,o,w) reduction(min:ix)
 #endif /* _OPENMP */
@@ -188,10 +188,10 @@ int main(int argc, char *argv[])
     (void)fprintf(stderr, "%s,", stoa(a, a11[ix]));
     (void)fprintf(stderr, "%s,", stoa(a, a22[ix]));
     (void)fprintf(stderr, "(%s,", stoa(a, a21r[ix]));
-    (void)fprintf(stderr, "%s,);", stoa(a, a21i[ix]));
+    (void)fprintf(stderr, "%s);", stoa(a, a21i[ix]));
     (void)fprintf(stderr, "%s,", stoa(a, cs1[ix]));
     (void)fprintf(stderr, "(%s,", stoa(a, snr[ix]));
-    (void)fprintf(stderr, "%s,);", stoa(a, sni[ix]));
+    (void)fprintf(stderr, "%s);", stoa(a, sni[ix]));
     (void)fprintf(stderr, "%s,", stoa(a, l1[ix]));
     (void)fprintf(stderr, "%s\n", stoa(a, l2[ix]));
     (void)fflush(stderr);

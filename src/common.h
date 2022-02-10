@@ -12,7 +12,6 @@ extern __float128 __fminq(__float128, __float128);
 extern __float128 __frexpq(__float128, int*);
 extern __float128 __hypotq(__float128, __float128);
 extern __float128 __scalbq(__float128, __float128);
-extern __float128 __invsqrtq(__float128);
 extern __float128 __sqrtq(__float128);
 #endif /* !USE_EXTENDED */
 #else /* !__ICC */
@@ -57,9 +56,6 @@ extern __float128 __sqrtq(__float128);
 #ifdef scalbw
 #error scalbw already defined
 #endif /* scalbw */
-#ifdef invsqrtw
-#error invsqrtw already defined
-#endif /* invsqrtw */
 #ifdef sqrtw
 #error sqrtw already defined
 #endif /* sqrtw */
@@ -70,9 +66,6 @@ extern __float128 __sqrtq(__float128);
 #ifdef W_ZERO
 #error W_ZERO already defined
 #endif /* W_ZERO */
-#ifdef W_MONE
-#error W_MONE already defined
-#endif /* W_MONE */
 #ifdef W_SQRT2
 #error W_SQRT2 already defined
 #endif /* W_SQRT2 */
@@ -90,11 +83,9 @@ typedef long double wide;
 #define frexpw      frexpl
 #define hypotw      hypotl
 #define scalbw      scalbl
-#define invsqrtw    invsqrtl
 #define sqrtw       sqrtl
 #define W_ONE        1.0L
 #define W_ZERO       0.0L
-#define W_MONE      -1.0L
 #define W_SQRT2      1.4142135623730950488016887242097L
 #define CMPLXW(r,i) CMPLXL((r),(i))
 #else /* USE_QUAD */
@@ -107,11 +98,9 @@ typedef __float128  wide;
 #define frexpw      __frexpq
 #define hypotw      __hypotq
 #define scalbw      __scalbq
-#define invsqrtw    __invsqrtq
 #define sqrtw       __sqrtq
 #define W_ONE        1.0q
 #define W_ZERO       0.0q
-#define W_MONE      -1.0q
 #define W_SQRT2      1.4142135623730950488016887242097q
 #define CMPLXW(r,i) ((wide)(r) + I * (wide)(i))
 #endif /* ?USE_EXTENDED */

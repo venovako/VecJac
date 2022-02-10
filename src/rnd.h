@@ -102,7 +102,11 @@ static inline bool wu2rand(wide t[static restrict 1], wide c[static restrict 1],
 {
   wo2rand(t, c);
   // reduce the precision in the hope of getting 1-cos(alpha)^2 exact
+#ifdef USE_EXTENDED
+  *r = (float)w2rand();
+#else /* !USE_EXTENDED */
   *r = (double)w2rand();
+#endif /* ?USE_EXTENDED */
   *j = sqrtw(fmaw(-*r, *r, W_ONE));
   // absorb the negative sign of tan(phi) into e^(alpha*I)
   if (copysignw(W_ONE, *t) != W_ONE) {
