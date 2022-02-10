@@ -135,8 +135,13 @@ int main(int argc, char *argv[])
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,a11,a22,a21,l1,l2,cs1,sn1)
 #endif /* _OPENMP */
-    for (size_t i = 0u; i < n; ++i)
-      LAPACK_D(laev2)((a11 + i), (a22 + i), (a21 + i), (l1 + i), (l2 + i), (cs1 + i), (sn1 + i));
+    for (size_t i = 0u; i < n; ++i) {
+#ifdef USE_INL
+      _dlaev2((a11 + i), (a21 + i), (a22 + i), (l1 + i), (l2 + i), (cs1 + i), (sn1 + i));
+#else /* !USE_INL */
+      LAPACK_D(laev2)((a11 + i), (a21 + i), (a22 + i), (l1 + i), (l2 + i), (cs1 + i), (sn1 + i));
+#endif /* ?USE_INL */
+    }
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);

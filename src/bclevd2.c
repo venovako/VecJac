@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 #pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,l1,l2,cs1,snr,sni)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i)
-      clevd2((a11 + i), (a22 + i), (a21r + i), (a21i + i), (l1 + i), (l2 + i), (cs1 + i), (snr + i), (sni + i));
+      _claev2((a11 + i), (a21r + i), (a21i + i), (a22 + i), (l1 + i), (l2 + i), (cs1 + i), (snr + i), (sni + i));
     be[1u] = rdtsc_end(rd);
     (void)fprintf(stdout, "%15.9Lf,", tsc_lap(hz, be[0u], be[1u]));
     (void)fflush(stdout);

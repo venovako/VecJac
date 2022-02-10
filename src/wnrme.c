@@ -80,7 +80,7 @@ static wide waec(const wide a11, const wide a22, const wide a21r, const wide a21
 
 // relative error checkers
 
-// return || U L U^T  - A ||_F / || A ||_F
+// return || U L U^T - A ||_F / || A ||_F
 wide wrer(const wide a11, const wide a22, const wide a21, const wide cs, const wide sn, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1])
 {
   *ae = waer(a11, a22, a21, cs, sn, l1, l2);
