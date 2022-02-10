@@ -16,17 +16,17 @@ wide wnrmec(const wide a11, const wide a22, const wide a21r, const wide a21i)
 
 // orthogonality checkers
 
-// return cos^2 + sin^2 - 1
+// return |cos^2 + sin^2 - 1|
 wide worr(const wide cs, const wide sn)
 {
-  return fmaw((sn + W_ONE), (sn - W_ONE), (cs * cs));
+  return fabsw(fmaw((sn + W_ONE), (sn - W_ONE), (cs * cs)));
 }
 
-// return cos^2 + |sin|^2 - 1
+// return |cos^2 + |sin|^2 - 1|
 wide worc(const wide cs, const wide ca, const wide sa)
 {
   const wide _s = hypotw(ca, sa);
-  return fmaw((_s + W_ONE), (_s - W_ONE), (cs * cs));
+  return fabsw(fmaw((_s + W_ONE), (_s - W_ONE), (cs * cs)));
 }
 
 // absolute error checkers
