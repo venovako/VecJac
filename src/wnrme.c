@@ -5,7 +5,7 @@
 // return || A ||_F
 wide wnrmer(const wide a11, const wide a22, const wide a21)
 {
-  return hypotw(hypotw(a11, a22), hypotw(a21, a21));
+  return hypotw(hypotw(a11, a22), (W_SQRT2 * a21));
 }
 
 // return || A ||_F
@@ -34,33 +34,53 @@ wide worc(const wide cs, const wide ca, const wide sa)
 // return || U L U^T - A ||_F
 static wide waer(const wide a11, const wide a22, const wide a21, const wide cs, const wide sn, const wide l1, const wide l2)
 {
-  const wide c2 = cs * cs;
-  const wide t = sn / cs;
-  const wide t2 = t * t;
-  const wide l = l1 - l2;
-  const wide tl = t * l;
-  return wnrmer(fmaw(c2, fmaw(l2, t2, l1), -a11), fmaw(c2, fmaw(l1, t2, l2), -a22), fmaw(c2, tl, -a21));
+  wide d11, d22;
+  if (fabsw(cs) >= fabsw(sn)) {
+    const wide t = sn / cs;
+    const wide t2 = t * t;
+    const wide c2 = cs * cs;
+    d11 = fmaw(fmaw(l2, t2, l1), c2, -a11);
+    d22 = fmaw(fmaw(l1, t2, l2), c2, -a22);
+  }
+  else {
+    const wide g = cs / sn;
+    const wide g2 = g * g;
+    const wide s2 = sn * sn;
+    d11 = fmaw(fmaw(l1, g2, l2), s2, -a11);
+    d22 = fmaw(fmaw(l2, g2, l1), s2, -a22);
+  }
+  const wide d21 = fmaw((l1 - l2), (cs * sn), -a21);
+  return wnrmer(d11, d22, d21);
 }
 
 // return || U L U^H - A ||_F
-static wide waec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide cs, wide ca, wide sa, const wide l1, const wide l2)
+static wide waec(const wide a11, const wide a22, const wide a21r, const wide a21i, const wide cs, const wide ca, const wide sa, const wide l1, const wide l2)
 {
-  const wide c2 = cs * cs;
-  const wide sn = hypotw(ca, sa);
-  if (sn != W_ZERO) {
-    ca /= sn;
-    sa /= sn;
+  const wide _s = hypotw(ca, sa);
+  wide d11, d22;
+  if (fabsw(cs) >= _s) {
+    const wide t = _s / cs;
+    const wide t2 = t * t;
+    const wide c2 = cs * cs;
+    d11 = fmaw(fmaw(l2, t2, l1), c2, -a11);
+    d22 = fmaw(fmaw(l1, t2, l2), c2, -a22);
   }
-  const wide t = sn / cs;
-  const wide t2 = t * t;
+  else {
+    const wide g = cs / _s;
+    const wide g2 = g * g;
+    const wide s2 = _s * _s;
+    d11 = fmaw(fmaw(l1, g2, l2), s2, -a11);
+    d22 = fmaw(fmaw(l2, g2, l1), s2, -a22);
+  }
   const wide l = l1 - l2;
-  const wide tl = t * l;
-  return wnrmec(fmaw(c2, fmaw(l2, t2, l1), -a11), fmaw(c2, fmaw(l1, t2, l2), -a22), fmaw(c2, (ca * tl), -a21r), fmaw(c2, (sa * tl), -a21i));
+  const wide d21r = fmaw(l, (cs * ca), -a21r);
+  const wide d21i = fmaw(l, (cs * sa), -a21i);
+  return wnrmec(d11, d22, d21r, d21i);
 }
 
 // relative error checkers
 
-// return || U L U^T - A ||_F / || A ||_F
+// return || U L U^T  - A ||_F / || A ||_F
 wide wrer(const wide a11, const wide a22, const wide a21, const wide cs, const wide sn, const wide l1, const wide l2, wide ae[static restrict 1], wide an[static restrict 1])
 {
   *ae = waer(a11, a22, a21, cs, sn, l1, l2);
