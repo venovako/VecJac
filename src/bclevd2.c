@@ -185,15 +185,15 @@ int main(int argc, char *argv[])
       if (w[i] == o)
         ix = i;
     (void)fprintf(stderr, "%zu,%zu,%s;", j, ix, xtoa(a, (long double)o));
-    (void)fprintf(stderr, "%s,", stoa(a, a11[ix]));
-    (void)fprintf(stderr, "%s,", stoa(a, a22[ix]));
-    (void)fprintf(stderr, "(%s,", stoa(a, a21r[ix]));
-    (void)fprintf(stderr, "%s);", stoa(a, a21i[ix]));
-    (void)fprintf(stderr, "%s,", stoa(a, cs1[ix]));
-    (void)fprintf(stderr, "(%s,", stoa(a, snr[ix]));
-    (void)fprintf(stderr, "%s);", stoa(a, sni[ix]));
-    (void)fprintf(stderr, "%s,", stoa(a, l1[ix]));
-    (void)fprintf(stderr, "%s\n", stoa(a, l2[ix]));
+    (void)fprintf(stderr, "%s,", xtoa(a, a11[ix]));
+    (void)fprintf(stderr, "%s,", xtoa(a, a22[ix]));
+    (void)fprintf(stderr, "(%s,", xtoa(a, a21r[ix]));
+    (void)fprintf(stderr, "%s);", xtoa(a, a21i[ix]));
+    (void)fprintf(stderr, "%s,", xtoa(a, cs1[ix]));
+    (void)fprintf(stderr, "(%s,", xtoa(a, snr[ix]));
+    (void)fprintf(stderr, "%s);", xtoa(a, sni[ix]));
+    (void)fprintf(stderr, "%s,", xtoa(a, l1[ix]));
+    (void)fprintf(stderr, "%s\n", xtoa(a, l2[ix]));
     (void)fflush(stderr);
 #endif /* TEST_ORT */
 #ifdef _OPENMP
