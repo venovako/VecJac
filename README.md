@@ -3,6 +3,9 @@ Vectorization of the Jacobi-type methods for the SVD and the EVD
 
 (... work in progress ...)
 
+This software is a supplementary material for the paper
+arXiv:[2202.08361](https://arxiv.org/abs/2202.08361 "Vectorization of the Jacobi-type singular value decomposition method") \[math.NA\].
+
 ## Building
 
 ### Prerequisites
