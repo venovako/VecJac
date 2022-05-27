@@ -3,19 +3,6 @@
 
 #include "common.h"
 
-static inline uint64_t rdtsc_beg(unsigned aux[static restrict 1])
-{
-  _mm_mfence();
-  return __rdtscp(aux);
-}
-
-static inline uint64_t rdtsc_end(unsigned aux[static restrict 1])
-{
-  const uint64_t tsc = __rdtscp(aux);
-  _mm_lfence();
-  return tsc;
-}
-
 static inline long double tsc_lap(const uint64_t freq_hz, const uint64_t beg, const uint64_t end)
 {
   if (freq_hz) {
@@ -36,6 +23,29 @@ static inline int64_t t2ns(const struct timespec tp[static restrict 1])
 static inline int64_t t2us(const struct timeval tp[static restrict 1])
 {
   return (int64_t)(tp->tv_sec * INT64_C(1000000) + tp->tv_usec);
+}
+
+static inline uint64_t rdtsc_beg(unsigned aux[static restrict 1])
+{
+#ifdef KNL
+  _mm_mfence();
+  return __rdtscp(aux);
+#else /* !KNL */
+  struct timespec t;
+  return (uint64_t)((*(int*)aux = clock_gettime(CLOCK_MONOTONIC_RAW, &t)) ? INT64_C(-1) : t2ns(&t));
+#endif /* ?KNL */
+}
+
+static inline uint64_t rdtsc_end(unsigned aux[static restrict 1])
+{
+#ifdef KNL
+  const uint64_t tsc = __rdtscp(aux);
+  _mm_lfence();
+  return tsc;
+#else /* !KNL */
+  struct timespec t;
+  return (uint64_t)((*(int*)aux = clock_gettime(CLOCK_MONOTONIC_RAW, &t)) ? INT64_C(-1) : t2ns(&t));
+#endif /* ?KNL */
 }
 
 extern uint64_t tsc_get_freq_hz_(unsigned rem_den[static restrict 2]);

@@ -2,6 +2,7 @@
 
 uint64_t tsc_get_freq_hz_(unsigned rem_den[static restrict 2])
 {
+#ifdef KNL
   const uint64_t hz = (uint64_t)atoz(getenv("TSC_FREQ_HZ"));
   if (hz) {
     rem_den[0u] = 0u;
@@ -20,6 +21,11 @@ uint64_t tsc_get_freq_hz_(unsigned rem_den[static restrict 2])
   rem_den[0u] = 0u;
   rem_den[1u] = 0u;
   return UINT64_C(0);
+#else /* !KNL */
+  rem_den[0u] = 0u;
+  rem_den[1u] = 0u;
+  return UINT64_C(1000000000);
+#endif /* ?KNL */
 }
 
 int64_t get_thread_ns_()
