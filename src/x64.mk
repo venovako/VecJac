@@ -1,5 +1,8 @@
 SHELL=/bin/bash
 ARCH=$(shell uname)
+ifndef CPU
+CPU=Host
+endif # !CPU
 ifndef ABI
 ABI=ilp64
 endif # !ABI
@@ -50,10 +53,10 @@ ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
 ifdef NDEBUG
-OPTFLAGS=-O$(NDEBUG) -xHost -qopt-multi-version-aggressive
+OPTFLAGS=-O$(NDEBUG) -x$(CPU) -qopt-multi-version-aggressive
 DBGFLAGS += -DNDEBUG -qopt-report=5
 else # DEBUG
-OPTFLAGS=-O0 -xHost -qopt-multi-version-aggressive
+OPTFLAGS=-O0 -x$(CPU) -qopt-multi-version-aggressive
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -DPRINTOUT=stderr
 ifneq ($(ARCH),Darwin) # Linux
 DBGFLAGS += -debug parallel
@@ -75,7 +78,11 @@ ifdef SLEEF
 ifdef ($(ARCH),Darwin)
 LDFLAGS += -L$(SLEEF)/lib -Wl,-rpath,$(SLEEF)/lib
 else # Linux
+ifeq ($(wildcard $(SLEEF)/lib64),)
+LDFLAGS += -L$(SLEEF)/lib -Wl,-rpath=$(SLEEF)/lib
+else # lib64
 LDFLAGS += -L$(SLEEF)/lib64 -Wl,-rpath=$(SLEEF)/lib64
+endif # ?lib64
 endif # ?Darwin
 LDFLAGS += -lsleefquad
 endif # SLEEF

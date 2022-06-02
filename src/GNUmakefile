@@ -25,7 +25,7 @@ endif # SLEEF
 all: $(LIBS) $(EXES)
 
 help:
-	@echo "make [COMPILER=x64|x200] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [all|clean|help]"
+	@echo "make [COMPILER=x64|x200] [x64 ? CPU=...] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [all|clean|help]"
 	@echo "Setting explicitly MKL to sequential (default) turns off OpenMP (otherwise it is turned on, unless debugging)."
 
 libvecjac$(SUFX).a: $(OBJS) $(MKFS)
