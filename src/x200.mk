@@ -41,7 +41,7 @@ MKL=sequential
 endif # !LAPACK
 endif # !MKL
 DBGFLAGS=-traceback #-DJTRACE
-FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -fimf-use-svml=true
+FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt
 ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
@@ -79,7 +79,7 @@ LDFLAGS += -liomp5
 endif # ?qopenmp
 endif # intel_thread
 endif # MKL
-LDFLAGS += -lpthread -lm -ldl -lmemkind
+LDFLAGS += -lpthread -lm -ldl
 CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
 FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads
 ifdef NDEBUG
