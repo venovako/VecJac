@@ -92,6 +92,8 @@ int main(int argc, char *argv[])
   assert(sni);
   assert(l1);
   assert(l2);
+  wide *const w = (wide*)aligned_alloc(sizeof(wide), (n * sizeof(wide)));
+  assert(w);
 
   unsigned rd[2u] = { 0u, 0u };
   const uint64_t hz = tsc_get_freq_hz_(rd);
@@ -154,16 +156,34 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
     wide o = W_ZERO, r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,cs1,snr,sni,l1,l2) reduction(max:o,r)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,cs1,snr,sni,l1,l2,w) reduction(max:o,r)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       wide AE = W_ZERO, AN = W_ZERO;
-      o = fmaxw(o, worc(cs1[i], snr[i], sni[i]));
+      o = fmaxw(o, (w[i] = worc(cs1[i], snr[i], sni[i])));
       r = fmaxw(r, wrec(a11[i], a22[i], a21r[i], a21i[i], cs1[i], snr[i], sni[i], l1[i], l2[i], &AE, &AN));
     }
     (void)fprintf(stdout, "%s,", xtoa(a, (long double)o));
     (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
     (void)fflush(stdout);
+    size_t ix = n;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,o,w) reduction(min:ix)
+#endif /* _OPENMP */
+    for (size_t i = 0u; i < n; ++i)
+      if (w[i] == o)
+        ix = i;
+    (void)fprintf(stderr, "%zu,%zu,%s;", j, ix, xtoa(a, (long double)o));
+    (void)fprintf(stderr, "%s,", xtoa(a, a11[ix]));
+    (void)fprintf(stderr, "%s,", xtoa(a, a22[ix]));
+    (void)fprintf(stderr, "(%s,", xtoa(a, a21r[ix]));
+    (void)fprintf(stderr, "%s);", xtoa(a, a21i[ix]));
+    (void)fprintf(stderr, "%s,", xtoa(a, cs1[ix]));
+    (void)fprintf(stderr, "(%s,", xtoa(a, snr[ix]));
+    (void)fprintf(stderr, "%s);", xtoa(a, sni[ix]));
+    (void)fprintf(stderr, "%s,", xtoa(a, l1[ix]));
+    (void)fprintf(stderr, "%s\n", xtoa(a, l2[ix]));
+    (void)fflush(stderr);
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(fk,fl,snr,sni,n,n_t,cnt,jn)
 #endif /* _OPENMP */
@@ -209,6 +229,7 @@ int main(int argc, char *argv[])
   (void)close(fl);
   (void)close(fk);
 
+  free(w);
   free(l2);
   free(l1);
   free(sni);

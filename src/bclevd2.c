@@ -92,10 +92,8 @@ int main(int argc, char *argv[])
   assert(sni);
   assert(l1);
   assert(l2);
-#ifdef TEST_ORT
   wide *const w = (wide*)aligned_alloc(sizeof(wide), (n * sizeof(wide)));
   assert(w);
-#endif /* TEST_ORT */
 
   unsigned rd[2u] = { 0u, 0u };
   const uint64_t hz = tsc_get_freq_hz_(rd);
@@ -158,25 +156,16 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
     wide o = W_ZERO, r = W_ZERO;
 #ifdef _OPENMP
-#ifdef TEST_ORT
 #pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,cs1,snr,sni,l1,l2,w) reduction(max:o,r)
-#else /* !TEST_ORT */
-#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,cs1,snr,sni,l1,l2) reduction(max:o,r)
-#endif /* ?TEST_ORT */
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       wide AE = W_ZERO, AN = W_ZERO;
-#ifdef TEST_ORT
       o = fmaxw(o, (w[i] = worc(cs1[i], snr[i], sni[i])));
-#else /* !TEST_ORT */
-      o = fmaxw(o, worc(cs1[i], snr[i], sni[i]));
-#endif /* ?TEST_ORT */
       r = fmaxw(r, wrec(a11[i], a22[i], a21r[i], a21i[i], cs1[i], snr[i], sni[i], l1[i], l2[i], &AE, &AN));
     }
     (void)fprintf(stdout, "%s,", xtoa(a, (long double)o));
     (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
     (void)fflush(stdout);
-#ifdef TEST_ORT
     size_t ix = n;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(n,o,w) reduction(min:ix)
@@ -195,7 +184,6 @@ int main(int argc, char *argv[])
     (void)fprintf(stderr, "%s,", xtoa(a, l1[ix]));
     (void)fprintf(stderr, "%s\n", xtoa(a, l2[ix]));
     (void)fflush(stderr);
-#endif /* TEST_ORT */
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(fk,fl,snr,sni,n,n_t,cnt,jn)
 #endif /* _OPENMP */
@@ -241,9 +229,7 @@ int main(int argc, char *argv[])
   (void)close(fl);
   (void)close(fk);
 
-#ifdef TEST_ORT
   free(w);
-#endif /* TEST_ORT */
   free(l2);
   free(l1);
   free(sni);

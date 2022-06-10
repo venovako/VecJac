@@ -95,6 +95,9 @@ int main(int argc, char *argv[])
   assert(l1);
   assert(l2);
 
+  wide *const w = (wide*)aligned_alloc(sizeof(wide), (n * sizeof(wide)));
+  assert(w);
+
   unsigned *const p = (unsigned*)malloc((n >> VSLlg) * sizeof(unsigned));
   assert(p);
 
@@ -154,19 +157,37 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
     wide o = W_ZERO, r = W_ZERO;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,c,cat,sat,l1,l2) reduction(max:o,r)
+#pragma omp parallel for default(none) shared(n,a11,a22,a21r,a21i,c,cat,sat,l1,l2,w) reduction(max:o,r)
 #endif /* _OPENMP */
     for (size_t i = 0u; i < n; ++i) {
       const wide CS = (wide)(c[i]);
       const wide SNR = (wide)(cat[i]);
       const wide SNI = (wide)(sat[i]);
       wide AE = W_ZERO, AN = W_ZERO;
-      o = fmaxw(o, worc(CS, SNR, SNI));
+      o = fmaxw(o, (w[i] = worc(CS, SNR, SNI)));
       r = fmaxw(r, wrec(a11[i], a22[i], a21r[i], a21i[i], CS, SNR, SNI, l1[i], l2[i], &AE, &AN));
     }
     (void)fprintf(stdout, "%s,", xtoa(a, (long double)o));
     (void)fprintf(stdout, "%s", xtoa(a, (long double)r));
     (void)fflush(stdout);
+    size_t ix = n;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,o,w) reduction(min:ix)
+#endif /* _OPENMP */
+    for (size_t i = 0u; i < n; ++i)
+      if (w[i] == o)
+        ix = i;
+    (void)fprintf(stderr, "%zu,%zu,%s;", j, ix, xtoa(a, (long double)o));
+    (void)fprintf(stderr, "%s,", xtoa(a, a11[ix]));
+    (void)fprintf(stderr, "%s,", xtoa(a, a22[ix]));
+    (void)fprintf(stderr, "(%s,", xtoa(a, a21r[ix]));
+    (void)fprintf(stderr, "%s);", xtoa(a, a21i[ix]));
+    (void)fprintf(stderr, "%s,", xtoa(a, c[ix]));
+    (void)fprintf(stderr, "(%s,", xtoa(a, cat[ix]));
+    (void)fprintf(stderr, "%s);", xtoa(a, sat[ix]));
+    (void)fprintf(stderr, "%s,", xtoa(a, l1[ix]));
+    (void)fprintf(stderr, "%s\n", xtoa(a, l2[ix]));
+    (void)fflush(stderr);
 #ifdef _OPENMP
 #pragma omp parallel default(none) shared(fk,fl,cat,sat,n,n_t,cnt,jn)
 #endif /* _OPENMP */
@@ -213,7 +234,7 @@ int main(int argc, char *argv[])
   (void)close(fk);
 
   free(p);
-
+  free(w);
   free(l2);
   free(l1);
   free(sat);
