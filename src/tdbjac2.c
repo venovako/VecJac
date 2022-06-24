@@ -1,6 +1,5 @@
 #include "dbjac2.h"
 #include "wnrme.h"
-#include "rnd.h"
 #include "timer.h"
 
 int main(int argc, char *argv[])
@@ -29,7 +28,7 @@ int main(int argc, char *argv[])
   const size_t
     nl = strlen(argv[1u]),
     nl1 = (nl + 1u);
-  char *const fn = calloc((nl + 3u), sizeof(char));
+  char *const fn = (char*)calloc((nl + 3u), sizeof(char));
   assert(fn);
   strcpy(fn, argv[1u])[nl] = '.';
   int fm = O_RDONLY;
