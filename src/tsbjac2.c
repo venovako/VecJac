@@ -5,7 +5,7 @@
 int main(int argc, char *argv[])
 {
   if (4 != argc) {
-    (void)fprintf(stderr, "%s filename 2^{batch_size} #batches\n", *argv);
+    (void)fprintf(stderr, "%s filename lg(batch_size) #batches\n", *argv);
     return EXIT_FAILURE;
   }
 
