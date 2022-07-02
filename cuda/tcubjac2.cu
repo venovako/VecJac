@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
   if (!w)
     return EXIT_FAILURE;
   const size_t cnt = n * abs(kind);
+  const size_t ni = n * sizeof(int);
 
   void
     *ha11 = NULL, *ha22 = NULL, *ha21r = NULL, *ha21i = NULL,
@@ -152,6 +153,10 @@ int main(int argc, char *argv[])
   if (cudaSuccess != cudaMallocHost(&hl2, cnt))
     return EXIT_FAILURE;
 
+  int *hsp = (int*)NULL;
+  if (cudaSuccess != cudaMallocHost(&hsp, ni))
+    return EXIT_FAILURE;
+
   void
     *da11 = NULL, *da22 = NULL, *da21r = NULL, *da21i = NULL,
     *dc = NULL, *dcat = NULL, *dsat = NULL, *dl1 = NULL, *dl2 = NULL;
@@ -173,6 +178,10 @@ int main(int argc, char *argv[])
   if (cudaSuccess != cudaMalloc(&dl1, cnt))
     return EXIT_FAILURE;
   if (cudaSuccess != cudaMalloc(&dl2, cnt))
+    return EXIT_FAILURE;
+
+  int *dsp = (int*)NULL;
+  if (cudaSuccess != cudaMalloc(&dsp, ni))
     return EXIT_FAILURE;
 
   uint64_t be[2u] = { UINT64_C(0), UINT64_C(0) };
@@ -225,17 +234,17 @@ int main(int argc, char *argv[])
     be[0u] = rdtsc_beg(&aux);
     if (kind > 0) {
       if (kind == (int)sizeof(float)) {
-        ccjac2<<<bpg,tpb>>>((const float*)da11, (const float*)da22, (const float*)da21r, (const float*)da21i, (float*)dc, (float*)dcat, (float*)dsat, (float*)dl1, (float*)dl2);
+        ccjac2<<<bpg,tpb>>>((const float*)da11, (const float*)da22, (const float*)da21r, (const float*)da21i, (float*)dc, (float*)dcat, (float*)dsat, (float*)dl1, (float*)dl2, dsp);
       }
       else {
-        zcjac2<<<bpg,tpb>>>((const double*)da11, (const double*)da22, (const double*)da21r, (const double*)da21i, (double*)dc, (double*)dcat, (double*)dsat, (double*)dl1, (double*)dl2);
+        zcjac2<<<bpg,tpb>>>((const double*)da11, (const double*)da22, (const double*)da21r, (const double*)da21i, (double*)dc, (double*)dcat, (double*)dsat, (double*)dl1, (double*)dl2, dsp);
       }
     }
     else if (kind == -(int)sizeof(float)) {
-      scjac2<<<bpg,tpb>>>((const float*)da11, (const float*)da22, (const float*)da21r, (float*)dc, (float*)dcat, (float*)dl1, (float*)dl2);
+      scjac2<<<bpg,tpb>>>((const float*)da11, (const float*)da22, (const float*)da21r, (float*)dc, (float*)dcat, (float*)dl1, (float*)dl2, dsp);
     }
     else {
-      dcjac2<<<bpg,tpb>>>((const double*)da11, (const double*)da22, (const double*)da21r, (double*)dc, (double*)dcat, (double*)dl1, (double*)dl2);
+      dcjac2<<<bpg,tpb>>>((const double*)da11, (const double*)da22, (const double*)da21r, (double*)dc, (double*)dcat, (double*)dl1, (double*)dl2, dsp);
     }
     if (cudaSuccess != cudaDeviceSynchronize())
       return EXIT_FAILURE;
@@ -251,6 +260,8 @@ int main(int argc, char *argv[])
     if (cudaSuccess != cudaMemcpyAsync(hl1, dl1, cnt, cudaMemcpyDeviceToHost))
       return EXIT_FAILURE;
     if (cudaSuccess != cudaMemcpyAsync(hl2, dl2, cnt, cudaMemcpyDeviceToHost))
+      return EXIT_FAILURE;
+    if (cudaSuccess != cudaMemcpyAsync(hsp, dsp, ni, cudaMemcpyDeviceToHost))
       return EXIT_FAILURE;
     if (cudaSuccess != cudaDeviceSynchronize())
       return EXIT_FAILURE;
@@ -384,6 +395,8 @@ int main(int argc, char *argv[])
     (void)fflush(stdout);
   }
 
+  if (cudaSuccess != cudaFree(dsp))
+    return EXIT_FAILURE;
   if (cudaSuccess != cudaFree(dl2))
     return EXIT_FAILURE;
   if (cudaSuccess != cudaFree(dl1))
@@ -403,6 +416,8 @@ int main(int argc, char *argv[])
   if (cudaSuccess != cudaFree(da11))
     return EXIT_FAILURE;
 
+  if (cudaSuccess != cudaFreeHost(hsp))
+    return EXIT_FAILURE;
   if (cudaSuccess != cudaFreeHost(hl2))
     return EXIT_FAILURE;
   if (cudaSuccess != cudaFreeHost(hl1))
