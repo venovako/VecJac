@@ -1,8 +1,6 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <immintrin.h>
-
 #ifdef __ICC
 #include <mathimf.h>
 #else /* !__ICC */
