@@ -86,11 +86,13 @@ int csjac2(const float a11, const float a22, const float a21r, const float a21i,
   *cs = 1.0f / s1;
   *snr = (ar_ * t1) / s1;
   *sni = (ai_ * t1) / s1;
-  er = (es << 1);
+  *l1 = fmaf(t1, fmaf(a2, t1,  an), a1) / s2;
+  *l2 = fmaf(t1, fmaf(a1, t1, -an), a2) / s2;
+  er = ((es << 1) | (*l1 < *l2));
   es = -es;
-  *l1 = scalbnf(fmaf(t1, fmaf(a2, t1,  an), a1) / s2, es);
-  *l2 = scalbnf(fmaf(t1, fmaf(a1, t1, -an), a2) / s2, es);
-  return (er | (*l1 < *l2));
+  *l1 = scalbnf(*l1, es);
+  *l2 = scalbnf(*l2, es);
+  return er;
 }
 
 int zsjac2(const double a11, const double a22, const double a21r, const double a21i, double *const cs, double *const snr, double *const sni, double *const l1, double *const l2)
@@ -138,11 +140,13 @@ int zsjac2(const double a11, const double a22, const double a21r, const double a
   *cs = 1.0 / s1;
   *snr = (ar_ * t1) / s1;
   *sni = (ai_ * t1) / s1;
-  er = (es << 1);
+  *l1 = fma(t1, fma(a2, t1,  an), a1) / s2;
+  *l2 = fma(t1, fma(a1, t1, -an), a2) / s2;
+  er = ((es << 1) | (*l1 < *l2));
   es = -es;
-  *l1 = scalbn(fma(t1, fma(a2, t1,  an), a1) / s2, es);
-  *l2 = scalbn(fma(t1, fma(a1, t1, -an), a2) / s2, es);
-  return (er | (*l1 < *l2));
+  *l1 = scalbn(*l1, es);
+  *l2 = scalbn(*l2, es);
+  return er;
 }
 
 int ssjac2(const float a11, const float a22, const float a21, float *const cs, float *const sn, float *const l1, float *const l2)
@@ -175,11 +179,13 @@ int ssjac2(const float a11, const float a22, const float a21, float *const cs, f
     s1 = sqrtf(s2);
   *cs = 1.0f / s1;
   *sn = (t1 * as) / s1;
-  er = (es << 1);
+  *l1 = fmaf(t1, fmaf(a2, t1,  an), a1) / s2;
+  *l2 = fmaf(t1, fmaf(a1, t1, -an), a2) / s2;
+  er = ((es << 1) | (*l1 < *l2));
   es = -es;
-  *l1 = scalbnf(fmaf(t1, fmaf(a2, t1,  an), a1) / s2, es);
-  *l2 = scalbnf(fmaf(t1, fmaf(a1, t1, -an), a2) / s2, es);
-  return (er | (*l1 < *l2));
+  *l1 = scalbnf(*l1, es);
+  *l2 = scalbnf(*l2, es);
+  return er;
 }
 
 int dsjac2(const double a11, const double a22, const double a21, double *const cs, double *const sn, double *const l1, double *const l2)
@@ -212,9 +218,11 @@ int dsjac2(const double a11, const double a22, const double a21, double *const c
     s1 = sqrt(s2);
   *cs = 1.0 / s1;
   *sn = (t1 * as) / s1;
-  er = (es << 1);
+  *l1 = fma(t1, fma(a2, t1,  an), a1) / s2;
+  *l2 = fma(t1, fma(a1, t1, -an), a2) / s2;
+  er = ((es << 1) | (*l1 < *l2));
   es = -es;
-  *l1 = scalbn(fma(t1, fma(a2, t1,  an), a1) / s2, es);
-  *l2 = scalbn(fma(t1, fma(a1, t1, -an), a2) / s2, es);
-  return (er | (*l1 < *l2));
+  *l1 = scalbn(*l1, es);
+  *l2 = scalbn(*l2, es);
+  return er;
 }
