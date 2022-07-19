@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
       l += (e - b);
   }
   long double t = tsc_lap(hz, 0u, l);
-  long double f = (n / t);
+  long double f = ((n * it) / t);
   char a[31] = { '\0' };
   (void)fprintf(stdout, "DDOT  : %15.9Lf s, %s FLOPS\n", t, xtoa(a, f));
   (void)fflush(stdout);
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
       l += (e - b);
   }
   t = tsc_lap(hz, 0u, l);
-  f = ((4u * n) / t);
+  f = ((4u * n * it) / t);
   (void)fprintf(stdout, "DROT  : %15.9Lf s, %s FLOPS\n", t, xtoa(a, f));
   (void)fflush(stdout);
   double e2[2u] = { 1.0, 1.0 };
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
       l += (e - b);
   }
   t = tsc_lap(hz, 0u, l);
-  f = ((3u * n + 11u) / t);
+  f = (((3u * n + 11u) * it) / t);
   (void)fprintf(stdout, "ddpscl: %15.9Lf s, %s FLOPS\n", t, xtoa(a, f));
   (void)fflush(stdout);
   const double tp6 = (1.0 / rt3);
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
       l += (e - b);
   }
   t = tsc_lap(hz, 0u, l);
-  f = ((4u * n) / t);
+  f = ((4u * n * it) / t);
   (void)fprintf(stdout, "djrotf: %15.9Lf s, %s FLOPS\n", t, xtoa(a, f));
   (void)fflush(stdout);
   free(y);
