@@ -27,6 +27,8 @@
 #define DBL_SQRT_HUGE 1.34078079299425956E+154
 #endif /* ?DBL_SQRT_HUGE */
 
+// in the kernels below, -_es could be returned instead of _es
+
 __global__ void ccjac2(const float *const a11, const float *const a22, const float *const a21r, const float *const a21i, float *const cs, float *const snr, float *const sni, float *const l1, float *const l2, int *const sp)
 {
   const size_t _off = (size_t)(blockIdx.x) * blockDim.x + threadIdx.x;

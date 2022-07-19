@@ -1,3 +1,6 @@
+// Estimates the number of floating-point operations per second.
+// One scalar FMA is counted as a single FLOP, as well as SCALEF.
+// IT, the number of iterations, should be set sufficiently high; e.g., to 100000.
 #include "ddpscl.h"
 #include "djrotf.h"
 #include "rnd.h"

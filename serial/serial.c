@@ -41,6 +41,8 @@
 #define DBL_SQRT_HUGE 1.34078079299425956E+154
 #endif /* ?DBL_SQRT_HUGE */
 
+/* in the routines below, -es could be returned instead of es */
+
 int csjac2(const float a11, const float a22, const float a21r, const float a21i, float *const cs, float *const snr, float *const sni, float *const l1, float *const l2)
 {
 #ifndef NDEBUG
