@@ -1,4 +1,5 @@
 #include "ddpscl.h"
+#include "djrotf.h"
 #include "rnd.h"
 #include "timer.h"
 
