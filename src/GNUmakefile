@@ -12,7 +12,7 @@ endif # local.mk
 
 LIBS=libvecjac$(SUFX).a
 
-EXES=bclevd2$(SUFX).exe bdlevd2$(SUFX).exe bslevd2$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tcbjac2$(SUFX).exe tdbjac2$(SUFX).exe tsbjac2$(SUFX).exe tzbjac2$(SUFX).exe tpjs$(SUFX).exe tdgesvj$(SUFX).exe tzgesvj$(SUFX).exe tdvjsvd$(SUFX).exe tzvjsvd$(SUFX).exe
+EXES=bclevd2$(SUFX).exe bdlevd2$(SUFX).exe bslevd2$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tcbjac2$(SUFX).exe tdbjac2$(SUFX).exe tsbjac2$(SUFX).exe tzbjac2$(SUFX).exe tpjs$(SUFX).exe tdgesvj$(SUFX).exe tzgesvj$(SUFX).exe tdvjsvd$(SUFX).exe tzvjsvd$(SUFX).exe dflops$(SUFX).exe
 ifdef SLEEF
 EXES += tdnorme$(SUFX).exe
 endif # SLEEF
@@ -208,6 +208,9 @@ tdvjsvd$(SUFX).exe: tdvjsvd.c $(LIBS) $(MKFS)
 tzvjsvd$(SUFX).exe: tzvjsvd.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
+dflops$(SUFX).exe: dflops.c $(LIBS) $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
 clean:
 	-$(RM) aalloc$(SUFX).o aalloc$(SUFX).optrpt
 	-$(RM) cbjac2$(SUFX).o cbjac2$(SUFX).optrpt
@@ -259,6 +262,7 @@ clean:
 	-$(RM) tzgesvj$(SUFX).exe tzgesvj.optrpt
 	-$(RM) tdvjsvd$(SUFX).exe tdvjsvd.optrpt
 	-$(RM) tzvjsvd$(SUFX).exe tzvjsvd.optrpt
+	-$(RM) dflops$(SUFX).exe dflops.optrpt
 ifdef SLEEF
 	-$(RM) dnormb$(SUFX).o dnormb$(SUFX).optrpt
 	-$(RM) dnorme$(SUFX).o dnorme$(SUFX).optrpt
