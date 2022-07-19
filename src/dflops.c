@@ -70,6 +70,7 @@ int main(int argc, char *argv[])
   double f2[2u] = { 1.5, 1.5 };
   // warmup
   (void)ddpscl_(&n, x, y, e2, f2);
+  l = 0u;
   for (size_t i = 0u; i < it; ++i) {
     gendfrand_(&n, &aub, x);
     gendfrand_(&n, &aub, y);
@@ -86,6 +87,7 @@ int main(int argc, char *argv[])
   const double tp6 = (1.0 / rt3);
   // warmup
   (void)djrotf_(&n, x, y, &cp6, &tp6);
+  l = 0u;
   for (size_t i = 0u; i < it; ++i) {
     gendfrand_(&n, &aub, x);
     gendfrand_(&n, &aub, y);
