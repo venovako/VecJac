@@ -5,7 +5,7 @@ endif # !CPU
 ifndef NDEBUG
 NDEBUG=3
 endif # !NDEBUG
-CFLAGS=-D_LARGEFILE64_SOURCE -DNDEBUG -std=c18 -O$(NDEBUG) -x$(CPU) -qopenmp -qopt-multi-version-aggressive -qopt-report=5 -fp-model precise -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -fPIC -fexceptions -fno-omit-frame-pointer -rdynamic -traceback
+CFLAGS=-D_LARGEFILE64_SOURCE -DNDEBUG -std=gnu18 -O$(NDEBUG) -x$(CPU) -qopenmp -qopt-multi-version-aggressive -qopt-report=5 -fp-model precise -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -inline-level=2 -vec-threshold0 -fPIC -fexceptions -fno-omit-frame-pointer -rdynamic -traceback
 LDFLAGS=-lpthread -lm -ldl
 ifneq ($(shell uname),Darwin) # Linux
 CFLAGS += -D_GNU_SOURCE

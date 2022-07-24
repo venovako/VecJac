@@ -41,12 +41,12 @@ MKL=sequential
 endif # !LAPACK
 endif # !MKL
 DBGFLAGS=-traceback #-DJTRACE
-FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt #-qsimd-honor-fp-model -qsimd-serialize-fp-reduction -fimf-use-svml=true -vec-threshold0
+FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt #-qsimd-honor-fp-model -qsimd-serialize-fp-reduction -fimf-use-svml=true
 ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
 ifdef NDEBUG
-OPTFLAGS=-O$(NDEBUG) -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high
+OPTFLAGS=-O$(NDEBUG) -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high -inline-level=2 -vec-threshold0
 DBGFLAGS += -DNDEBUG -qopt-report=5
 else # DEBUG
 OPTFLAGS=-O0 -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high
@@ -80,7 +80,7 @@ endif # ?qopenmp
 endif # intel_thread
 endif # MKL
 LDFLAGS += -lpthread -lm -ldl
-CFLAGS=-std=c18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
+CFLAGS=-std=gnu18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
 FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads
 ifdef NDEBUG
 CFLAGS += -w3
