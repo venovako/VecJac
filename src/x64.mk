@@ -23,11 +23,7 @@ ARFLAGS=-qnoipo -lib rsv
 CC=icc
 FC=ifort
 ifdef SLEEF
-ifeq ($(ARCH),Darwin)
 CXX=icpc
-else # Linux
-CXX=icpx
-endif # ?Darwin
 endif # SLEEF
 CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer -rdynamic
 ifdef NDEBUG
@@ -109,29 +105,16 @@ LDFLAGS += -lpthread -lm -ldl
 CFLAGS=-std=gnu18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
 FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads
 ifdef SLEEF
-CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS)
-ifeq ($(ARCH),Darwin)
-CXXFLAGS += $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
-else # Linux
-CXXFLAGS += $(subst -debug pubnames,,$(DBGFLAGS)) $(LIBFLAGS) $(CPUFLAGS) $(subst -no-ftz,,$(FPUFLAGS))
-endif # ?Darwin
+CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
 endif # SLEEF
-ifdef NDEBUG
-CFLAGS += -w3
-else # DEBUG
-CFLAGS += -check=stack,uninit -w3
+ifndef NDEBUG
+CFLAGS += -check=stack,uninit
 FFLAGS += -check all -assume ieee_fpe_flags
-endif # ?NDEBUG
+endif # !NDEBUG
 ifdef SLEEF
-ifdef NDEBUG
-CXXFLAGS += -w3
-else # DEBUG
-ifeq ($(ARCH),Darwin)
-CXXFLAGS += -check=stack,uninit -w3
-else # Linux
-CXXFLAGS += -fcheck=stack,uninit -w3
-endif # ?Darwin
-endif # ?NDEBUG
+ifndef NDEBUG
+CXXFLAGS += -check=stack,uninit
+endif # !NDEBUG
 endif # SLEEF
 ifeq ($(ABI),ilp64)
 FFLAGS += -i8
