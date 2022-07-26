@@ -82,19 +82,15 @@ endif # MKL
 LDFLAGS += -lpthread -lm -ldl
 CFLAGS=-std=gnu18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
 FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads
-ifdef NDEBUG
-CFLAGS += -w3
-else # DEBUG
-CFLAGS += -check=stack,uninit -w3
+ifndef NDEBUG
+CFLAGS += -check=stack,uninit
 FFLAGS += -check all -assume ieee_fpe_flags
-endif # ?NDEBUG
+endif # !NDEBUG
 ifdef SLEEF
 CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(subst -debug pubnames,,$(DBGFLAGS)) $(LIBFLAGS) $(CPUFLAGS) $(subst -no-ftz,,$(FPUFLAGS))
-ifdef NDEBUG
-CXXFLAGS += -w3
-else # DEBUG
-CXXFLAGS += -fcheck=stack,uninit -w3
-endif # ?NDEBUG
+ifndef NDEBUG
+CXXFLAGS += -fcheck=stack,uninit
+endif # !NDEBUG
 endif # SLEEF
 ifeq ($(ABI),ilp64)
 FFLAGS += -i8
