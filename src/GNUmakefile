@@ -17,7 +17,7 @@ ifdef SLEEF
 EXES += tdnorme$(SUFX).exe
 endif # SLEEF
 
-OBJS=aalloc$(SUFX).o cbjac2$(SUFX).o common$(SUFX).o dbjac2$(SUFX).o ddpscl$(SUFX).o dgsscl$(SUFX).o djrot$(SUFX).o djrotf$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dnssvj$(SUFX).o dscale$(SUFX).o dswp$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sbjac2$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o zbjac2$(SUFX).o zdpscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o znssvj$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
+OBJS=aalloc$(SUFX).o cbjac2$(SUFX).o cmerge$(SUFX).o common$(SUFX).o csplit$(SUFX).o dbjac2$(SUFX).o ddpscl$(SUFX).o dgsscl$(SUFX).o djrot$(SUFX).o djrotf$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dnssvj$(SUFX).o dscale$(SUFX).o dswp$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sbjac2$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o zbjac2$(SUFX).o zdpscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o znssvj$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
 ifdef SLEEF
 OBJS += dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o
 endif # SLEEF
@@ -37,7 +37,13 @@ aalloc$(SUFX).o: aalloc.c aalloc.h vec.h common.h $(MKFS)
 cbjac2$(SUFX).o: cbjac2.c cbjac2.h scjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+cmerge$(SUFX).o: cmerge.c cmerge.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 common$(SUFX).o: common.c common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+csplit$(SUFX).o: csplit.c csplit.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 dbjac2$(SUFX).o: dbjac2.c dbjac2.h dzjac2.h vecdef.h vec.h common.h $(MKFS)
@@ -62,7 +68,7 @@ ifdef SLEEF
 dnormb$(SUFX).o: dnormb.f90 $(MKFS)
 	$(FC) $(FFLAGS) -c $< -o $@
 
-dnorme$(SUFX).o: dnorme.c dnorme.h dznrme.h dkvsrt.h d8sort.h defops.h vecdef.h vec.h common.h $(MKFS)
+dnorme$(SUFX).o: dnorme.c dnorme.h dznrme.h dkvsrt.h defops.h d8sort.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 dnormf$(SUFX).o: dnormf.c dnormf.h dznrmf.h common.h $(MKFS)
@@ -214,7 +220,9 @@ dflops$(SUFX).exe: dflops.c $(LIBS) $(MKFS)
 clean:
 	-$(RM) aalloc$(SUFX).o aalloc$(SUFX).optrpt
 	-$(RM) cbjac2$(SUFX).o cbjac2$(SUFX).optrpt
+	-$(RM) cmerge$(SUFX).o cmerge$(SUFX).optrpt
 	-$(RM) common$(SUFX).o common$(SUFX).optrpt
+	-$(RM) csplit$(SUFX).o csplit$(SUFX).optrpt
 	-$(RM) dbjac2$(SUFX).o dbjac2$(SUFX).optrpt
 	-$(RM) ddpscl$(SUFX).o ddpscl$(SUFX).optrpt
 	-$(RM) dgsscl$(SUFX).o dgsscl$(SUFX).optrpt
@@ -269,6 +277,6 @@ ifdef SLEEF
 	-$(RM) dnormf$(SUFX).o dnormf$(SUFX).optrpt
 	-$(RM) dnorms$(SUFX).o dnorms$(SUFX).optrpt
 	-$(RM) wdp$(SUFX).o wdp$(SUFX).optrpt
-	-$(RM) psort$(SUFX).o psort$(SUFX).optrpt psort$(SUFX).opt.yaml
+	-$(RM) psort$(SUFX).o psort$(SUFX).optrpt
 	-$(RM) tdnorme$(SUFX).exe tdnorme$(SUFX).o tdnorme$(SUFX).optrpt
 endif # SLEEF
