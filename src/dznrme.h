@@ -2,20 +2,20 @@
 #define DZNRME_H
 
 #include "vecdef.h"
-/* #include "d8sort.h" */
+#include "d8sort.h"
 #include "defops.h"
 #include "dkvsrt.h"
 
 #ifdef DZNRME_VARS0
 #error DZNRME_VARS0 already defined
 #else /* !DZNRME_VARS0 */
-#define DZNRME_VARS0                                    \
-  register const VD  _inf = _mm512_set1_pd(-HUGE_VAL);  \
-  /* register const VD _zero = _mm512_set1_pd(-0.0); */ \
-  register const VD  _one = _mm512_set1_pd(-1.0);       \
-  register const VD   one = _mm512_set1_pd( 1.0);       \
-  register VD re = _inf;                                \
-  register VD rf =  one
+#define DZNRME_VARS0                                   \
+  register const VD  _inf = _mm512_set1_pd(-HUGE_VAL); \
+  register const VD _zero = _mm512_set1_pd(-0.0);      \
+  register const VD  _one = _mm512_set1_pd(-1.0);      \
+  register const VD   one = _mm512_set1_pd( 1.0);      \
+  register VD re = _inf;                               \
+  register VD rf = one
 #endif /* ?DZNRME_VARS0 */
 
 #ifdef DZNRME_VARS1
@@ -56,30 +56,39 @@
 #endif /* ?NDEBUG */
 #endif /* ?ASSERT_FINITE */
 
+#ifdef DZNRME_ASRT
+#error DZNRME_ASRT already defined
+#else /* !DZNRME_ASRT */
+#ifdef DZNRME_ABSORT
+#define DZNRME_ASRT(xi) xi = VDABS(xi); VDSORT(xi); VDP(xi)
+#else /* !DZNRME_ABSORT */
+#define DZNRME_ASRT(xi) VDP(xi)
+#endif /* ?DZNRME_ABSORT */
+#endif /* ?DZNRME_ASRT */
+
 #ifdef DZNRME_LOOP
 #error DZNRME_LOOP already defined
 #else /* !DZNRME_LOOP */
-#define DZNRME_LOOP(x,ec)                                             \
-  {                                                                   \
-    register VD xi = _mm512_load_pd((x) + i); VDP(xi);                \
-    register const VD reh = VDLSB(re); VDP(reh);                      \
-    register const VD rep = _mm512_sub_pd(re, reh); VDP(rep);         \
-    register const VD rfp = _mm512_scalef_pd(rf, reh); VDP(rfp);      \
-    /* xi = VDABS(xi); VDP(xi); */                                    \
-    /* VDSORT(xi); VDP(xi); */                                        \
-    register const VD fi = VDMANT(xi); VDP(fi);                       \
-    register const VD ei = _mm512_getexp_pd(xi); VDP(ei);             \
-    ASSERT_FINITE(ec);                                                \
-    register const VD eh = _mm512_scalef_pd(ei, one); VDP(eh);        \
-    register const VD emax = _mm512_max_pd(eh, rep); VDP(emax);       \
-    register const VD ehp = VDSUBE(eh, emax); VDP(ehp);               \
-    register const VD repp = VDSUBE(rep, emax); VDP(repp);            \
-    register const VD ehpp = _mm512_scalef_pd(ehp, _one); VDP (ehpp); \
-    register const VD fh = _mm512_scalef_pd(fi, ehpp); VDP(fh);       \
-    register const VD rfhp = _mm512_scalef_pd(rfp, repp); VDP(rfhp);  \
-    rf = _mm512_fmadd_pd(fh, fh, rfhp); VDP(rf);                      \
-    re = _mm512_add_pd(emax, _mm512_getexp_pd(rf)); VDP(re);          \
-    rf = VDMANT(rf); VDP(rf);                                         \
+#define DZNRME_LOOP(x,ec)                                            \
+  {                                                                  \
+    register VD xi = _mm512_load_pd((x) + i);                        \
+    register const VD reh = VDLSB(re); VDP(reh);                     \
+    register const VD rep = _mm512_sub_pd(re, reh); VDP(rep);        \
+    register const VD rfp = _mm512_scalef_pd(rf, reh); VDP(rfp);     \
+    DZNRME_ASRT(xi);                                                 \
+    register const VD fi = VDMANT(xi); VDP(fi);                      \
+    register const VD ei = _mm512_getexp_pd(xi); VDP(ei);            \
+    ASSERT_FINITE(ec);                                               \
+    register const VD eh = _mm512_scalef_pd(ei, one); VDP(eh);       \
+    register const VD emax = _mm512_max_pd(eh, rep); VDP(emax);      \
+    register const VD ehp = VDSUBE(eh, emax); VDP(ehp);              \
+    register const VD repp = VDSUBE(rep, emax); VDP(repp);           \
+    register const VD ehpp = _mm512_scalef_pd(ehp, _one); VDP(ehpp); \
+    register const VD fh = _mm512_scalef_pd(fi, ehpp); VDP(fh);      \
+    register const VD rfhp = _mm512_scalef_pd(rfp, repp); VDP(rfhp); \
+    rf = _mm512_fmadd_pd(fh, fh, rfhp); VDP(rf);                     \
+    re = _mm512_add_pd(emax, _mm512_getexp_pd(rf)); VDP(re);         \
+    rf = VDMANT(rf); VDP(rf);                                        \
   }
 #endif /* ?DZNRME_LOOP */
 

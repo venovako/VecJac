@@ -61,7 +61,7 @@ FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL
 ifdef SLEEF
-LIBFLAGS += -DDZNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
+LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
