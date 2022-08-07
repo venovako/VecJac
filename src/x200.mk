@@ -40,7 +40,7 @@ ifndef LAPACK
 MKL=sequential
 endif # !LAPACK
 endif # !MKL
-DBGFLAGS=-traceback #-DJTRACE
+DBGFLAGS=-traceback -diag-disable=10397 #-DJTRACE
 FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt #-qsimd-honor-fp-model -qsimd-serialize-fp-reduction -fimf-use-svml=true
 ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
