@@ -1,6 +1,6 @@
 // Estimates the number of floating-point operations per second.
 // One scalar FMA is counted as a single FLOP, as well as SCALEF.
-// IT, the number of iterations, should be set sufficiently high; e.g., to 100000.
+// IT, the number of iterations, should be set sufficiently high; e.g., to 200000.
 #include "sdpscl.h"
 #include "sjrotf.h"
 #include "rnd.h"
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
       l += (e - b);
   }
   t = tsc_lap(hz, 0u, l);
-  f = (((3u * n + 11u) * it) / t);
+  f = (((3u * n + 19u) * it) / t);
   (void)fprintf(stdout, "%15.9Lf,%s,", t, xtoa(a, f));
   (void)fflush(stdout);
   const float tp6 = (1.0f / rt3);
