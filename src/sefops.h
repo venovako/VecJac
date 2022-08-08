@@ -36,7 +36,7 @@
 #ifdef FLT_MAX_FIN_EXP
 #error FLT_MAX_FIN_EXP already defined
 #else /* !FLT_MAX_FIN_EXP */
-#define FLT_MAX_FIN_EXP 127.0
+#define FLT_MAX_FIN_EXP 127.0f
 #endif /* ?FLT_MAX_FIN_EXP */
 
 static inline int efcmpf(float e0[static restrict 1], float f0[static restrict 1], float e1[static restrict 1], float f1[static restrict 1])
