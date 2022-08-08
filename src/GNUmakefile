@@ -12,12 +12,12 @@ endif # local.mk
 
 LIBS=libvecjac$(SUFX).a
 
-EXES=bclevd2$(SUFX).exe bdlevd2$(SUFX).exe bslevd2$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tcbjac2$(SUFX).exe tdbjac2$(SUFX).exe tsbjac2$(SUFX).exe tzbjac2$(SUFX).exe tpjs$(SUFX).exe tdgesvj$(SUFX).exe tzgesvj$(SUFX).exe tdvjsvd$(SUFX).exe tzvjsvd$(SUFX).exe dflops$(SUFX).exe sflops$(SUFX).exe
+EXES=bclevd2$(SUFX).exe bdlevd2$(SUFX).exe bslevd2$(SUFX).exe bzlevd2$(SUFX).exe gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tcbjac2$(SUFX).exe tdbjac2$(SUFX).exe tsbjac2$(SUFX).exe tzbjac2$(SUFX).exe tpjs$(SUFX).exe tcgesvj$(SUFX).exe tdgesvj$(SUFX).exe tsgesvj$(SUFX).exe tzgesvj$(SUFX).exe tdvjsvd$(SUFX).exe tzvjsvd$(SUFX).exe dflops$(SUFX).exe sflops$(SUFX).exe
 ifdef SLEEF
 EXES += tdnorme$(SUFX).exe
 endif # SLEEF
 
-OBJS=aalloc$(SUFX).o cbjac2$(SUFX).o cdpscl$(SUFX).o cmerge$(SUFX).o cnorm2$(SUFX).o common$(SUFX).o csplit$(SUFX).o dbjac2$(SUFX).o ddpscl$(SUFX).o dgsscl$(SUFX).o djrot$(SUFX).o djrotf$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dnssvj$(SUFX).o dscale$(SUFX).o dswp$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sbjac2$(SUFX).o sdpscl$(SUFX).o sgsscl$(SUFX).o sjrot$(SUFX).o sjrotf$(SUFX).o snorm2$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o zbjac2$(SUFX).o zdpscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o znssvj$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
+OBJS=aalloc$(SUFX).o cbjac2$(SUFX).o cdpscl$(SUFX).o cmerge$(SUFX).o cnorm2$(SUFX).o cnssvj$(SUFX).o common$(SUFX).o csplit$(SUFX).o dbjac2$(SUFX).o ddpscl$(SUFX).o dgsscl$(SUFX).o djrot$(SUFX).o djrotf$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dnssvj$(SUFX).o dscale$(SUFX).o dswp$(SUFX).o dvjsvd$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o sbjac2$(SUFX).o sdpscl$(SUFX).o sgsscl$(SUFX).o sjrot$(SUFX).o sjrotf$(SUFX).o snorm2$(SUFX).o snssvj$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o zbjac2$(SUFX).o zdpscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o znssvj$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
 ifdef SLEEF
 OBJS += dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o
 endif # SLEEF
@@ -45,6 +45,9 @@ cmerge$(SUFX).o: cmerge.c cmerge.h vec.h common.h $(MKFS)
 
 cnorm2$(SUFX).o: cnorm2.c cnorm2.h scnrm2.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+cnssvj$(SUFX).o: cnssvj.f $(MKFS)
+	$(FC) $(FFLAGS) -c $< -o $@
 
 common$(SUFX).o: common.c common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -128,6 +131,9 @@ sjrotf$(SUFX).o: sjrotf.c sjrotf.h vecdef.h vec.h common.h $(MKFS)
 
 snorm2$(SUFX).o: snorm2.c snorm2.h scnrm2.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+snssvj$(SUFX).o: snssvj.f $(MKFS)
+	$(FC) $(FFLAGS) -c $< -o $@
 
 timer$(SUFX).o: timer.c timer.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -223,7 +229,13 @@ endif # SLEEF
 tpjs$(SUFX).exe: tpjs.c $(LIBS) ../../JACSD/libjstrat$(DEBUG).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
+tcgesvj$(SUFX).exe: tcgesvj.c $(LIBS) $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) -lifcoremt
+
 tdgesvj$(SUFX).exe: tdgesvj.c $(LIBS) $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) -lifcoremt
+
+tsgesvj$(SUFX).exe: tsgesvj.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) -lifcoremt
 
 tzgesvj$(SUFX).exe: tzgesvj.c $(LIBS) $(MKFS)
@@ -247,6 +259,7 @@ clean:
 	-$(RM) cdpscl$(SUFX).o cdpscl$(SUFX).optrpt
 	-$(RM) cmerge$(SUFX).o cmerge$(SUFX).optrpt
 	-$(RM) cnorm2$(SUFX).o cnorm2$(SUFX).optrpt
+	-$(RM) cnssvj$(SUFX).o cnssvj$(SUFX).optrpt
 	-$(RM) common$(SUFX).o common$(SUFX).optrpt
 	-$(RM) csplit$(SUFX).o csplit$(SUFX).optrpt
 	-$(RM) dbjac2$(SUFX).o dbjac2$(SUFX).optrpt
@@ -270,6 +283,7 @@ clean:
 	-$(RM) sjrot$(SUFX).o sjrot$(SUFX).optrpt
 	-$(RM) sjrotf$(SUFX).o sjrotf$(SUFX).optrpt
 	-$(RM) snorm2$(SUFX).o snorm2$(SUFX).optrpt
+	-$(RM) snssvj$(SUFX).o snssvj$(SUFX).optrpt
 	-$(RM) timer$(SUFX).o timer$(SUFX).optrpt
 	-$(RM) vec$(SUFX).o vec$(SUFX).optrpt
 	-$(RM) vecjac$(SUFX).o vecjac$(SUFX).optrpt vecjac.mod
@@ -297,7 +311,9 @@ clean:
 	-$(RM) tsbjac2$(SUFX).exe tsbjac2.optrpt
 	-$(RM) tzbjac2$(SUFX).exe tzbjac2.optrpt
 	-$(RM) tpjs$(SUFX).exe tpjs.optrpt
+	-$(RM) tcgesvj$(SUFX).exe tcgesvj.optrpt
 	-$(RM) tdgesvj$(SUFX).exe tdgesvj.optrpt
+	-$(RM) tsgesvj$(SUFX).exe tsgesvj.optrpt
 	-$(RM) tzgesvj$(SUFX).exe tzgesvj.optrpt
 	-$(RM) tdvjsvd$(SUFX).exe tdvjsvd.optrpt
 	-$(RM) tzvjsvd$(SUFX).exe tzvjsvd.optrpt

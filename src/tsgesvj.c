@@ -3,9 +3,9 @@
 #include "vec.h"
 
 #ifndef USE_MKL
-extern void dgesvj_(const char *const, const char *const, const char *const, const fint *const, const fint *const, double *const, const fint *const, double *const, const fint *const, double *const, const fint *const, double *const, const fint *const, fint *const);
+extern void sgesvj_(const char *const, const char *const, const char *const, const fint *const, const fint *const, float *const, const fint *const, float *const, const fint *const, float *const, const fint *const, float *const, const fint *const, fint *const);
 #endif /* !USE_MKL */
-extern void dnssvj_(const char *const, const char *const, const char *const, const fint *const, const fint *const, double *const, const fint *const, double *const, const fint *const, double *const, const fint *const, double *const, const fint *const, const fint *const, fint *const);
+extern void snssvj_(const char *const, const char *const, const char *const, const fint *const, const fint *const, float *const, const fint *const, float *const, const fint *const, float *const, const fint *const, float *const, const fint *const, const fint *const, fint *const);
 
 int main(int argc, char *argv[])
 {
@@ -26,20 +26,20 @@ int main(int argc, char *argv[])
   const fint nsweep = ((argc == 5) ? (fint)atoz(argv[4u]) : (fint)0);
 
   const fint ldG = m;
-  double *const G = (double*)aligned_alloc(VA, (ldG * (n * sizeof(double))));
+  float *const G = (float*)aligned_alloc(VA, (ldG * (n * sizeof(float))));
   if (!G)
     return EXIT_FAILURE;
   const fint ldV = n;
-  double *const V = (double*)aligned_alloc(VA, (ldV * (n * sizeof(double))));
+  float *const V = (float*)aligned_alloc(VA, (ldV * (n * sizeof(float))));
   if (!V)
     return EXIT_FAILURE;
-  double *const sva = (double*)aligned_alloc(VA, (n * sizeof(double)));
+  float *const sva = (float*)aligned_alloc(VA, (n * sizeof(float)));
   if (!sva)
     return EXIT_FAILURE;
   fint mv = n;
-  const fint n2 = (n << 1);
-  const fint lwork = imax(6, n2);
-  double *const work = (double*)aligned_alloc(VA, (lwork * sizeof(double)));
+  const fint n4 = (n << 2);
+  const fint lwork = imax(6, n4);
+  float *const work = (float*)aligned_alloc(VA, (lwork * sizeof(float)));
   if (!work)
     return EXIT_FAILURE;
   fint info = 0;
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
   if (gd < 0)
     return EXIT_FAILURE;
 
-  if (dread2_(&m, &n, G, &ldG, &gd))
+  if (sread2_(&m, &n, G, &ldG, &gd))
     return EXIT_FAILURE;
 
   if (close(gd))
@@ -58,18 +58,18 @@ int main(int argc, char *argv[])
   const uint64_t hz = tsc_get_freq_hz_(rd);
   const uint64_t b = rdtsc_beg(rd);
   if (nsweep)
-    dnssvj_("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &nsweep, &info);
+    snssvj_("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &nsweep, &info);
   else
-    LAPACK_D(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &info);
+    LAPACK_S(gesvj)("G", "U", "V", &m, &n, G, &ldG, sva, &mv, V, &ldV, work, &lwork, &info);
   const uint64_t e = rdtsc_end(rd);
 
-  (void)fprintf(stdout, "\"%s\",%4lld,%4lld,%1lld,%15.9Lf,%#.17e,%4lld,%4lld,%3lld,%#.17e,%#.17e\n", bn, (long long)m, (long long)n, (long long)info, tsc_lap(hz, b, e), work[0u], (long long)(work[1u]), (long long)(work[2u]), (long long)(work[3u]), work[4u], work[5u]);
+  (void)fprintf(stdout, "\"%s\",%4lld,%4lld,%1lld,%15.9Lf,%#.9e,%4lld,%4lld,%3lld,%#.9e,%#.9e\n", bn, (long long)m, (long long)n, (long long)info, tsc_lap(hz, b, e), work[0u], (long long)(work[1u]), (long long)(work[2u]), (long long)(work[3u]), work[4u], work[5u]);
   (void)fflush(stdout);
 
-  const double ds = *work;
+  const float ds = *work;
   size_t l = (n * sizeof(wide));
   wide *const ws = (wide*)memset(work, 0, l);
-  if (ds == 1.0)
+  if (ds == 1.0f)
     for (fint i = 0; i < n; ++i)
       ws[i] = sva[i];
   else { // SCALE .NE. ONE
@@ -85,31 +85,31 @@ int main(int argc, char *argv[])
   if (resizef_(&sd, &l))
     return EXIT_FAILURE;
   mv = 1;
-  if (dwrite2_(&n2, &mv, work, &n2, &sd))
+  if (swrite2_(&n4, &mv, work, &n4, &sd))
     return EXIT_FAILURE;
   if (close(sd))
     return EXIT_FAILURE;
   free(work);
 
-  l = (n * (n * sizeof(double)));
+  l = (n * (n * sizeof(float)));
   const int vd = open_wo_(bn, "VL");
   if (vd < 0)
     return EXIT_FAILURE;
   if (resizef_(&vd, &l))
     return EXIT_FAILURE;
-  if (dwrite2_(&n, &n, V, &ldV, &vd))
+  if (swrite2_(&n, &n, V, &ldV, &vd))
     return EXIT_FAILURE;
   if (close(vd))
     return EXIT_FAILURE;
   free(V);
 
-  l = (m * (n * sizeof(double)));
+  l = (m * (n * sizeof(float)));
   const int ud = open_wo_(bn, "UL");
   if (ud < 0)
     return EXIT_FAILURE;
   if (resizef_(&ud, &l))
     return EXIT_FAILURE;
-  if (dwrite2_(&m, &n, G, &ldG, &ud))
+  if (swrite2_(&m, &n, G, &ldG, &ud))
     return EXIT_FAILURE;
   if (close(ud))
     return EXIT_FAILURE;
