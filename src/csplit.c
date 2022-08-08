@@ -40,8 +40,8 @@ fint csplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
       _mm256_store_ps((Arj + i), _mm512_extractf32x8_ps(ri, 0x00u));
       _mm256_store_ps((Aij + i), _mm512_extractf32x8_ps(ri, 0x01u));
 #else /* !__AVX512DQ__ */
-      _mm256_store_ps((Arj + i), _mm512_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(ri), 0x00u)));
-      _mm256_store_ps((Aij + i), _mm512_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(ri), 0x01u)));
+      _mm256_store_ps((Arj + i), _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(ri), 0x00u)));
+      _mm256_store_ps((Aij + i), _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(ri), 0x01u)));
 #endif /* ?__AVX512DQ__ */
     }
   }
@@ -58,8 +58,8 @@ fint csplit_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
       _mm256_store_ps((Arj + i), _mm512_extractf32x8_ps(ri, 0x00u));
       _mm256_store_ps((Aij + i), _mm512_extractf32x8_ps(ri, 0x01u));
 #else /* !__AVX512DQ__ */
-      _mm256_store_ps((Arj + i), _mm512_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(ri), 0x00u)));
-      _mm256_store_ps((Aij + i), _mm512_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(ri), 0x01u)));
+      _mm256_store_ps((Arj + i), _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(ri), 0x00u)));
+      _mm256_store_ps((Aij + i), _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(ri), 0x01u)));
 #endif /* ?__AVX512DQ__ */
     }
   }

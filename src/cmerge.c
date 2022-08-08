@@ -38,7 +38,7 @@ fint cmerge_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
 #ifdef __AVX512DQ__
       _mm512_store_ps((Aj + i), _mm512_permutexvar_ps(idx, _mm512_insertf32x8(_mm512_zextps256_ps512(_mm256_load_ps(Arj + i)), _mm256_load_ps(Aij + i), 0x01u)));
 #else /* !__AVX512DQ__ */
-      _mm512_store_ps((Aj + i), _mm512_permutexvar_ps(idx, _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_zextps256_ps512(_mm256_load_ps(Arj + i))), _mm512_castps_pd(_mm256_load_ps(Aij + i)), 0x01u))));
+      _mm512_store_ps((Aj + i), _mm512_permutexvar_ps(idx, _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_zextps256_ps512(_mm256_load_ps(Arj + i))), _mm256_castps_pd(_mm256_load_ps(Aij + i)), 0x01u))));
 #endif /* ?__AVX512DQ__ */
     }
   }
@@ -53,7 +53,7 @@ fint cmerge_(const fnat m[static restrict 1], const fnat n[static restrict 1], c
 #ifdef __AVX512DQ__
       _mm512_store_ps((Aj + i), _mm512_permutexvar_ps(idx, _mm512_insertf32x8(_mm512_zextps256_ps512(_mm256_load_ps(Arj + i)), _mm256_load_ps(Aij + i), 0x01u)));
 #else /* !__AVX512DQ__ */
-      _mm512_store_ps((Aj + i), _mm512_permutexvar_ps(idx, _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_zextps256_ps512(_mm256_load_ps(Arj + i))), _mm512_castps_pd(_mm256_load_ps(Aij + i)), 0x01u))));
+      _mm512_store_ps((Aj + i), _mm512_permutexvar_ps(idx, _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_zextps256_ps512(_mm256_load_ps(Arj + i))), _mm256_castps_pd(_mm256_load_ps(Aij + i)), 0x01u))));
 #endif /* ?__AVX512DQ__ */
     }
   }
