@@ -12,9 +12,9 @@ endif # local.mk
 
 LIBS=libvecjac$(SUFX).a
 
-SEXES=bslevd2$(SUFX).exe tsbjac2$(SUFX).exe tsgesvj$(SUFX).exe sflops$(SUFX).exe
+SEXES=bslevd2$(SUFX).exe tsbjac2$(SUFX).exe tsgesvj$(SUFX).exe tsvjsvd$(SUFX).exe sflops$(SUFX).exe
 DEXES=bdlevd2$(SUFX).exe tdbjac2$(SUFX).exe tdgesvj$(SUFX).exe tdvjsvd$(SUFX).exe dflops$(SUFX).exe
-CEXES=bclevd2$(SUFX).exe tcbjac2$(SUFX).exe tcgesvj$(SUFX).exe
+CEXES=bclevd2$(SUFX).exe tcbjac2$(SUFX).exe tcgesvj$(SUFX).exe tcvjsvd$(SUFX).exe
 ZEXES=bzlevd2$(SUFX).exe tzbjac2$(SUFX).exe tzgesvj$(SUFX).exe tzvjsvd$(SUFX).exe
 XEXES=gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tpjs$(SUFX).exe
 ifdef SLEEF
@@ -278,7 +278,13 @@ tsgesvj$(SUFX).exe: tsgesvj.c $(LIBS) $(MKFS)
 tzgesvj$(SUFX).exe: tzgesvj.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) -lifcoremt
 
+tcvjsvd$(SUFX).exe: tcvjsvd.c $(LIBS) $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
 tdvjsvd$(SUFX).exe: tdvjsvd.c $(LIBS) $(MKFS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
+
+tsvjsvd$(SUFX).exe: tsvjsvd.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
 tzvjsvd$(SUFX).exe: tzvjsvd.c $(LIBS) $(MKFS)
