@@ -89,6 +89,13 @@
 #define VSL 16u
 #endif /* ?VSL */
 
+/* VSL * 2 */
+#ifdef VSL2
+#error VSL2 already defined
+#else /* !VSL2 */
+#define VSL2 32u
+#endif /* ?VSL2 */
+
 /* VSL - 1 */
 #ifdef VSL_1
 #error VSL_1 already defined
@@ -124,6 +131,7 @@
 #define VDL 8u
 #endif /* ?VDL */
 
+/* VDL * 2 */
 #ifdef VDL2
 #error VDL2 already defined
 #else /* !VDL2 */

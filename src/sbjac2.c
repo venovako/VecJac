@@ -41,8 +41,7 @@ _mm512_store_ps((c + i), co);                                                   
 register const VS L2 = _mm512_div_ps(_mm512_fmadd_ps(t1, _mm512_fmsub_ps(a1, t1, ab), a2), s2); VSP(L2);                 \
 _mm512_store_ps((l1 + i), _mm512_scalef_ps(L1, es));                                                                     \
 register const MS P = _mm512_cmplt_ps_mask(L1, L2); MSP(P);                                                              \
-_mm512_store_ps((l2 + i), _mm512_scalef_ps(L2, es));                                                                     \
-p[i >> VSLlg] = MS2U(P)
+_mm512_store_ps((l2 + i), _mm512_scalef_ps(L2, es))
 #endif /* ?S8JAC2_LOOP */
 
 // return the sines instead of the tangents
@@ -76,8 +75,7 @@ _mm512_store_ps((c + i), co);                                                   
 register const VS L2 = _mm512_div_ps(_mm512_fmadd_ps(t1, _mm512_fmsub_ps(a1, t1, ab), a2), s2); VSP(L2);                 \
 _mm512_store_ps((l1 + i), _mm512_scalef_ps(L1, es));                                                                     \
 register const MS P = _mm512_cmplt_ps_mask(L1, L2); MSP(P);                                                              \
-_mm512_store_ps((l2 + i), _mm512_scalef_ps(L2, es));                                                                     \
-p[i >> VSLlg] = MS2U(P)
+_mm512_store_ps((l2 + i), _mm512_scalef_ps(L2, es))
 #endif /* ?S8JACL_LOOP */
 
 fint sbjac2_(const fint n[static restrict 1], const float a11[static restrict VSL], const float a22[static restrict VSL], const float a21[static restrict VSL], float c[static restrict VSL], float at[static restrict VSL], float l1[static restrict VSL], float l2[static restrict VSL], unsigned p[static restrict 1])
@@ -110,12 +108,14 @@ fint sbjac2_(const fint n[static restrict 1], const float a11[static restrict VS
     for (fnat i = 0u; i < _n; i += VSL) {
       S8JAC2_PARAMS;
       S8JACL_LOOP;
+      p[i >> VSLlg] = MS2U(P);
     }
     return 1;
 #else /* !_OPENMP */
     S8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VSL) {
       S8JACL_LOOP;
+      p[i >> VSLlg] = MS2U(P);
     }
     return 0;
 #endif /* ?_OPENMP */
@@ -127,12 +127,14 @@ fint sbjac2_(const fint n[static restrict 1], const float a11[static restrict VS
     for (fnat i = 0u; i < _n; i += VSL) {
       S8JAC2_PARAMS;
       S8JAC2_LOOP;
+      p[i >> VSLlg] = MS2U(P);
     }
     return 1;
 #else /* !_OPENMP */
     S8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VSL) {
       S8JAC2_LOOP;
+      p[i >> VSLlg] = MS2U(P);
     }
     return 0;
 #endif /* ?_OPENMP */
@@ -170,7 +172,7 @@ register const VS L2 = _mm512_div_ps(_mm512_fmadd_ps(t1, _mm512_fmsub_ps(a1, t1,
 _mm512_store_ps((l1 + i), _mm512_scalef_ps(L1, es));                                                                     \
 register const MS P = _mm512_cmplt_ps_mask(L1, L2); MSP(P);                                                              \
 _mm512_store_ps((l2 + i), _mm512_scalef_ps(L2, es));                                                                     \
-p[i >> VSLlg] = MS2U(P)
+p[j] = ((p[j] & 0xFFFF0000u) | MS2U(P))
 #endif /* ?S8JACI_LOOP */
 
 // for internal use only
@@ -202,17 +204,21 @@ fint sbjac2i(const fint n[static restrict 1], const float a11[static restrict VS
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(_n,a11,a22,a21,c,at,l1,l2,p)
     for (fnat i = 0u; i < _n; i += VSL) {
-      if (p[i >> VSLlg]) {
+      const fnat j = (i >> VSLlg);
+      if (p[j]) {
         S8JAC2_PARAMS;
         S8JACI_LOOP;
+        p[j] = ((p[j] & 0xFFFF0000u) | MS2U(P));
       }
     }
     return 1;
 #else /* !_OPENMP */
     S8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VSL) {
-      if (p[i >> VSLlg]) {
+      const fnat j = (i >> VSLlg);
+      if (p[j]) {
         S8JACI_LOOP;
+        p[j] = ((p[j] & 0xFFFF0000u) | MS2U(P));
       }
     }
     return 0;
@@ -223,17 +229,21 @@ fint sbjac2i(const fint n[static restrict 1], const float a11[static restrict VS
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(_n,a11,a22,a21,c,at,l1,l2,p)
     for (fnat i = 0u; i < _n; i += VSL) {
-      if (p[i >> VSLlg]) {
+      const fnat j = (i >> VSLlg);
+      if (p[j]) {
         S8JAC2_PARAMS;
         S8JAC2_LOOP;
+        p[j] = ((p[j] & 0xFFFF0000u) | MS2U(P));
       }
     }
     return 1;
 #else /* !_OPENMP */
     S8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VSL) {
-      if (p[i >> VSLlg]) {
+      const fnat j = (i >> VSLlg);
+      if (p[j]) {
         S8JAC2_LOOP;
+        p[j] = ((p[j] & 0xFFFF0000u) | MS2U(P));
       }
     }
     return 0;

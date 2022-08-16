@@ -135,7 +135,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
   // see LAPACK's DGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
+#ifdef DGSSCL_H
   const double gst = scalb(tol, DBL_MAX_FIN_EXP);
+#endif /* DGSSCL_H */
   unsigned sw = 0u;
 
 #ifdef JTRACE
@@ -298,7 +300,11 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       }
       fnat stt = 0u;
 #ifdef _OPENMP
+#ifdef DGSSCL_H
 #pragma omp parallel for default(none) shared(n_2,a11,a22,a21,c,at,l1,l2,w,p,pc,tol,gst) reduction(+:stt)
+#else /* !DGSSCL_H */
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,c,at,l1,l2,w,p,pc,tol) reduction(+:stt)
+#endif /* ?DGSSCL_H */
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
@@ -375,8 +381,10 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
+#ifdef DGSSCL_H
         unsigned gsp = ((pc[j] & 0xFF0000u) >> VDL2);
         unsigned gsn = ((pc[j] & 0xFF00u) >> VDL);
+#endif /* DGSSCL_H */
         unsigned trans = (pc[j] & 0xFFu);
         unsigned perm = (p[j] & 0xFFu);
         for (fnat k = 0u; k < VDL; ++k) {
@@ -386,13 +394,16 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const uint64_t _q = r[pq + 1u];
           *(uint64_t*)(a11 + l) = _p;
           *(uint64_t*)(a22 + l) = _q;
+#ifdef DGSSCL_H
           if (gsp & 1u) {
             a21[l] = -3.0;
             ++np;
           }
           else if (gsn & 1u)
             a21[l] = 3.0;
-          else if (trans & 1u) {
+          else
+#endif /* DGSSCL_H */
+          if (trans & 1u) {
             if (perm & 1u) {
               a21[l] = -2.0;
               ++np;
@@ -412,8 +423,10 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           }
           else // no swap
             a21[l] = 1.0;
+#ifdef DGSSCL_H
           gsp >>= 1u;
           gsn >>= 1u;
+#endif /* DGSSCL_H */
           trans >>= 1u;
           perm >>= 1u;
         }

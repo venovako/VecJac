@@ -22,9 +22,9 @@ DEXES += tdnorme$(SUFX).exe
 endif # SLEEF
 EXES=$(SEXES) $(DEXES) $(CEXES) $(ZEXES) $(XEXES)
 
-SOBJS=sbjac2$(SUFX).o sdpscl$(SUFX).o sgsscl$(SUFX).o sjrot$(SUFX).o sjrotf$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o snssvj$(SUFX).o sscale$(SUFX).o sswp$(SUFX).o
+SOBJS=sbjac2$(SUFX).o sdpscl$(SUFX).o sgsscl$(SUFX).o sjrot$(SUFX).o sjrotf$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o snssvj$(SUFX).o sscale$(SUFX).o sswp$(SUFX).o svjsvd$(SUFX).o
 DOBJS=dbjac2$(SUFX).o ddpscl$(SUFX).o dgsscl$(SUFX).o djrot$(SUFX).o djrotf$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dnssvj$(SUFX).o dscale$(SUFX).o dswp$(SUFX).o dvjsvd$(SUFX).o
-COBJS=cbjac2$(SUFX).o cdpscl$(SUFX).o cmerge$(SUFX).o cjrot$(SUFX).o cjrotf$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cnssvj$(SUFX).o cscale$(SUFX).o csplit$(SUFX).o
+COBJS=cbjac2$(SUFX).o cdpscl$(SUFX).o cmerge$(SUFX).o cjrot$(SUFX).o cjrotf$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cnssvj$(SUFX).o cscale$(SUFX).o csplit$(SUFX).o cvjsvd$(SUFX).o
 ZOBJS=zbjac2$(SUFX).o zdpscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o znssvj$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
 XOBJS=aalloc$(SUFX).o common$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o
 ifdef SLEEF
@@ -77,6 +77,9 @@ cscale$(SUFX).o: cscale.c cscale.h scscal.h vec.h common.h $(MKFS)
 csplit$(SUFX).o: csplit.c csplit.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+cvjsvd$(SUFX).o: cvjsvd.c cvjsvd.h cnormx.h cscale.h cnorm2.h scnrm2.h cdpscl.h cbjac2.h cjrotf.h cjrot.h sswp.h vecdef.h sefops.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
 dbjac2$(SUFX).o: dbjac2.c dbjac2.h dzjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -121,7 +124,7 @@ dscale$(SUFX).o: dscale.c dscale.h dzscal.h vec.h common.h $(MKFS)
 dswp$(SUFX).o: dswp.c dswp.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-dvjsvd$(SUFX).o: dvjsvd.c dvjsvd.h dnormx.h dscale.h dnorm2.h dznrm2.h ddpscl.h dgsscl.h dbjac2.h djrotf.h djrot.h dswp.h vecdef.h defops.h vec.h common.h $(MKFS)
+dvjsvd$(SUFX).o: dvjsvd.c dvjsvd.h dnormx.h dscale.h dnorm2.h dznrm2.h ddpscl.h dbjac2.h djrotf.h djrot.h dswp.h vecdef.h defops.h vec.h common.h $(MKFS) #dgsscl.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 laev2$(SUFX).o: laev2.c laev2.h common.h $(MKFS)
@@ -164,6 +167,9 @@ sscale$(SUFX).o: sscale.c sscale.h scscal.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 sswp$(SUFX).o: sswp.c sswp.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+svjsvd$(SUFX).o: svjsvd.c svjsvd.h snormx.h sscale.h snorm2.h scnrm2.h sdpscl.h sbjac2.h sjrotf.h sjrot.h sswp.h vecdef.h sefops.h vec.h common.h $(MKFS) #sgsscl.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 timer$(SUFX).o: timer.c timer.h common.h $(MKFS)
