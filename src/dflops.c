@@ -72,13 +72,13 @@ int main(int argc, char *argv[])
   double e2[2u] = { 1.0, 1.0 };
   double f2[2u] = { 1.5, 1.5 };
   // warmup
-  (void)ddpscl_((const fint*)&n, x, y, e2, f2);
+  (void)ddpscl_((const fnat*)&n, x, y, e2, f2);
   l = 0u;
   for (size_t i = 0u; i < it; ++i) {
     gendfrand_(&n, &aub, x);
     gendfrand_(&n, &aub, y);
     b = rdtsc_beg(rd);
-    (void)ddpscl_((const fint*)&n, x, y, e2, f2); // n FMAs + 2n SCALEFs + O(1)
+    (void)ddpscl_((const fnat*)&n, x, y, e2, f2); // n FMAs + 2n SCALEFs + O(1)
     e = rdtsc_end(rd);
     if (e >= b)
       l += (e - b);

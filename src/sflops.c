@@ -72,13 +72,13 @@ int main(int argc, char *argv[])
   float e2[2u] = { 1.0f, 1.0f };
   float f2[2u] = { 1.5f, 1.5f };
   // warmup
-  (void)sdpscl_((const fint*)&n, x, y, e2, f2);
+  (void)sdpscl_((const fnat*)&n, x, y, e2, f2);
   l = 0u;
   for (size_t i = 0u; i < it; ++i) {
     gensfrand_(&n, &aub, x);
     gensfrand_(&n, &aub, y);
     b = rdtsc_beg(rd);
-    (void)sdpscl_((const fint*)&n, x, y, e2, f2); // n FMAs + 2n SCALEFs + O(1)
+    (void)sdpscl_((const fnat*)&n, x, y, e2, f2); // n FMAs + 2n SCALEFs + O(1)
     e = rdtsc_end(rd);
     if (e >= b)
       l += (e - b);

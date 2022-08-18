@@ -10,7 +10,7 @@ arXiv:[2202.08361](https://arxiv.org/abs/2202.08361 "Vectorization of the Jacobi
 
 ### Prerequisites
 
-A recent Intel CPU (with at least the AVX512F instruction subset) and oneAPI Base and HPC Toolkits (e.g., 2021.2) on a 64-bit Linux (e.g., CentOS 7.9) are required; macOS (e.g., Big Sur) should also be supported (not tested).
+A recent Intel CPU (with at least the AVX512F instruction subset) and oneAPI Base and HPC Toolkits (e.g., 2021.2 or newer) on a 64-bit Linux (e.g., CentOS 7.9) are required; macOS (e.g., Big Sur) should also be supported (not tested).
 
 First, clone and build [JACSD](https://github.com/venovako/JACSD) repository, with the same parent directory as this one.  In fact, only the ``jstrat`` library is required to be built there.
 
@@ -20,7 +20,7 @@ Run ``make`` in the ``src`` subdirectory as follows:
 ```bash
 make [COMPILER=x64|x200] [x64 ? CPU=...] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [all|clean|help]
 ```
-where ``COMPILER`` should be set to ``x64`` for Xeons (not tested), or to ``x200`` for Xeon Phi KNLs, respectively.
+where ``COMPILER`` should be set to ``x64`` for Xeons, or to ``x200`` for Xeon Phi KNLs, respectively (in both cases only the classic, non-LLVM compilers are supported).
 Here, ``NDEBUG`` should be set to the desired optimization level (``3`` is a sensible choice).
 As a hack, setting ``MKL`` *explicitly* to ``sequential`` turns off OpenMP (otherwise it is turned on, unless debugging).
 If ``COMPILER=x64`` then the ``CPU`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``) or left undefined to take the default value of ``Host``.
