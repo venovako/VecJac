@@ -129,6 +129,12 @@ int zread2_(const fnat m[static restrict 1], const fnat n[static restrict 1], do
   return r;
 }
 
+int wwrite1_(const fnat m[static restrict 1], const wide w[static restrict 1], const int fd[static restrict 1])
+{
+  const size_t sz = (*m * sizeof(wide));
+  return (sz ? ((ssize_t)sz != write(*fd, w, sz)) : 0);
+}
+
 #ifdef WRITE_LOOP
 #error WRITE_LOOP already defined
 #else /* !WRITE_LOOP */

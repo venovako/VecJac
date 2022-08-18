@@ -80,7 +80,8 @@ int main(int argc, char *argv[])
   *rwork1 = *rwork;
   free(rwork);
 
-  wide *const ws = (wide*)memset(cwork, 0, (n * sizeof(wide)));
+  *(size_t*)cwork1 = (n * sizeof(wide));
+  wide *const ws = (wide*)memset(cwork, 0, *(const size_t*)cwork1);
   if (*rwork1 == 1.0f)
     for (fint i = 0; i < n; ++i)
       ws[i] = sva[i];
@@ -91,14 +92,12 @@ int main(int argc, char *argv[])
   }
   free(sva);
 
-  *(size_t*)cwork1 = (n * sizeof(wide));
   const int sd = open_wo_(bn, "SL");
   if (sd < 0)
     return EXIT_FAILURE;
   if (resizef_(&sd, (const size_t*)cwork1))
     return EXIT_FAILURE;
-  *(fnat*)cwork1 = 2u;
-  if (cwrite2_(&n, (const fnat*)cwork1, cwork, &n, &sd))
+  if (wwrite1_(&n, ws, &sd))
     return EXIT_FAILURE;
   if (close(sd))
     return EXIT_FAILURE;

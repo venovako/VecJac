@@ -36,9 +36,8 @@ int main(int argc, char *argv[])
   double *const sva = (double*)aligned_alloc(VA, (n * sizeof(double)));
   if (!sva)
     return EXIT_FAILURE;
-  fint mv = n;
-  const fint n2 = (n << 1);
-  const fint lwork = imax(6, n2);
+  const fint mv = n;
+  const fint lwork = imax(6, (n << 1));
   double *const work = (double*)aligned_alloc(VA, (lwork * sizeof(double)));
   if (!work)
     return EXIT_FAILURE;
@@ -84,8 +83,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   if (resizef_(&sd, &l))
     return EXIT_FAILURE;
-  mv = 1;
-  if (dwrite2_(&n2, &mv, work, &n2, &sd))
+  if (wwrite1_(&n, ws, &sd))
     return EXIT_FAILURE;
   if (close(sd))
     return EXIT_FAILURE;

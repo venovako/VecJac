@@ -120,8 +120,7 @@ int main(int argc, char *argv[])
   *(size_t*)js = (n * sizeof(wide));
   if (resizef_(&sd, (const size_t*)js))
     return 10;
-  const fnat n4 = (n << 2u), n1 = 1u;
-  if (swrite2_(&n4, &n1, work, &n4, &sd))
+  if (wwrite1_(&n, ws, &sd))
     return 10;
   if (close(sd))
     return 10;
