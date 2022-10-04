@@ -5,7 +5,7 @@ CPU=Host
 !IFNDEF NDEBUG
 NDEBUG=3
 !ENDIF # !NDEBUG
-CFLAGS=/nologo /DNDEBUG /Qstd=c18 /O$(NDEBUG) /Qx$(CPU) /Qlong-double /Qopenmp /Qopt-multi-version-aggressive /Qopt-report:5 /fp:precise /Qprotect-parens /Qfma /Qftz- /Qcomplex-limited-range- /Qfast-transcendentals- /Qprec-div /Qprec-sqrt /Ob2 /Qvec-threshold:0 /MD /traceback /Qdiag-disable:10397
+CFLAGS=/nologo /DNDEBUG /Qstd=c18 /O$(NDEBUG) /Qx$(CPU) /Qlong-double /Qopenmp /Qopt-multi-version-aggressive /Qopt-report:5 /fp:precise /Qprotect-parens /Qfma /Qftz- /Qcomplex-limited-range- /Qfast-transcendentals- /Qprec-div /Qprec-sqrt /Ob2 /Qvec-threshold:0 /MD /traceback /Qdiag-disable:10397,10441
 
 all: tsjac2.exe
 

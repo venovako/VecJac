@@ -9,7 +9,7 @@ SHELL=/bin/bash
 CC=icc
 FLAGS_NOOPT=-DUSE_IEEE_INTRINSIC -DWeirdNEC -DLAPACK_ILP64 -xHost -qopenmp -fPIC -fexceptions -fno-omit-frame-pointer -rdynamic -fp-model precise -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -qopt-multi-version-aggressive -qopt-report=5 #-qopt-zmm-usage=high
 FLAGS=-O3 $(FLAGS_NOOPT)
-CFLAGS=$(FLAGS) -std=c18
+CFLAGS=$(FLAGS) -std=c18 -diag-disable=10441
 
 #  Modify the FC and FFLAGS definitions to the desired compiler
 #  and desired compiler options for your machine.  NOOPT refers to
