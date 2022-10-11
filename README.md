@@ -20,7 +20,7 @@ Run ``make`` in the ``src`` subdirectory as follows:
 ```bash
 make [COMPILER=x64|x64x|x200] [x64[x] ? CPU=...] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [all|clean|help]
 ```
-where ``COMPILER`` should be set to ``x64`` for Xeon processors with icc/ifort, to ``x64x`` for Xeons with icx/ifx, or to ``x200`` for Xeon Phi KNLs (for which only the classic, non-LLVM compilers icc/ifort are supported), respectively.
+where ``COMPILER`` should be set to ``x64`` for Xeon processors with icc/icpc/ifort, to ``x64x`` for Xeons with icx/icpx/ifx, or to ``x200`` for Xeon Phi KNLs (for which only the classic, non-LLVM compilers icc/icpc/ifort are supported), respectively.
 Here, ``NDEBUG`` should be set to the desired optimization level (``3`` is a sensible choice).
 As a hack, setting ``MKL`` *explicitly* to ``sequential`` turns off OpenMP (otherwise it is turned on, unless debugging).
 If ``COMPILER=x64[x]`` then the ``CPU`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``) or left undefined to take the default value of ``Host``.
