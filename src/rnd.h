@@ -1,7 +1,7 @@
 #ifndef RND_H
 #define RND_H
 
-#include "common.h"
+#include "vec.h"
 
 static inline uint16_t uwrand()
 {

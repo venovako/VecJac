@@ -18,18 +18,18 @@ First, clone and build [JACSD](https://github.com/venovako/JACSD) repository, wi
 
 Run ``make`` in the ``src`` subdirectory as follows:
 ```bash
-make [COMPILER=x64|x200] [x64 ? CPU=...] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [all|clean|help]
+make [COMPILER=x64|x64x|x200] [x64[x] ? CPU=...] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [all|clean|help]
 ```
-where ``COMPILER`` should be set to ``x64`` for Xeons, or to ``x200`` for Xeon Phi KNLs, respectively (in both cases only the classic, non-LLVM compilers are supported).
+where ``COMPILER`` should be set to ``x64`` for Xeon processors with icc/ifort, to ``x64x`` for Xeons with icx/ifx, or to ``x200`` for Xeon Phi KNLs (for which only the classic, non-LLVM compilers icc/ifort are supported), respectively.
 Here, ``NDEBUG`` should be set to the desired optimization level (``3`` is a sensible choice).
 As a hack, setting ``MKL`` *explicitly* to ``sequential`` turns off OpenMP (otherwise it is turned on, unless debugging).
-If ``COMPILER=x64`` then the ``CPU`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``) or left undefined to take the default value of ``Host``.
+If ``COMPILER=x64[x]`` then the ``CPU`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``) or left undefined to take the default value of ``Host``.
 Other options should not be used unless their consequences are fully understood.
-For example, ``make COMPILER=x200 NDEBUG=3 clean all`` will trigger a full, release-mode rebuild for the KNLs.
+For example, ``make COMPILER=x64 NDEBUG=3 clean all`` will trigger a full, release-mode rebuild for Xeons.
 
 ## Running
 
-The ``etc`` subdirectory contains a script that should be sourced *before* launching the executables.
+The ``etc`` subdirectory contains ``env.sh``, the script that should be sourced *before* launching the executables.
 The script should be modified for any Linux distribution different from RedHat/CentOS 7.
 On newer Intel Xeon CPUs it might be sufficient to query the CPUID leaf ``0x15`` for the TSC frequency in run-time, but since it is not guaranteed to work, a safer timing procedure, using ``CLOCK_MONOTONIC_RAW``, is default there.
 The OpenMP-enabled executables require setting ``OMP_NUM_THREADS`` environment variable for the upper bound on the number of threads to be used.

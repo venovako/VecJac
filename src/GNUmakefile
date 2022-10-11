@@ -35,7 +35,7 @@ OBJS=$(SOBJS) $(DOBJS) $(COBJS) $(ZOBJS) $(XOBJS)
 all: $(LIBS) $(EXES)
 
 help:
-	@echo "make [COMPILER=x64|x200] [x64 ? CPU=...] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [all|clean|help]"
+	@echo "make [COMPILER=x64|x64x|x200] [x64[x] ? CPU=...] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [all|clean|help]"
 	@echo "Setting explicitly MKL to sequential (default) turns off OpenMP (otherwise it is turned on, unless debugging)."
 
 libvecjac$(SUFX).a: $(OBJS) $(MKFS)
@@ -136,7 +136,7 @@ mtxio$(SUFX).o: mtxio.c mtxio.h common.h $(MKFS)
 pjs$(SUFX).o: pjs.c pjs.h common.h ../../JACSD/jstrat/jstrat.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-rnd$(SUFX).o: rnd.c rnd.h common.h $(MKFS)
+rnd$(SUFX).o: rnd.c rnd.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 sbjac2$(SUFX).o: sbjac2.c sbjac2.h scjac2.h vecdef.h vec.h common.h $(MKFS)
