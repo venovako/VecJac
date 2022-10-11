@@ -84,4 +84,4 @@ endif # DEBUG
 ifeq ($(ABI),ilp64)
 FFLAGS += -fdefault-integer-8
 endif # ilp64
-FLFLAGS=
+FLFLAGS=-lgfortran
