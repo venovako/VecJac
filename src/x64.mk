@@ -86,9 +86,9 @@ ifdef LAPACK
 LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas -lifcoremt
 else # MKL
 ifeq ($(ARCH),Darwin)
-LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib -lmkl_intel_$(ABI) -lmkl_sequential -lmkl_core
+LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath,${MKLROOT}/lib -lmkl_intel_$(ABI) -lmkl_$(MKL) -lmkl_core
 else # Linux
-LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_intel_$(ABI) -lmkl_sequential -lmkl_core
+LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_intel_$(ABI) -lmkl_$(MKL) -lmkl_core
 endif # ?Darwin
 endif # ?LAPACK
 ifneq ($(ARCH),Darwin) # Linux
@@ -119,3 +119,4 @@ endif # SLEEF
 ifeq ($(ABI),ilp64)
 FFLAGS += -i8
 endif # ilp64
+FLFLAGS=-lifcoremt

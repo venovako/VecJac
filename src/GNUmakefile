@@ -260,23 +260,23 @@ tdnorme$(SUFX).o: tdnorme.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 tdnorme$(SUFX).exe: tdnorme$(SUFX).o psort$(SUFX).o wdp$(SUFX).o $(LIBS) $(MKFS)
-	$(CXX) $(CXXFLAGS) tdnorme$(SUFX).o psort$(SUFX).o wdp$(SUFX).o -o $@ $(LDFLAGS) -lifcoremt
+	$(CXX) $(CXXFLAGS) tdnorme$(SUFX).o psort$(SUFX).o wdp$(SUFX).o -o $@ $(LDFLAGS) $(FLFLAGS)
 endif # SLEEF
 
 tpjs$(SUFX).exe: tpjs.c $(LIBS) ../../JACSD/libjstrat$(DEBUG).a $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
 tcgesvj$(SUFX).exe: tcgesvj.c $(LIBS) $(MKFS)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) -lifcoremt
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(FLFLAGS)
 
 tdgesvj$(SUFX).exe: tdgesvj.c $(LIBS) $(MKFS)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) -lifcoremt
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(FLFLAGS)
 
 tsgesvj$(SUFX).exe: tsgesvj.c $(LIBS) $(MKFS)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) -lifcoremt
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(FLFLAGS)
 
 tzgesvj$(SUFX).exe: tzgesvj.c $(LIBS) $(MKFS)
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) -lifcoremt
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(FLFLAGS)
 
 tcvjsvd$(SUFX).exe: tcvjsvd.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
