@@ -1,3 +1,6 @@
+ifdef SLEEF
+$(error SLEEF is not yet supported with GCC)
+endif # SLEEF
 SHELL=/bin/bash
 ifndef CPU
 CPU=native
@@ -18,9 +21,6 @@ AR=ar
 ARFLAGS=rsv
 CC=gcc$(GNU)
 FC=gfortran$(GNU)
-ifdef SLEEF
-CXX=g++$(GNU)
-endif # SLEEF
 CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer -rdynamic
 ifdef NDEBUG
 ifdef MKL
@@ -55,9 +55,6 @@ OPTFLAGS += -O$(DEBUG)
 DBGFLAGS += -$(DEBUG) -DPRINTOUT=stderr
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL
-ifdef SLEEF
-LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
-endif # SLEEF
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
 endif # MKL
@@ -65,14 +62,6 @@ ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
 LDFLAGS=-L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
-ifdef SLEEF
-ifeq ($(wildcard $(SLEEF)/lib64),)
-LDFLAGS += -L$(SLEEF)/lib -Wl,-rpath=$(SLEEF)/lib
-else # lib64
-LDFLAGS += -L$(SLEEF)/lib64 -Wl,-rpath=$(SLEEF)/lib64
-endif # ?lib64
-LDFLAGS += -lsleefquad
-endif # SLEEF
 ifdef LAPACK
 LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas
 else # MKL
@@ -89,9 +78,6 @@ endif # MKL
 LDFLAGS += -lpthread -lm -ldl
 CFLAGS=-std=gnu18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -Wno-incompatible-pointer-types
 FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -fprotect-parens
-ifdef SLEEF
-CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS)
-endif # SLEEF
 ifndef NDEBUG
 FFLAGS += -fcheck=all -finit-local-zero -finit-real=snan -finit-derived -pedantic
 endif # DEBUG
