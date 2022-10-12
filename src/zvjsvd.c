@@ -107,18 +107,17 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   dbl2ef(M, &es, &fs);
   int eM = (int)es;
   int sR = DBL_MAX_ROT_EXP - eM - 1;
-  int sN = DBL_MAX_NRM_EXP - eM - 1;
+  fint sN = DBL_MAX_NRM_EXP - eM - 1;
 #ifdef JTRACE
-  (void)fprintf(jtr, "eM=%d, sR=%d, sN=%d, M=", eM, sR, sN);
+  (void)fprintf(jtr, "eM=%d, sR=%d, sN=%d, M=", eM, sR, (int)sN);
   (void)fflush(jtr);
 #endif /* JTRACE */
   if (sN) {
-    *(fint*)&es = sN;
-    if (zscale_(m, n, Gr, ldGr, Gi, ldGi, (const fint*)&es) < 0)
+    if (zscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
       return -21;
-    M = scalbn(M, sN);
+    M = scalbn(M, (int)sN);
   }
-  int sT = sN;
+  int sT = (int)sN;
 #ifdef JTRACE
   (void)fprintf(jtr, "%#.17e\n", M);
   (void)fflush(jtr);
@@ -169,14 +168,13 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       sN = DBL_MAX_NRM_EXP - eM - 1;
       if (sR < 0) {
 #ifdef JTRACE
-        (void)fprintf(jtr, "sweep=%u, step=%u, eM=%d, sR=%d, sN=%d, M=", sw, st, eM, sR, sN);
+        (void)fprintf(jtr, "sweep=%u, step=%u, eM=%d, sR=%d, sN=%d, M=", sw, st, eM, sR, (int)sN);
         (void)fflush(jtr);
 #endif /* JTRACE */
-        *(fint*)&es = sN;
-        if (zscale_(m, n, Gr, ldGr, Gi, ldGi, (const fint*)&es) < 0)
+        if (zscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
           return -22;
-        M = scalbn(M, sN);
-        sT += sN;
+        M = scalbn(M, (int)sN);
+        sT += (int)sN;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(l1,n)
 #endif /* _OPENMP */
@@ -232,11 +230,10 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           (void)fprintf(jtr, "sweep=%u, step=%u, M=", sw, st);
           (void)fflush(jtr);
 #endif /* JTRACE */
-          *(fint*)&es = sN;
-          if (zscale_(m, n, Gr, ldGr, Gi, ldGi, (const fint*)&es) < 0)
+          if (zscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
             return -23;
-          M = scalbn(M, sN);
-          sT += sN;
+          M = scalbn(M, (int)sN);
+          sT += (int)sN;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(l1,n)
 #endif /* _OPENMP */
