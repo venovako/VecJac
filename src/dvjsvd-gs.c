@@ -342,14 +342,14 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const uint64_t _q = r[pq + 1u];
           *(uint64_t*)(a11 + l) = _p;
           *(uint64_t*)(a22 + l) = _q;
-          if (gsp & 1u) {
-            a21[l] = -3.0;
-            ++np;
-          }
-          else if (gsn & 1u)
-            a21[l] = 3.0;
-          else if (trans & 1u) {
-            if (perm & 1u) {
+          if (trans & 1u) {
+            if (gsp & 1u) {
+              a21[l] = -3.0;
+              ++np;
+            }
+            else if (gsn & 1u)
+              a21[l] = 3.0;
+            else if (perm & 1u) {
               a21[l] = -2.0;
               ++np;
             }
