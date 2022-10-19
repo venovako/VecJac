@@ -408,6 +408,22 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
               fS[_p] = fS[_q];
               fS[_q] = a21[i];
             }
+            float *const Gp = G + _p * (*ldG);
+            float *const Gq = G + _q * (*ldG);
+            if (_m = sswp_(m, Gp, Gq)) {
+              w[i] = (float)_m;
+              nM = HUGE_VALF;
+              continue;
+            }
+            float *const Vp = V + _p * (*ldV);
+            float *const Vq = V + _q * (*ldV);
+            if (_n = sswp_(n, Vp, Vq)) {
+              w[i] = (float)_n;
+              nM = HUGE_VALF;
+              continue;
+            }
+            nM = fmaxf(nM, (w[i] = 0.0f));
+            continue;
           }
         }
         else if (a21[i] == -1.0f) {
