@@ -454,6 +454,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _c = c[i];
           _at = at[i];
           if (big && (_c == 1.0f)) {
+            nM = fmaxf(nM, (w[i] = 0.0f));
           #pragma omp atomic update seq_cst
             --stt;
             continue;
