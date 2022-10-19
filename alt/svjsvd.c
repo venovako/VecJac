@@ -341,7 +341,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #endif /* JTRACE */
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(a11,a22,a21,eS,fS,p,pc,r,n_2,c,big) reduction(+:np)
+#pragma omp parallel for default(none) shared(a11,a22,a21,eS,fS,p,pc,r,n_2) reduction(+:np)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VSL) {
         const fnat j = (i >> VSLlg);
@@ -354,7 +354,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           const unsigned _q = r[pq + 1u];
           *(unsigned*)(a11 + l) = _p;
           *(unsigned*)(a22 + l) = _q;
-          if ((trans & 1u) && (!big || (c[l] < 1.0f))) {
+          if (trans & 1u) {
             if (perm & 1u) {
               a21[l] = -2.0f;
               ++np;
@@ -380,7 +380,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       }
       nM = 0.0f;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,l1,w,eS,fS,n_2,stt) reduction(max:nM)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,l1,w,eS,fS,n_2,stt,big) reduction(max:nM)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
         const unsigned _p = *(const unsigned*)(a11 + i);
@@ -397,6 +397,18 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _n = -(fint)*n;
           _c = c[i];
           _at = at[i];
+          if (big && (_c == 1.0f)) {
+#pragma omp atomic update seq_cst
+            --stt;
+            if (a21[i] < 0.0f) {
+              a21[i] = eS[_p];
+              eS[_p] = eS[_q];
+              eS[_q] = a21[i];
+              a21[i] = fS[_p];
+              fS[_p] = fS[_q];
+              fS[_q] = a21[i];
+            }
+          }
         }
         else if (a21[i] == -1.0f) {
           float *const Gp = G + _p * (*ldG);
@@ -425,6 +437,11 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _n = (fint)*n;
           _c = c[i];
           _at = at[i];
+          if (big && (_c == 1.0f)) {
+          #pragma omp atomic update seq_cst
+            --stt;
+            continue;
+          }
         }
         else { // should never happen
           w[i] = NAN;
