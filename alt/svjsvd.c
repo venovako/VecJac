@@ -132,6 +132,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   // see LAPACK's SGESVJ
   const float tol = sqrtf((float)(*m)) * scalbnf(FLT_EPSILON, -1);
   unsigned sw = 0u;
+  int big = 1;
 
 #ifdef JTRACE
   unsigned rd[2u] = { 0u, 0u };
@@ -340,7 +341,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #endif /* JTRACE */
       fnat np = 0u; // number of swaps
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(a11,a22,a21,eS,fS,p,pc,r,n_2) reduction(+:np)
+#pragma omp parallel for default(none) shared(a11,a22,a21,eS,fS,p,pc,r,n_2,c,big) reduction(+:np)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VSL) {
         const fnat j = (i >> VSLlg);
@@ -353,7 +354,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           const unsigned _q = r[pq + 1u];
           *(unsigned*)(a11 + l) = _p;
           *(unsigned*)(a22 + l) = _q;
-          if (trans & 1u) {
+          if ((trans & 1u) && (!big || (c[l] < 1.0f))) {
             if (perm & 1u) {
               a21[l] = -2.0f;
               ++np;
@@ -471,8 +472,12 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         return -22;
       }
     }
-    if (!swt)
-      break;
+    if (!swt) {
+      if (big)
+        big = 0;
+      else
+        break;
+    }
     ++sw;
   }
 
