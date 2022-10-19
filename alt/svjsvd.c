@@ -132,7 +132,6 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   // see LAPACK's SGESVJ
   const float tol = sqrtf((float)(*m)) * scalbnf(FLT_EPSILON, -1);
   unsigned sw = 0u;
-  int big = 1;
 
 #ifdef JTRACE
   unsigned rd[2u] = { 0u, 0u };
@@ -380,7 +379,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       }
       nM = 0.0f;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,l1,w,eS,fS,n_2,stt,big) reduction(max:nM)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,l1,w,eS,fS,n_2,stt) reduction(max:nM)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
         const unsigned _p = *(const unsigned*)(a11 + i);
@@ -397,34 +396,6 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _n = -(fint)*n;
           _c = c[i];
           _at = at[i];
-          if (big && (_c == 1.0f)) {
-#pragma omp atomic update seq_cst
-            --stt;
-            if (a21[i] < 0.0f) {
-              a21[i] = eS[_p];
-              eS[_p] = eS[_q];
-              eS[_q] = a21[i];
-              a21[i] = fS[_p];
-              fS[_p] = fS[_q];
-              fS[_q] = a21[i];
-            }
-            float *const Gp = G + _p * (*ldG);
-            float *const Gq = G + _q * (*ldG);
-            if (_m = sswp_(m, Gp, Gq)) {
-              w[i] = (float)_m;
-              nM = HUGE_VALF;
-              continue;
-            }
-            float *const Vp = V + _p * (*ldV);
-            float *const Vq = V + _q * (*ldV);
-            if (_n = sswp_(n, Vp, Vq)) {
-              w[i] = (float)_n;
-              nM = HUGE_VALF;
-              continue;
-            }
-            nM = fmaxf(nM, (w[i] = 0.0f));
-            continue;
-          }
         }
         else if (a21[i] == -1.0f) {
           float *const Gp = G + _p * (*ldG);
@@ -453,12 +424,6 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _n = (fint)*n;
           _c = c[i];
           _at = at[i];
-          if (big && (_c == 1.0f)) {
-            nM = fmaxf(nM, (w[i] = 0.0f));
-          #pragma omp atomic update seq_cst
-            --stt;
-            continue;
-          }
         }
         else { // should never happen
           w[i] = NAN;
@@ -506,12 +471,8 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         return -22;
       }
     }
-    if (!swt) {
-      if (big)
-        big = 0;
-      else
-        break;
-    }
+    if (!swt)
+      break;
     ++sw;
   }
 
