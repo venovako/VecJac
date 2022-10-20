@@ -49,5 +49,5 @@ float sdpscl_(const fnat m[static restrict 1], const float x[static restrict VSL
 
   const float fx = f[0u];
   const float fy = f[1u];
-  return ((_mm512_reduce_add_ps(p) + _mm512_reduce_add(s)) / (fx * fy));
+  return ((_mm512_reduce_add_ps(p) + _mm512_reduce_add_ps(s)) / (fx * fy));
 }
