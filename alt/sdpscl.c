@@ -1,5 +1,6 @@
 #include "sdpscl.h"
 
+// M\o ller's 2Sum
 #ifdef TwoSum
 #error TwoSum already defined
 #else /* !TwoSum */
@@ -54,6 +55,7 @@ float sdpscl_(const fnat m[static restrict 1], const float x[static restrict VSL
   register VS a_ = _mm512_setzero_ps();
   register VS b_ = _mm512_setzero_ps();
 
+  // Kahan + Graillat & al.
   for (fnat i = 0u; i < *m; i += VSL) {
     register VS xi = _mm512_load_ps(x + i);
     register VS yi = _mm512_load_ps(y + i);
@@ -66,7 +68,7 @@ float sdpscl_(const fnat m[static restrict 1], const float x[static restrict VSL
     TwoSum(a,b,a_,b_,spd,tpd);
     a = sdn;
     b = _mm512_add_ps(dn, tdn);
-    TwoSum(a,b,a_,b_,sdn, tdn);
+    TwoSum(a,b,a_,b_,sdn,tdn);
   }
 
   const float fx = f[0u];
