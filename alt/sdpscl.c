@@ -41,7 +41,7 @@ float sdpscl_(const fnat m[static restrict 1], const float x[static restrict VSL
     register VS yi = _mm512_load_ps(y + i);
     xi = _mm512_scalef_ps(xi, xe); VSP(xi);
     yi = _mm512_scalef_ps(yi, ye); VSP(yi);
-    c = _mm512_mul_round_ps(xi, yi, _MM_FROUND_TO_NEG_INF); VSP(c);
+    c = _mm512_mul_round_ps(xi, yi, (_MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)); VSP(c);
     d = _mm512_fmsub_ps(xi, yi, c); VSP(d);
     p = _mm512_add_ps(p, c); VSP(p);
     s = _mm512_add_ps(s, d); VSP(s);
