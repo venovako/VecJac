@@ -45,7 +45,7 @@ DBGFLAGS=-DJTRACE
 else # l
 DBGFLAGS=
 endif # a dirty hack
-FPUFLAGS=-DUSE_EXTENDED -ffp-contract=fast
+FPUFLAGS=-DUSE_EXTENDED -DUSE_2SUM -ffp-contract=fast
 ifdef NDEBUG
 OPTFLAGS += -O$(NDEBUG) -fgcse-las -fgcse-sm -fipa-pta -ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts -fvect-cost-model=unlimited -fvariable-expansion-in-unroller
 DBGFLAGS += -DNDEBUG -fopt-info-optimized-vec

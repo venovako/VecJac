@@ -7,7 +7,7 @@ SHELL=/bin/bash
 #  CC is the C compiler, normally invoked with options CFLAGS.
 #
 CC=icc
-FLAGS_NOOPT=-DUSE_IEEE_INTRINSIC -DWeirdNEC -DLAPACK_ILP64 -xHost -qopenmp -fPIC -fexceptions -fno-omit-frame-pointer -rdynamic -fp-model precise -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -qopt-multi-version-aggressive -qopt-report=5 #-qopt-zmm-usage=high
+FLAGS_NOOPT=-DUSE_IEEE_INTRINSIC -DWeirdNEC -DLAPACK_ILP64 -xHost -qopenmp -fPIC -fexceptions -fno-omit-frame-pointer -rdynamic -fp-model precise -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -qopt-multi-version-aggressive -qopt-report=5 -qsimd-honor-fp-model -qsimd-serialize-fp-reduction #-qopt-zmm-usage=high -fimf-use-svml=true
 FLAGS=-O3 $(FLAGS_NOOPT)
 CFLAGS=$(FLAGS) -std=c18 -diag-disable=10441
 
