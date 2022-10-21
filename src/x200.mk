@@ -87,7 +87,7 @@ CFLAGS += -check=stack,uninit
 FFLAGS += -check all -assume ieee_fpe_flags
 endif # !NDEBUG
 ifdef SLEEF
-CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(subst -debug pubnames,,$(DBGFLAGS)) $(LIBFLAGS) $(CPUFLAGS) $(subst -no-ftz,,$(FPUFLAGS))
+CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(subst -qopt-report=5,,$(subst -debug pubnames,,$(DBGFLAGS))) $(LIBFLAGS) $(CPUFLAGS) $(subst -qsimd-serialize-fp-reduction,,$(subst -qsimd-honor-fp-model,,$(subst -no-ftz,,$(FPUFLAGS))))
 ifndef NDEBUG
 CXXFLAGS += -fcheck=stack,uninit
 endif # !NDEBUG
