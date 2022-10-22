@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     b = rdtsc_beg(rd);
     (void)(BLAS_S(dot)((const fint*)&n, x, &incx, y, &incy)); // n FMAs
     e = rdtsc_end(rd);
-    if (e >= b)
+    if (e > b)
       l += (e - b);
   }
   long double t = tsc_lap(hz, 0u, l);
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     b = rdtsc_beg(rd);
     BLAS_S(rot)((const fint*)&n, x, &incx, y, &incy, &cp6, &sp6); // 2n FMAs + 2n MULs
     e = rdtsc_end(rd);
-    if (e >= b)
+    if (e > b)
       l += (e - b);
   }
   t = tsc_lap(hz, 0u, l);
@@ -80,11 +80,15 @@ int main(int argc, char *argv[])
     b = rdtsc_beg(rd);
     (void)sdpscl_((const fnat*)&n, x, y, e2, f2); // n FMAs + 2n SCALEFs + O(1)
     e = rdtsc_end(rd);
-    if (e >= b)
+    if (e > b)
       l += (e - b);
   }
   t = tsc_lap(hz, 0u, l);
+#ifdef USE_2SUM
+  f = (((18u * n + 67u) * it) / t);
+#else /* !USE_2SUM */
   f = (((3u * n + 19u) * it) / t);
+#endif /* ?USE_2SUM */
   (void)fprintf(stdout, "%15.9Lf,%s,", t, xtoa(a, f));
   (void)fflush(stdout);
   const float tp6 = (1.0f / rt3);
@@ -97,7 +101,7 @@ int main(int argc, char *argv[])
     b = rdtsc_beg(rd);
     (void)sjrotf_((const fint*)&n, x, y, &cp6, &tp6); // 2n FMAs + 2n MULs
     e = rdtsc_end(rd);
-    if (e >= b)
+    if (e > b)
       l += (e - b);
   }
   t = tsc_lap(hz, 0u, l);

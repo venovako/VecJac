@@ -44,8 +44,8 @@ float sdpscl_(const fnat m[static restrict 1], const float x[static restrict VSL
   if (!(ey > -HUGE_VALF))
     return 0.0f;
 
-  register const VS xe = _mm512_set1_ps(-ex);
-  register const VS ye = _mm512_set1_ps(-ey);
+  register const VS xe = _mm512_set1_ps(-ex); // 1
+  register const VS ye = _mm512_set1_ps(-ey); // 1
   register VS spd = _mm512_setzero_ps();
 #ifdef USE_2SUM
   register VS sdn = _mm512_setzero_ps();
@@ -57,30 +57,30 @@ float sdpscl_(const fnat m[static restrict 1], const float x[static restrict VSL
   for (fnat i = 0u; i < *m; i += VSL) {
     register VS xi = _mm512_load_ps(x + i);
     register VS yi = _mm512_load_ps(y + i);
-    xi = _mm512_scalef_ps(xi, xe); VSP(xi);
-    yi = _mm512_scalef_ps(yi, ye); VSP(yi);
+    xi = _mm512_scalef_ps(xi, xe); VSP(xi); // 1
+    yi = _mm512_scalef_ps(yi, ye); VSP(yi); // 1
 #ifdef USE_2SUM
-    register const VS pd = _mm512_mul_round_ps(xi, yi, (_MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)); VSP(pd);
-    register const VS dn = _mm512_fmsub_ps(xi, yi, pd); VSP(dn);
+    register const VS pd = _mm512_mul_round_ps(xi, yi, (_MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)); VSP(pd); // 1
+    register const VS dn = _mm512_fmsub_ps(xi, yi, pd); VSP(dn); // 1
     register VS a = spd;
-    register VS b = _mm512_add_ps(pd, tpd);
+    register VS b = _mm512_add_ps(pd, tpd); // 1
     register VS a_, b_;
-    TwoSum(a,b,a_,b_,spd,tpd);
+    TwoSum(a,b,a_,b_,spd,tpd); // 6
     a = sdn;
-    b = _mm512_add_ps(dn, tdn);
-    TwoSum(a,b,a_,b_,sdn,tdn);
+    b = _mm512_add_ps(dn, tdn); // 1
+    TwoSum(a,b,a_,b_,sdn,tdn); // 6
 #else /* !USE_2SUM */
-    spd = _mm512_fmadd_ps(xi, yi, spd); VSP(spd);
+    spd = _mm512_fmadd_ps(xi, yi, spd); VSP(spd); // 1
 #endif /* ?USE_2SUM */
   }
 
   const float fx = f[0u];
   const float fy = f[1u];
 #ifdef USE_2SUM
-  const float nu = (_mm512_reduce_add_ps(spd) + (_mm512_reduce_add_ps(tpd) + (_mm512_reduce_add_ps(sdn) + _mm512_reduce_add_ps(tdn))));
+  const float nu = (_mm512_reduce_add_ps(spd) + (_mm512_reduce_add_ps(tpd) + (_mm512_reduce_add_ps(sdn) + _mm512_reduce_add_ps(tdn)))); // 63
 #else /* !USE_2SUM */
-  const float nu = _mm512_reduce_add_ps(spd);
+  const float nu = _mm512_reduce_add_ps(spd); // 15
 #endif /* ?USE_2SUM */
-  const float de = (fx * fy);
-  return (nu / de);
+  const float de = (fx * fy); // 1
+  return (nu / de); // 1
 }
