@@ -1,1 +1,1 @@
-Routines without the Gram-Schmidt orthogonalization.
+Routines without the compensated summation and the Gram-Schmidt orthogonalization.
