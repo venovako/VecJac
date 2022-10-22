@@ -131,7 +131,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   unsigned rd[2u] = { 0u, 0u };
   const uint64_t hz = tsc_get_freq_hz_(rd);
 
-  long float Tn = 0.0L, Tp = 0.0L, Ta = 0.0L, Te = 0.0L, Tr = 0.0L;
+  long double Tn = 0.0L, Tp = 0.0L, Ta = 0.0L, Te = 0.0L, Tr = 0.0L;
   uint64_t T = UINT64_C(0);
 #endif /* JTRACE */
 
