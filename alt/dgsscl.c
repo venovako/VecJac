@@ -53,7 +53,7 @@ double dgsscl_(const fint m[static restrict 1], const double t[static restrict 1
     for (fnat i = 0u; i < _m; i += VDL) {
       double *const x_i = x + i;
       double *const y_i = y + i;
-      register VD xi = _mm512_load_pd(x_i);
+      register const VD xi = _mm512_load_pd(x_i);
       register VD yi = _mm512_load_pd(y_i);
       _mm512_store_pd(x_i, yi);
       yi = _mm512_scalef_pd(yi, y_e); VDP(yi);
@@ -72,7 +72,7 @@ double dgsscl_(const fint m[static restrict 1], const double t[static restrict 1
     for (fnat i = 0u; i < _m; i += VDL) {
       double *const y_i = y + i;
       register VD xi = _mm512_load_pd(x + i);
-      register VD yi = _mm512_load_pd(y_i);
+      register const VD yi = _mm512_load_pd(y_i);
       xi = _mm512_scalef_pd(xi, x_e); VDP(xi);
       xi = _mm512_scalef_pd(_mm512_fmadd_pd(tf, xi, _mm512_scalef_pd(yi, y_e)), ye); VDP(xi);
       ne = MDOR(ne, _mm512_cmpneq_pd_mask(yi, xi));
