@@ -87,8 +87,8 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
         register const VD x_r = _mm512_fmadd_pd(y_, t_, x_);
         register const VD y_r = _mm512_fnmadd_pd(x_, t_, y_);
         mx = _mm512_max_pd(mx, _mm512_max_pd(VDABS(x_r), VDABS(y_r)));
-        ne = MDOR(ne, _mm512_cmpneq_pd_mask(x_, y_r));
-        ne = MDOR(ne, _mm512_cmpneq_pd_mask(y_, x_r));
+        ne = MDOR(ne, _mm512_cmpneq_pd_mask(x_, x_r));
+        ne = MDOR(ne, _mm512_cmpneq_pd_mask(y_, y_r));
         _mm512_store_pd(xi, x_r);
         _mm512_store_pd(yi, y_r);
       }
@@ -104,8 +104,8 @@ double djrot_(const fint n[static restrict 1], double x[static restrict VDL], do
         register const VD x_r = VDMULDIV(_mm512_fmadd_pd(y_, t_, x_), c_);
         register const VD y_r = VDMULDIV(_mm512_fnmadd_pd(x_, t_, y_), c_);
         mx = _mm512_max_pd(mx, _mm512_max_pd(VDABS(x_r), VDABS(y_r)));
-        ne = MDOR(ne, _mm512_cmpneq_pd_mask(x_, y_r));
-        ne = MDOR(ne, _mm512_cmpneq_pd_mask(y_, x_r));
+        ne = MDOR(ne, _mm512_cmpneq_pd_mask(x_, x_r));
+        ne = MDOR(ne, _mm512_cmpneq_pd_mask(y_, y_r));
         _mm512_store_pd(xi, x_r);
         _mm512_store_pd(yi, y_r);
       }
