@@ -55,7 +55,7 @@ float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], flo
     = _mm512_setzero_ps()
 #endif /* !NDEBUG */
     ;
-  register MS ne = _mm512_kxor(ne, ne);
+  register MS ne = _kxor_mask16(ne, ne);
 
   if (*n < 0) { // permute
     const fnat n_ = (fnat)-*n;
@@ -75,8 +75,8 @@ float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], flo
         _mm512_store_ps(yri, _r);
         _mm512_store_ps(yii, _i);
 
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_r, _r));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_i, _i));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_r, _r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_i, _i));
 
         _r = VSABS(_r);
         _i = VSABS(_i);
@@ -86,8 +86,8 @@ float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], flo
         _mm512_store_ps(xri, _r);
         _mm512_store_ps(xii, _i);
 
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_r, _r));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_i, _i));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_r, _r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_i, _i));
 
         _r = VSABS(_r);
         _i = VSABS(_i);
@@ -112,8 +112,8 @@ float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], flo
         _mm512_store_ps(yri, yr_);
         _mm512_store_ps(yii, yi_);
 
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_r, yr_));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_i, yi_));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_r, yr_));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_i, yi_));
 
         _r = VSABS(yr_);
         _i = VSABS(yi_);
@@ -125,8 +125,8 @@ float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], flo
         _mm512_store_ps(xri, xr_);
         _mm512_store_ps(xii, xi_);
 
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_r, xr_));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_i, xi_));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_r, xr_));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_i, xi_));
 
         _r = VSABS(xr_);
         _i = VSABS(xi_);
@@ -152,8 +152,8 @@ float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], flo
         _mm512_store_ps(xri, _r);
         _mm512_store_ps(xii, _i);
 
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_r, _r));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_i, _i));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_r, _r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_i, _i));
 
         _r = VSABS(_r);
         _i = VSABS(_i);
@@ -163,8 +163,8 @@ float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], flo
         _mm512_store_ps(yri, _r);
         _mm512_store_ps(yii, _i);
 
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_r, _r));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_i, _i));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_r, _r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_i, _i));
 
         _r = VSABS(_r);
         _i = VSABS(_i);
@@ -189,8 +189,8 @@ float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], flo
         _mm512_store_ps(xri, xr_);
         _mm512_store_ps(xii, xi_);
 
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_r, xr_));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_i, xi_));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_r, xr_));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_i, xi_));
 
         _r = VSABS(xr_);
         _i = VSABS(xi_);
@@ -202,8 +202,8 @@ float cjrot_(const fint n[static restrict 1], float xr[static restrict VSL], flo
         _mm512_store_ps(yri, yr_);
         _mm512_store_ps(yii, yi_);
 
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_r, yr_));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_i, yi_));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_r, yr_));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_i, yi_));
 
         _r = VSABS(yr_);
         _i = VSABS(yi_);

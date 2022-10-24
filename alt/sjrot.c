@@ -20,7 +20,7 @@ float sjrot_(const fint n[static restrict 1], float x[static restrict VSL], floa
 
   register const VS _zerof = _mm512_set1_ps(-0.0f);
   register VS mx = _mm512_setzero_ps();
-  register MS ne = _mm512_kxor(ne, ne);
+  register MS ne = _kxor_mask16(ne, ne);
 
   if (*n < 0) { // permute
     const fnat n_ = (fnat)-*n;
@@ -49,8 +49,8 @@ float sjrot_(const fint n[static restrict 1], float x[static restrict VSL], floa
         register const VS x_r = _mm512_fnmadd_ps(x_, t_, y_);
         register const VS y_r = _mm512_fmadd_ps(y_, t_, x_);
         mx = _mm512_max_ps(mx, _mm512_max_ps(VSABS(x_r), VSABS(y_r)));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_, y_r));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_, x_r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_, y_r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_, x_r));
         _mm512_store_ps(xi, x_r);
         _mm512_store_ps(yi, y_r);
       }
@@ -66,8 +66,8 @@ float sjrot_(const fint n[static restrict 1], float x[static restrict VSL], floa
         register const VS x_r = VSMULDIV(_mm512_fnmadd_ps(x_, t_, y_), c_);
         register const VS y_r = VSMULDIV(_mm512_fmadd_ps(y_, t_, x_), c_);
         mx = _mm512_max_ps(mx, _mm512_max_ps(VSABS(x_r), VSABS(y_r)));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_, y_r));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_, x_r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_, y_r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_, x_r));
         _mm512_store_ps(xi, x_r);
         _mm512_store_ps(yi, y_r);
       }
@@ -87,8 +87,8 @@ float sjrot_(const fint n[static restrict 1], float x[static restrict VSL], floa
         register const VS x_r = _mm512_fmadd_ps(y_, t_, x_);
         register const VS y_r = _mm512_fnmadd_ps(x_, t_, y_);
         mx = _mm512_max_ps(mx, _mm512_max_ps(VSABS(x_r), VSABS(y_r)));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_, x_r));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_, y_r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_, x_r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_, y_r));
         _mm512_store_ps(xi, x_r);
         _mm512_store_ps(yi, y_r);
       }
@@ -104,8 +104,8 @@ float sjrot_(const fint n[static restrict 1], float x[static restrict VSL], floa
         register const VS x_r = VSMULDIV(_mm512_fmadd_ps(y_, t_, x_), c_);
         register const VS y_r = VSMULDIV(_mm512_fnmadd_ps(x_, t_, y_), c_);
         mx = _mm512_max_ps(mx, _mm512_max_ps(VSABS(x_r), VSABS(y_r)));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(x_, x_r));
-        ne = _mm512_kor(ne, _mm512_cmpneq_ps_mask(y_, y_r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(x_, x_r));
+        ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(y_, y_r));
         _mm512_store_ps(xi, x_r);
         _mm512_store_ps(yi, y_r);
       }

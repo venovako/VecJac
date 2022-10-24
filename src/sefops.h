@@ -21,16 +21,10 @@
 #define VSLSB(x) _mm512_cvtepi32_ps(_mm512_and_epi32(_mm512_cvtps_epi32(x),ione))
 #endif /* ?VSLSB */
 
-#ifdef MSOR
-#error MSOR already defined
-#else /* !MSOR */
-#define MSOR(a,b) _kor_mask16((a),(b))
-#endif /* ?MSOR */
-
 #ifdef VSEFLE
 #error VSEFLE already defined
 #else /* !VSEFLE */
-#define VSEFLE(e0,e1,f0,f1) MSOR(_mm512_cmplt_ps_mask(e0,e1),_mm512_mask_cmple_ps_mask(_mm512_cmpeq_ps_mask(e0,e1),f0,f1))
+#define VSEFLE(e0,e1,f0,f1) _kor_mask16(_mm512_cmplt_ps_mask(e0,e1),_mm512_mask_cmple_ps_mask(_mm512_cmpeq_ps_mask(e0,e1),f0,f1))
 #endif /* ?VSEFLE */
 
 #ifdef FLT_MAX_FIN_EXP

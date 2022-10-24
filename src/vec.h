@@ -237,6 +237,25 @@
 #endif /* ?__AVX512DQ__ */
 #endif /* ?MD2U */
 
+#ifdef MDOR
+#error MDOR already defined
+#else /* !MDOR */
+#ifdef __AVX512DQ__
+#define MDOR(a,b) _kor_mask8((a),(b))
+#else /* !__AVX512DQ__ */
+#define MDOR(a,b) (__mmask8)_kor_mask16((a),(b))
+#endif /* ?__AVX512DQ__ */
+#endif /* ?MDOR */
+#ifdef MDXOR
+#error MDXOR already defined
+#else /* !MDXOR */
+#ifdef __AVX512DQ__
+#define MDXOR(a,b) _kxor_mask8((a),(b))
+#else /* !__AVX512DQ__ */
+#define MDXOR(a,b) (__mmask8)_kxor_mask16((a),(b))
+#endif /* ?__AVX512DQ__ */
+#endif /* ?MDXOR */
+
 /* printout */
 
 #ifdef VSP
