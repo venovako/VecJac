@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     gensfrand_(&n, &aub, x);
     gensfrand_(&n, &aub, y);
     b = rdtsc_beg(rd);
-    (void)sdpscl_((const fnat*)&n, x, y, e2, f2); // n FMAs + 2n SCALEFs + O(1)
+    (void)sdpscl_((const fnat*)&n, x, y, e2, f2);
     e = rdtsc_end(rd);
     if (e > b)
       l += (e - b);

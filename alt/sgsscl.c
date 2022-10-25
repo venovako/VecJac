@@ -29,11 +29,11 @@ float sgsscl_(const fint m[static restrict 1], const float t[static restrict 1],
     return -0.0f;
 
   const float ex = e[0u];
-  if (!(ex >= -DBL_MAX))
+  if (!(ex >= -FLT_MAX))
     return -0.0f;
 
   const float ey = e[1u];
-  if (!(ey >= -DBL_MAX))
+  if (!(ey >= -FLT_MAX))
     return -0.0f;
 
   const float fx = f[0u];
