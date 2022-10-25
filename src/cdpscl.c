@@ -15,9 +15,9 @@ float complex cdpscl_(const fnat m[static restrict 1], const float xr[static res
     return NAN;
   if (IS_NOT_ALIGNED(yi))
     return NAN;
-  if (!(e[0u] < HUGE_VALF))
+  if (!(e[0u] <= FLT_MAX))
     return NAN;
-  if (!(e[1u] < HUGE_VALF))
+  if (!(e[1u] <= FLT_MAX))
     return NAN;
   if (!(f[0u] >= 1.0f) || !(f[0u] < 2.0f))
     return NAN;
@@ -26,11 +26,11 @@ float complex cdpscl_(const fnat m[static restrict 1], const float xr[static res
 #endif /* !NDEBUG */
 
   const float ex = e[0u];
-  if (!(ex > -HUGE_VALF))
+  if (!(ex >= -FLT_MAX))
     return 0.0f;
 
   const float ey = e[1u];
-  if (!(ey > -HUGE_VALF))
+  if (!(ey >= -FLT_MAX))
     return 0.0f;
 
   register const VS xe = _mm512_set1_ps(-ex);

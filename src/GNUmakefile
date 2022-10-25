@@ -83,7 +83,7 @@ cvjsvd$(SUFX).o: cvjsvd.c cvjsvd.h cnormx.h cscale.h cnorm2.h scnrm2.h cdpscl.h 
 dbjac2$(SUFX).o: dbjac2.c dbjac2.h dzjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-ddpscl$(SUFX).o: ddpscl.c ddpscl.h vec.h common.h $(MKFS)
+ddpscl$(SUFX).o: ddpscl.c ddpscl.h d2sum.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 dgsscl$(SUFX).o: dgsscl.c dgsscl.h vecdef.h vec.h common.h $(MKFS)
@@ -142,7 +142,7 @@ rnd$(SUFX).o: rnd.c rnd.h vec.h common.h $(MKFS)
 sbjac2$(SUFX).o: sbjac2.c sbjac2.h scjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-sdpscl$(SUFX).o: sdpscl.c sdpscl.h vec.h common.h $(MKFS)
+sdpscl$(SUFX).o: sdpscl.c sdpscl.h s2sum.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 sgsscl$(SUFX).o: sgsscl.c sgsscl.h vecdef.h vec.h common.h $(MKFS)

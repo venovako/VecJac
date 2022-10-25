@@ -15,9 +15,9 @@ double complex zdpscl_(const fnat m[static restrict 1], const double xr[static r
     return NAN;
   if (IS_NOT_ALIGNED(yi))
     return NAN;
-  if (!(e[0u] < HUGE_VAL))
+  if (!(e[0u] <= DBL_MAX))
     return NAN;
-  if (!(e[1u] < HUGE_VAL))
+  if (!(e[1u] <= DBL_MAX))
     return NAN;
   if (!(f[0u] >= 1.0) || !(f[0u] < 2.0))
     return NAN;
@@ -26,11 +26,11 @@ double complex zdpscl_(const fnat m[static restrict 1], const double xr[static r
 #endif /* !NDEBUG */
 
   const double ex = e[0u];
-  if (!(ex > -HUGE_VAL))
+  if (!(ex >= -DBL_MAX))
     return 0.0;
 
   const double ey = e[1u];
-  if (!(ey > -HUGE_VAL))
+  if (!(ey >= -DBL_MAX))
     return 0.0;
 
   register const VD xe = _mm512_set1_pd(-ex);
