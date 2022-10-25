@@ -43,7 +43,7 @@ double dgsscl_(const fint m[static restrict 1], const double t[static restrict 1
   register const VD y_e = _mm512_set1_pd(-ey);
   register const VD _zero = _mm512_set1_pd(-0.0);
   register VD M = _mm512_setzero_pd();
-  register MS ne = MDXOR(ne, ne);
+  register MD ne = MDXOR(ne, ne);
 
   if (*m < 0) { // transform x and permute
     register const VD tf = _mm512_set1_pd(-*t * (fx / fy));
@@ -53,11 +53,11 @@ double dgsscl_(const fint m[static restrict 1], const double t[static restrict 1
     for (fnat i = 0u; i < _m; i += VDL) {
       double *const x_i = x + i;
       double *const y_i = y + i;
-      register const VD xi = _mm512_load_pd(x_i);
-      register VD yi = _mm512_load_pd(y_i);
+      register const VD xi = _mm512_load_pd(x_i); VDP(xi);
+      register VD yi = _mm512_load_pd(y_i); VDP(yi);
       _mm512_store_pd(x_i, yi);
-      yi = _mm512_scalef_pd(yi, y_e); VDP(yi);
-      yi = _mm512_scalef_pd(_mm512_fmadd_pd(tf, yi, _mm512_scalef_pd(xi, x_e)), xe); VDP(yi);
+      yi = _mm512_scalef_pd(yi, y_e);
+      yi = _mm512_scalef_pd(_mm512_fmadd_pd(tf, yi, _mm512_scalef_pd(xi, x_e)), xe);
       ne = MDOR(ne, _mm512_cmpneq_pd_mask(xi, yi));
       _mm512_store_pd(y_i, yi);
       yi = VDABS(yi);
@@ -71,10 +71,10 @@ double dgsscl_(const fint m[static restrict 1], const double t[static restrict 1
 
     for (fnat i = 0u; i < _m; i += VDL) {
       double *const y_i = y + i;
-      register VD xi = _mm512_load_pd(x + i);
-      register const VD yi = _mm512_load_pd(y_i);
-      xi = _mm512_scalef_pd(xi, x_e); VDP(xi);
-      xi = _mm512_scalef_pd(_mm512_fmadd_pd(tf, xi, _mm512_scalef_pd(yi, y_e)), ye); VDP(xi);
+      register VD xi = _mm512_load_pd(x + i); VDP(xi);
+      register const VD yi = _mm512_load_pd(y_i); VDP(yi);
+      xi = _mm512_scalef_pd(xi, x_e);
+      xi = _mm512_scalef_pd(_mm512_fmadd_pd(tf, xi, _mm512_scalef_pd(yi, y_e)), ye);
       ne = MDOR(ne, _mm512_cmpneq_pd_mask(yi, xi));
       _mm512_store_pd(y_i, xi);
       xi = VDABS(xi);

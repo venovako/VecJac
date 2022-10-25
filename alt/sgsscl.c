@@ -53,11 +53,11 @@ float sgsscl_(const fint m[static restrict 1], const float t[static restrict 1],
     for (fnat i = 0u; i < _m; i += VSL) {
       float *const x_i = x + i;
       float *const y_i = y + i;
-      register const VS xi = _mm512_load_ps(x_i);
-      register VS yi = _mm512_load_ps(y_i);
+      register const VS xi = _mm512_load_ps(x_i); VSP(xi);
+      register VS yi = _mm512_load_ps(y_i); VSP(yi);
       _mm512_store_ps(x_i, yi);
-      yi = _mm512_scalef_ps(yi, y_e); VSP(yi);
-      yi = _mm512_scalef_ps(_mm512_fmadd_ps(tf, yi, _mm512_scalef_ps(xi, x_e)), xe); VSP(yi);
+      yi = _mm512_scalef_ps(yi, y_e);
+      yi = _mm512_scalef_ps(_mm512_fmadd_ps(tf, yi, _mm512_scalef_ps(xi, x_e)), xe);
       ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(xi, yi));
       _mm512_store_ps(y_i, yi);
       yi = VSABS(yi);
@@ -71,10 +71,10 @@ float sgsscl_(const fint m[static restrict 1], const float t[static restrict 1],
 
     for (fnat i = 0u; i < _m; i += VSL) {
       float *const y_i = y + i;
-      register VS xi = _mm512_load_ps(x + i);
-      register const VS yi = _mm512_load_ps(y_i);
-      xi = _mm512_scalef_ps(xi, x_e); VSP(xi);
-      xi = _mm512_scalef_ps(_mm512_fmadd_ps(tf, xi, _mm512_scalef_ps(yi, y_e)), ye); VSP(xi);
+      register VS xi = _mm512_load_ps(x + i); VSP(xi);
+      register const VS yi = _mm512_load_ps(y_i); VSP(yi);
+      xi = _mm512_scalef_ps(xi, x_e);
+      xi = _mm512_scalef_ps(_mm512_fmadd_ps(tf, xi, _mm512_scalef_ps(yi, y_e)), ye);
       ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(yi, xi));
       _mm512_store_ps(y_i, xi);
       xi = VSABS(xi);
