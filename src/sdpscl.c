@@ -1,18 +1,7 @@
 #include "sdpscl.h"
 
 #ifdef USE_2SUM
-// M\o ller's 2Sum
-#ifdef TwoSum
-#error TwoSum already defined
-#else /* !TwoSum */
-#define TwoSum(a,b,a_,b_,s,t)\
-  s = _mm512_add_ps(a, b);   \
-  a_ = _mm512_sub_ps(s, b);  \
-  b_ = _mm512_sub_ps(s, a_); \
-  a_ = _mm512_sub_ps(a, a_); \
-  b_ = _mm512_sub_ps(b, b_); \
-  t = _mm512_add_ps(a_, b_)
-#endif /* ?TwoSum */
+#include "s2sum.h"
 #endif /* USE_2SUM */
 
 float sdpscl_(const fnat m[static restrict 1], const float x[static restrict VSL], const float y[static restrict VSL], const float e[static restrict 2], const float f[static restrict 2])
