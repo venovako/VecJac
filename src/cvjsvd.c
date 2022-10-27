@@ -146,7 +146,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       l1[i] = 1.0f;
   }
 
-  // see LAPACK's ZGESVJ
+  // see LAPACK's CGESVJ
   const float tol = sqrtf((float)(*m)) * scalbnf(FLT_EPSILON, -1);
   unsigned sw = 0u;
 

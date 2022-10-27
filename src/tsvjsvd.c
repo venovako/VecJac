@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
   unsigned *const iwork = (unsigned*)aligned_alloc(VA, ((n >> VSLlg) * sizeof(unsigned)));
   if (!iwork)
     return 9;
+  *iwork = 0u;
 
   const unsigned swp = 999u;
   unsigned rd[2u] = { 0u, 0u };

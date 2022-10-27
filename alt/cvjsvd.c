@@ -5,6 +5,7 @@
 #include "cnorm2.h"
 #include "scnrm2.h"
 #include "cdpscl.h"
+#include "cgsscl.h"
 #include "cbjac2.h"
 #include "cjrotf.h"
 #include "cjrot.h"
@@ -146,7 +147,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       l1[i] = 1.0f;
   }
 
-  // see LAPACK's ZGESVJ
+  // see LAPACK's CGESVJ
   const float tol = sqrtf((float)(*m)) * scalbnf(FLT_EPSILON, -1);
   unsigned sw = 0u;
 
@@ -352,6 +353,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _mm512_store_ps((a21i + i), _a21i);
         }
       }
+      swt += stt;
 #ifdef JTRACE
       Ta += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
@@ -410,7 +412,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       }
       nM = 0.0f;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,l1,eS,fS,n_2,stt) reduction(max:nM)
+#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,l1,n_2) reduction(max:nM)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
         const unsigned _p = *(const unsigned*)(a11 + i);
@@ -478,22 +480,8 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           continue;
         }
         a21i[i] = cjrot_(&_m, (Gr + _p * (*ldGr)), (Gi + _p * (*ldGi)), (Gr + _q * (*ldGr)), (Gi + _q * (*ldGi)), &_c, &_cat, &_sat);
-        if (!isfinite(a21i[i])) {
+        if (!(a21i[i] >= 0.0f) || !(a21i[i] <= FLT_MAX)) {
           nM = a21i[i] = HUGE_VALF;
-          continue;
-        }
-        else if (copysignf(1.0f, a21i[i]) == -1.0f) {
-          nM = fmaxf(nM, -a21i[i]);
-#pragma omp atomic update seq_cst
-          --stt;
-          if (a21r[i] < 0.0f) {
-            a21r[i] = eS[_p];
-            eS[_p] = eS[_q];
-            eS[_q] = a21r[i];
-            a21r[i] = fS[_p];
-            fS[_p] = fS[_q];
-            fS[_q] = a21r[i];
-          }
           continue;
         }
         else // no overflow
@@ -506,7 +494,6 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         l1[_q] = l1[_p] = 1.0f;
       }
       M = fmaxf(M, nM);
-      swt += stt;
 #ifdef JTRACE
       Tr += tsc_lap(hz, T, rdtsc_end(rd));
 #endif /* JTRACE */

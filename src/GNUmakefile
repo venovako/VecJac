@@ -77,7 +77,7 @@ cscale$(SUFX).o: cscale.c cscale.h scscal.h vec.h common.h $(MKFS)
 csplit$(SUFX).o: csplit.c csplit.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-cvjsvd$(SUFX).o: cvjsvd.c cvjsvd.h cnormx.h cscale.h cnorm2.h scnrm2.h cdpscl.h cgsscl.h cbjac2.h cjrotf.h cjrot.h sswp.h vecdef.h sefops.h vec.h common.h $(MKFS)
+cvjsvd$(SUFX).o: cvjsvd.c cvjsvd.h cnormx.h cscale.h cnorm2.h scnrm2.h cdpscl.h cgsscl.h cbjac2.h cjrotf.h cjrot.h sswp.h vecdef.h sefops.h vec.h timer.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 dbjac2$(SUFX).o: dbjac2.c dbjac2.h dzjac2.h vecdef.h vec.h common.h $(MKFS)
@@ -124,7 +124,7 @@ dscale$(SUFX).o: dscale.c dscale.h dzscal.h vec.h common.h $(MKFS)
 dswp$(SUFX).o: dswp.c dswp.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-dvjsvd$(SUFX).o: dvjsvd.c dvjsvd.h dnormx.h dscale.h dnorm2.h dznrm2.h ddpscl.h dgsscl.h dbjac2.h djrotf.h djrot.h dswp.h vecdef.h defops.h vec.h common.h $(MKFS)
+dvjsvd$(SUFX).o: dvjsvd.c dvjsvd.h dnormx.h dscale.h dnorm2.h dznrm2.h ddpscl.h dgsscl.h dbjac2.h djrotf.h djrot.h dswp.h vecdef.h defops.h vec.h timer.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 laev2$(SUFX).o: laev2.c laev2.h common.h $(MKFS)
@@ -169,7 +169,7 @@ sscale$(SUFX).o: sscale.c sscale.h scscal.h vec.h common.h $(MKFS)
 sswp$(SUFX).o: sswp.c sswp.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-svjsvd$(SUFX).o: svjsvd.c svjsvd.h snormx.h sscale.h snorm2.h scnrm2.h sdpscl.h sgsscl.h sbjac2.h sjrotf.h sjrot.h sswp.h vecdef.h sefops.h vec.h common.h $(MKFS)
+svjsvd$(SUFX).o: svjsvd.c svjsvd.h snormx.h sscale.h snorm2.h scnrm2.h sdpscl.h sgsscl.h sbjac2.h sjrotf.h sjrot.h sswp.h vecdef.h sefops.h vec.h timer.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 timer$(SUFX).o: timer.c timer.h common.h $(MKFS)
@@ -219,7 +219,7 @@ zscale$(SUFX).o: zscale.c zscale.h dzscal.h vec.h common.h $(MKFS)
 zsplit$(SUFX).o: zsplit.c zsplit.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-zvjsvd$(SUFX).o: zvjsvd.c zvjsvd.h znormx.h zscale.h znorm2.h dznrm2.h zdpscl.h zgsscl.h zbjac2.h zjrotf.h zjrot.h dswp.h vecdef.h defops.h vec.h common.h $(MKFS)
+zvjsvd$(SUFX).o: zvjsvd.c zvjsvd.h znormx.h zscale.h znorm2.h dznrm2.h zdpscl.h zgsscl.h zbjac2.h zjrotf.h zjrot.h dswp.h vecdef.h defops.h vec.h timer.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 bclevd2$(SUFX).exe: bclevd2.c $(LIBS) $(MKFS)
