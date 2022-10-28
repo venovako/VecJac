@@ -3,25 +3,40 @@
 
 #include "common.h"
 
-#ifndef BV_IX_T
-#define BV_IX_T uint32_t
-#endif /* !BV_IX_T */
+extern uint32_t *bv32_new(const fnat sz);
+extern uint32_t *bv32_reset(uint32_t bv[static restrict 1], const fnat sz, const int c);
 
-extern uint64_t *bv_new(const BV_IX_T sz);
+static inline void bv32_set(uint32_t bv[static restrict 1], const fnat ix)
+{
+  bv[ix >> 5u] |= (UINT32_C(0x01) << (ix & 0x1Fu));
+}
 
-static inline void bv_set(uint64_t bv[static restrict 1], const BV_IX_T ix)
+static inline uint32_t bv32_get(const uint32_t bv[static restrict 1], const fnat ix)
+{
+  return (bv[ix >> 5u] & (UINT32_C(0x01) << (ix & 0x1Fu)));
+}
+
+static inline void bv32_clr(uint32_t bv[static restrict 1], const fnat ix)
+{
+  bv[ix >> 5u] &= ~(UINT32_C(0x01) << (ix & 0x1Fu));
+}
+
+extern uint64_t *bv64_new(const fnat sz);
+extern uint64_t *bv64_reset(uint64_t bv[static restrict 1], const fnat sz, const int c);
+
+static inline void bv64_set(uint64_t bv[static restrict 1], const fnat ix)
 {
   bv[ix >> 6u] |= (UINT64_C(0x01) << (ix & 0x3Fu));
 }
 
-static inline uint64_t bv_get(const uint64_t bv[static restrict 1], const BV_IX_T ix)
+static inline uint64_t bv64_get(const uint64_t bv[static restrict 1], const fnat ix)
 {
   return (bv[ix >> 6u] & (UINT64_C(0x01) << (ix & 0x3Fu)));
 }
 
-static inline void bv_clr(uint64_t bv[static restrict 1], const BV_IX_T ix)
+static inline void bv64_clr(uint64_t bv[static restrict 1], const fnat ix)
 {
   bv[ix >> 6u] &= ~(UINT64_C(0x01) << (ix & 0x3Fu));
 }
 
-#endif /* !BV_H */
+#endif /* !BV64_H */
