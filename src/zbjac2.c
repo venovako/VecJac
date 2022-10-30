@@ -55,8 +55,7 @@ _mm512_store_pd((sat + i), ai_);                                                
 register const VD L2 = _mm512_div_pd(_mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2), s2); VDP(L2);               \
 _mm512_store_pd((l1 + i), _mm512_scalef_pd(L1, es));                                                                   \
 register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                                                            \
-_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es));                                                                   \
-p[i >> VDLlg] = MD2U(P)
+_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es))
 #endif /* ?Z8JAC2_LOOP */
 
 // return the sines instead of the tangents
@@ -103,8 +102,7 @@ _mm512_store_pd((sat + i), ai_);                                                
 register const VD L2 = _mm512_div_pd(_mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2), s2); VDP(L2);               \
 _mm512_store_pd((l1 + i), _mm512_scalef_pd(L1, es));                                                                   \
 register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                                                            \
-_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es));                                                                   \
-p[i >> VDLlg] = MD2U(P)
+_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es))
 #endif /* ?Z8JACL_LOOP */
 
 fint zbjac2_(const fint n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21r[static restrict VDL], const double a21i[static restrict VDL], double c[static restrict VDL], double cat[static restrict VDL], double sat[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
@@ -141,12 +139,14 @@ fint zbjac2_(const fint n[static restrict 1], const double a11[static restrict V
     for (fnat i = 0u; i < _n; i += VDL) {
       Z8JAC2_PARAMS;
       Z8JACL_LOOP;
+      p[i >> VDLlg] = MD2U(P);
     }
     return 1;
 #else /* !_OPENMP */
     Z8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VDL) {
       Z8JACL_LOOP;
+      p[i >> VDLlg] = MD2U(P);
     }
     return 0;
 #endif /* ?_OPENMP */
@@ -158,12 +158,14 @@ fint zbjac2_(const fint n[static restrict 1], const double a11[static restrict V
     for (fnat i = 0u; i < _n; i += VDL) {
       Z8JAC2_PARAMS;
       Z8JAC2_LOOP;
+      p[i >> VDLlg] = MD2U(P);
     }
     return 1;
 #else /* !_OPENMP */
     Z8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VDL) {
       Z8JAC2_LOOP;
+      p[i >> VDLlg] = MD2U(P);
     }
     return 0;
 #endif /* ?_OPENMP */
@@ -213,8 +215,7 @@ _mm512_store_pd((sat + i), ai_);                                                
 register const VD L2 = _mm512_div_pd(_mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2), s2); VDP(L2);               \
 _mm512_store_pd((l1 + i), _mm512_scalef_pd(L1, es));                                                                   \
 register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                                                            \
-_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es));                                                                   \
-p[i >> VDLlg] = MD2U(P)
+_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es))
 #endif /* ?Z8JACI_LOOP */
 
 // for internal use only
@@ -250,17 +251,21 @@ fint zbjac2i(const fint n[static restrict 1], const double a11[static restrict V
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(_n,a11,a22,a21r,a21i,c,cat,sat,l1,l2,p)
     for (fnat i = 0u; i < _n; i += VDL) {
-      if (p[i >> VDLlg]) {
+      const fnat j = (i >> VDLlg);
+      if (p[j]) {
         Z8JAC2_PARAMS;
         Z8JACI_LOOP;
+        p[j] = ((p[j] & 0xFFFFFF00u) | MD2U(P));
       }
     }
     return 1;
 #else /* !_OPENMP */
     Z8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VDL) {
-      if (p[i >> VDLlg]) {
+      const fnat j = (i >> VDLlg);
+      if (p[j]) {
         Z8JACI_LOOP;
+        p[j] = ((p[j] & 0xFFFFFF00u) | MD2U(P));
       }
     }
     return 0;
@@ -271,17 +276,21 @@ fint zbjac2i(const fint n[static restrict 1], const double a11[static restrict V
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(_n,a11,a22,a21r,a21i,c,cat,sat,l1,l2,p)
     for (fnat i = 0u; i < _n; i += VDL) {
-      if (p[i >> VDLlg]) {
+      const fnat j = (i >> VDLlg);
+      if (p[j]) {
         Z8JAC2_PARAMS;
         Z8JAC2_LOOP;
+        p[j] = ((p[j] & 0xFFFFFF00u) | MD2U(P));
       }
     }
     return 1;
 #else /* !_OPENMP */
     Z8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VDL) {
-      if (p[i >> VDLlg]) {
+      const fnat j = (i >> VDLlg);
+      if (p[j]) {
         Z8JAC2_LOOP;
+        p[j] = ((p[j] & 0xFFFFFF00u) | MD2U(P));
       }
     }
     return 0;
