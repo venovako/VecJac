@@ -41,8 +41,7 @@ _mm512_store_pd((c + i), co);                                                   
 register const VD L2 = _mm512_div_pd(_mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2), s2); VDP(L2);               \
 _mm512_store_pd((l1 + i), _mm512_scalef_pd(L1, es));                                                                   \
 register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                                                            \
-_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es));                                                                   \
-p[i >> VDLlg] = MD2U(P)
+_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es))
 #endif /* ?D8JAC2_LOOP */
 
 // return the sines instead of the tangents
@@ -76,8 +75,7 @@ _mm512_store_pd((c + i), co);                                                   
 register const VD L2 = _mm512_div_pd(_mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2), s2); VDP(L2);               \
 _mm512_store_pd((l1 + i), _mm512_scalef_pd(L1, es));                                                                   \
 register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                                                            \
-_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es));                                                                   \
-p[i >> VDLlg] = MD2U(P)
+_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es))
 #endif /* ?D8JACL_LOOP */
 
 fint dbjac2_(const fint n[static restrict 1], const double a11[static restrict VDL], const double a22[static restrict VDL], const double a21[static restrict VDL], double c[static restrict VDL], double at[static restrict VDL], double l1[static restrict VDL], double l2[static restrict VDL], unsigned p[static restrict 1])
@@ -110,12 +108,14 @@ fint dbjac2_(const fint n[static restrict 1], const double a11[static restrict V
     for (fnat i = 0u; i < _n; i += VDL) {
       D8JAC2_PARAMS;
       D8JACL_LOOP;
+      p[i >> VDLlg] = MD2U(P);
     }
     return 1;
 #else /* !_OPENMP */
     D8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VDL) {
       D8JACL_LOOP;
+      p[i >> VDLlg] = MD2U(P);
     }
     return 0;
 #endif /* ?_OPENMP */
@@ -127,12 +127,14 @@ fint dbjac2_(const fint n[static restrict 1], const double a11[static restrict V
     for (fnat i = 0u; i < _n; i += VDL) {
       D8JAC2_PARAMS;
       D8JAC2_LOOP;
+      p[i >> VDLlg] = MD2U(P);
     }
     return 1;
 #else /* !_OPENMP */
     D8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VDL) {
       D8JAC2_LOOP;
+      p[i >> VDLlg] = MD2U(P);
     }
     return 0;
 #endif /* ?_OPENMP */
@@ -169,8 +171,7 @@ _mm512_store_pd((c + i), s1);                                                   
 register const VD L2 = _mm512_div_pd(_mm512_fmadd_pd(t1, _mm512_fmsub_pd(a1, t1, ab), a2), s2); VDP(L2);               \
 _mm512_store_pd((l1 + i), _mm512_scalef_pd(L1, es));                                                                   \
 register const MD P = _mm512_cmplt_pd_mask(L1, L2); MDP(P);                                                            \
-_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es));                                                                   \
-p[i >> VDLlg] = MD2U(P)
+_mm512_store_pd((l2 + i), _mm512_scalef_pd(L2, es))
 #endif /* ?D8JACI_LOOP */
 
 // for internal use only
@@ -202,17 +203,21 @@ fint dbjac2i(const fint n[static restrict 1], const double a11[static restrict V
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(_n,a11,a22,a21,c,at,l1,l2,p)
     for (fnat i = 0u; i < _n; i += VDL) {
-      if (p[i >> VDLlg]) {
+      const fnat j = (i >> VDLlg);
+      if (p[j]) {
         D8JAC2_PARAMS;
         D8JACI_LOOP;
+        p[j] = ((p[j] & 0xFFFFFF00u) | MD2U(P));
       }
     }
     return 1;
 #else /* !_OPENMP */
     D8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VDL) {
-      if (p[i >> VDLlg]) {
+      const fnat j = (i >> VDLlg);
+      if (p[j]) {
         D8JACI_LOOP;
+        p[j] = ((p[j] & 0xFFFFFF00u) | MD2U(P));
       }
     }
     return 0;
@@ -223,17 +228,21 @@ fint dbjac2i(const fint n[static restrict 1], const double a11[static restrict V
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(_n,a11,a22,a21,c,at,l1,l2,p)
     for (fnat i = 0u; i < _n; i += VDL) {
-      if (p[i >> VDLlg]) {
+      const fnat j = (i >> VDLlg);
+      if (p[j]) {
         D8JAC2_PARAMS;
         D8JAC2_LOOP;
+        p[j] = ((p[j] & 0xFFFFFF00u) | MD2U(P));
       }
     }
     return 1;
 #else /* !_OPENMP */
     D8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VDL) {
-      if (p[i >> VDLlg]) {
+      const fnat j = (i >> VDLlg);
+      if (p[j]) {
         D8JAC2_LOOP;
+        p[j] = ((p[j] & 0xFFFFFF00u) | MD2U(P));
       }
     }
     return 0;

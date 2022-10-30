@@ -171,8 +171,7 @@ _mm512_store_ps((c + i), s1);                                                   
 register const VS L2 = _mm512_div_ps(_mm512_fmadd_ps(t1, _mm512_fmsub_ps(a1, t1, ab), a2), s2); VSP(L2);                 \
 _mm512_store_ps((l1 + i), _mm512_scalef_ps(L1, es));                                                                     \
 register const MS P = _mm512_cmplt_ps_mask(L1, L2); MSP(P);                                                              \
-_mm512_store_ps((l2 + i), _mm512_scalef_ps(L2, es));                                                                     \
-p[j] = ((p[j] & 0xFFFF0000u) | MS2U(P))
+_mm512_store_ps((l2 + i), _mm512_scalef_ps(L2, es))
 #endif /* ?S8JACI_LOOP */
 
 // for internal use only
