@@ -357,13 +357,11 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       Ta += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
-      const fint _n_2 =
 #ifdef USE_SECANTS
-        -(fint)n_2
+      const fint _n_2 = -(fint)n_2;
 #else /* !USE_SECANTS */
-        (fint)n_2
+      const fint _n_2 = (fint)n_2;
 #endif /* ?USE_SECANTS */
-        ;
       if (cbjac2i(&_n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
         return -26;
 #ifdef JTRACE

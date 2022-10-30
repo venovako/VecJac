@@ -143,13 +143,14 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 
   flt2ef(MV, &es, &fs);
   eM = (int)es;
-  sN = FLT_MAX_ROT_EXP - eM - 1;
+  sR = FLT_MAX_ROT_EXP - eM - 1;
+  sN = sR;
   if (sN) {
     if (cscale_(n, n, Vr, ldVr, Vi, ldVi, &sN) < 0)
       return -__LINE__;
-    MV = scalbnf(MV, (int)sN);
+    MV = scalbnf(MV, sR);
   }
-  int sV = (int)sN;
+  int sV = sR;
 
   const fnat n_32 = (n_2 >> VSLlg);
 
@@ -165,8 +166,6 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   float *const w = l2 + n_2;
   unsigned *const p = iwork;
   unsigned *const pc = p + n_32;
-
-  // TODO
 
   if (*swp) {
 #ifdef _OPENMP
@@ -192,7 +191,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   while (sw < *swp) {
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
-      // rescale according to MG if necessary and update MG
+      // rescale G according to MG if necessary and update MG
       flt2ef(MG, &es, &fs);
       eM = (int)es;
       sR = FLT_MAX_ROT_EXP - eM - 1;
@@ -204,8 +203,9 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #endif /* JTRACE */
         if (cscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
           return -__LINE__;
-        MG = scalbnf(MG, (int)sN);
-        sT += (int)sN;
+        sR = (int)sN;
+        MG = scalbnf(MG, sR);
+        sT += sR;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(l1,n)
 #endif /* _OPENMP */
@@ -215,6 +215,17 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         (void)fprintf(jtr, "%#.9e\n", MG);
         (void)fflush(jtr);
 #endif /* JTRACE */
+      }
+      // rescale V according to MV if necessary and update MV
+      flt2ef(MV, &es, &fs);
+      eM = (int)es;
+      sR = FLT_MAX_ROT_EXP - eM - 1;
+      sN = sR;
+      if (sN) {
+        if (cscale_(n, n, Vr, ldVr, Vi, ldVi, &sN) < 0)
+          return -__LINE__;
+        MV = scalbnf(MV, sR);
+        sV += sR;
       }
       // compute the norms, overflow-aware
       const unsigned *const r = js + st * (size_t)(*n);
@@ -263,8 +274,9 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #endif /* JTRACE */
           if (cscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
             return -__LINE__;
-          MG = scalbnf(MG, (int)sN);
-          sT += (int)sN;
+          sR = (int)sN;
+          MG = scalbnf(MG, sR);
+          sT += sR;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(l1,n)
 #endif /* _OPENMP */
@@ -305,9 +317,9 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         l1[_pq] = crealf(z);
         l2[_pq] = cimagf(z);
         if (!(isfinite(l2[_pq])))
-          nMG = fminf(nMG, -25.0f);
+          nMG = fminf(nMG, (float)-__LINE__);
         if (!(isfinite(l1[_pq])))
-          nMG = fminf(nMG, -24.0f);
+          nMG = fminf(nMG, (float)-__LINE__);
       }
 #ifdef JTRACE
       Tp += tsc_lap(hz, T, rdtsc_end(rd));
@@ -354,6 +366,12 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         pc[j] = MS2U(_mm512_cmple_ps_mask(_tol, _a21_));
         if (p[j] = _mm_popcnt_u32(pc[j])) {
           stt += p[j];
+          register VS _a11 = _mm512_load_ps(a11 + i);
+          register VS _a22 = _mm512_load_ps(a22 + i);
+          register const VS _gst = _mm512_set1_ps(gst);
+          // might not yet be sorted, so check both cases
+          p[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a22), _a11)) << VSL);
+          pc[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a11), _a22)) << VSL);
           // Grammian pre-scaling into the single precision range
           register const VS f1 = _mm512_load_ps(cat + i);
           register const VS f2 = _mm512_load_ps(sat + i);
@@ -373,8 +391,8 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           register const VS d = _mm512_min_ps(_mm512_sub_ps(mxe, E), zerof);
           e12 = _mm512_add_ps(e12, d);
           e21 = _mm512_add_ps(e21, d);
-          register const VS _a11 = _mm512_scalef_ps(f12, e12);
-          register const VS _a22 = _mm512_scalef_ps(f21, e21);
+          _a11 = _mm512_scalef_ps(f12, e12);
+          _a22 = _mm512_scalef_ps(f21, e21);
           _a21r = _mm512_scalef_ps(_a21r, d);
           _a21i = _mm512_scalef_ps(_a21i, d);
           _mm512_store_ps((a11 + i), _a11);
@@ -388,13 +406,11 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       Ta += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
-      const fint _n_2 =
 #ifdef USE_SECANTS
-        -(fint)n_2
+      const fint _n_2 = -(fint)n_2;
 #else /* !USE_SECANTS */
-        (fint)n_2
+      const fint _n_2 = (fint)n_2;
 #endif /* ?USE_SECANTS */
-        ;
       if (cbjac2i(&_n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
         return -__LINE__;
 #ifdef JTRACE
@@ -407,6 +423,8 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VSL) {
         const fnat j = (i >> VSLlg);
+        unsigned gsp = ((p[j] & 0xFFFF0000u) >> VSL);
+        unsigned gsn = ((pc[j] & 0xFFFF0000u) >> VSL);
         unsigned trans = (pc[j] & 0xFFFFu);
         unsigned perm = (p[j] & 0xFFFFu);
         for (fnat k = 0u; k < VSL; ++k) {
@@ -417,7 +435,13 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           *(unsigned*)(a11 + l) = _p;
           *(unsigned*)(a22 + l) = _q;
           if (trans & 1u) {
-            if (perm & 1u) {
+            if (gsp & 1u)
+              a21r[l] = 3.0f;
+            else if (gsn & 1u) {
+              a21[l] = -3.0f;
+              ++np;
+            }
+            else if (perm & 1u) {
               a21r[l] = -2.0f;
               ++np;
             }
@@ -436,10 +460,13 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           }
           else // no swap
             a21r[l] = 1.0f;
+          gsp >>= 1u;
+          gsn >>= 1u;
           trans >>= 1u;
           perm >>= 1u;
         }
       }
+      // TODO
       nMG = 0.0f;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,l1,n_2) reduction(max:nMG)

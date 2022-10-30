@@ -74,9 +74,9 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 
   double M = znormx_(m, n, Gr, ldGr, Gi, ldGi);
   if (!(M <= DBL_MAX))
-    return -19;
+    return -__LINE__;
   if (copysign(1.0, M) == -1.0)
-    return -20;
+    return -__LINE__;
 
 #ifdef JTRACE
   (void)fprintf(jtr, "%#.17e\n", M);
@@ -114,7 +114,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #endif /* JTRACE */
   if (sN) {
     if (zscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
-      return -21;
+      return -__LINE__;
     M = scalbn(M, (int)sN);
   }
   int sT = (int)sN;
@@ -172,9 +172,10 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         (void)fflush(jtr);
 #endif /* JTRACE */
         if (zscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
-          return -22;
-        M = scalbn(M, (int)sN);
-        sT += (int)sN;
+          return -__LINE__;
+        sR = (int)sN;
+        M = scalbn(M, sR);
+        sT += sR;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(l1,n)
 #endif /* _OPENMP */
@@ -231,9 +232,10 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           (void)fflush(jtr);
 #endif /* JTRACE */
           if (zscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
-            return -23;
-          M = scalbn(M, (int)sN);
-          sT += (int)sN;
+            return -__LINE__;
+          sR = (int)sN;
+          M = scalbn(M, sR);
+          sT += sR;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(l1,n)
 #endif /* _OPENMP */
@@ -274,9 +276,9 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         l1[_pq] = creal(z);
         l2[_pq] = cimag(z);
         if (!(isfinite(l2[_pq])))
-          nM = fmin(nM, -25.0);
+          nM = fmin(nM, -__LINE__);
         if (!(isfinite(l1[_pq])))
-          nM = fmin(nM, -24.0);
+          nM = fmin(nM, -__LINE__);
       }
 #ifdef JTRACE
       Tp += tsc_lap(hz, T, rdtsc_end(rd));
@@ -357,15 +359,13 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       Ta += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
-      const fint _n_2 =
 #ifdef USE_SECANTS
-        -(fint)n_2
+      const fint _n_2 = -(fint)n_2;
 #else /* !USE_SECANTS */
-        (fint)n_2
+      const fint _n_2 = (fint)n_2;
 #endif /* ?USE_SECANTS */
-        ;
       if (zbjac2i(&_n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
-        return -26;
+        return -__LINE__;
 #ifdef JTRACE
       Te += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
@@ -501,7 +501,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
         (void)fflush(jtr);
 #endif /* JTRACE */
-        return -27;
+        return -__LINE__;
       }
     }
     if (!swt)

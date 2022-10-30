@@ -63,9 +63,9 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 
   float M = snormx_(m, n, G, ldG);
   if (!(M <= FLT_MAX))
-    return -15;
+    return -__LINE__;
   if (copysignf(1.0f, M) == -1.0f)
-    return -16;
+    return -__LINE__;
 
 #ifdef JTRACE
   (void)fprintf(jtr, "%#.9e\n", M);
@@ -100,7 +100,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #endif /* JTRACE */
   if (sN) {
     if (sscale_(m, n, G, ldG, &sN) < 0)
-      return -17;
+      return -__LINE__;
     M = scalbnf(M, (int)sN);
   }
   int sT = (int)sN;
@@ -149,9 +149,10 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         (void)fflush(jtr);
 #endif /* JTRACE */
         if (sscale_(m, n, G, ldG, &sN) < 0)
-          return -18;
-        M = scalbnf(M, (int)sN);
-        sT += (int)sN;
+          return -__LINE__;
+        sR = (int)sN;
+        M = scalbnf(M, sR);
+        sT += sR;
 #ifdef JTRACE
         (void)fprintf(jtr, "%#.9e\n", M);
         (void)fflush(jtr);
@@ -197,9 +198,10 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           (void)fflush(jtr);
 #endif /* JTRACE */
           if (sscale_(m, n, G, ldG, &sN) < 0)
-            return -19;
-          M = scalbnf(M, (int)sN);
-          sT += (int)sN;
+            return -__LINE__;
+          sR = (int)sN;
+          M = scalbnf(M, sR);
+          sT += sR;
 #ifdef JTRACE
           (void)fprintf(jtr, "%#.9e\n", M);
           (void)fflush(jtr);
@@ -230,7 +232,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         float *const Gq = G + _q * (*ldG);
         w[_pq] = sdpscl_(m, Gq, Gp, e2, f2);
         if (!(isfinite(w[_pq])))
-          nM = fminf(nM, -20.0f);
+          nM = fminf(nM, -__LINE__);
       }
 #ifdef JTRACE
       Tp += tsc_lap(hz, T, rdtsc_end(rd));
@@ -312,15 +314,13 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       Ta += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
-      const fint _n_2 =
 #ifdef USE_SECANTS
-        -(fint)n_2
+      const fint _n_2 = -(fint)n_2;
 #else /* !USE_SECANTS */
-        (fint)n_2
+      const fint _n_2 = (fint)n_2;
 #endif /* ?USE_SECANTS */
-        ;
       if (sbjac2i(&_n_2, a11, a22, a21, c, at, l1, l2, p) < 0)
-        return -21;
+        return -__LINE__;
 #ifdef JTRACE
       Te += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
@@ -343,12 +343,12 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           *(unsigned*)(a11 + l) = _p;
           *(unsigned*)(a22 + l) = _q;
           if (trans & 1u) {
-            if (gsp & 1u) {
+            if (gsp & 1u)
+              a21[l] = 3.0f;
+            else if (gsn & 1u) {
               a21[l] = -3.0f;
               ++np;
             }
-            else if (gsn & 1u)
-              a21[l] = 3.0f;
             else if (perm & 1u) {
               a21[l] = -2.0f;
               ++np;
@@ -478,7 +478,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
         (void)fflush(jtr);
 #endif /* JTRACE */
-        return -22;
+        return -__LINE__;
       }
     }
     if (!swt)
