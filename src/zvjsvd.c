@@ -370,9 +370,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       Te += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
-      fnat np = 0u; // number of swaps
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(a11,a22,a21r,eS,fS,p,pc,r,n_2) reduction(+:np)
+#pragma omp parallel for default(none) shared(a11,a22,a21r,eS,fS,p,pc,r,n_2)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
@@ -386,10 +385,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           *(uint64_t*)(a11 + l) = _p;
           *(uint64_t*)(a22 + l) = _q;
           if (trans & 1u) {
-            if (perm & 1u) {
+            if (perm & 1u)
               a21r[l] = -2.0;
-              ++np;
-            }
             else // no swap
               a21r[l] = 2.0;
           }
@@ -401,7 +398,6 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             fS[_p] = fS[_q];
             fS[_q] = a21r[l];
             a21r[l] = -1.0;
-            ++np;
           }
           else // no swap
             a21r[l] = 1.0;
