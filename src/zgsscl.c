@@ -74,7 +74,7 @@ double zgsscl_(const fint m[static restrict 1], const double tr[static restrict 
       register VD yii_ = _mm512_scalef_pd(yii, y_e); VDP(yii_);
       register VD xri_ = _mm512_scalef_pd(xri, x_e); VDP(xri_);
       register VD xii_ = _mm512_scalef_pd(xii, x_e); VDP(xii_);
-      VDFMA(yri,yii,tfr,tfi,yri_,yii_,xri_,xii_);
+      VZFMA(yri,yii,tfr,tfi,yri_,yii_,xri_,xii_);
       xri_ = _mm512_scalef_pd(yri, xe); VDP(xri_);
       xii_ = _mm512_scalef_pd(yii, xe); VDP(xii_);
       ne = MDOR(ne, _mm512_cmpneq_pd_mask(xri, xri_));
@@ -106,7 +106,7 @@ double zgsscl_(const fint m[static restrict 1], const double tr[static restrict 
       register const VD yii = _mm512_load_pd(yi_i); VDP(yii);
       register VD yri_ = _mm512_scalef_pd(yri, y_e); VDP(yri_);
       register VD yii_ = _mm512_scalef_pd(yii, y_e); VDP(yii_);
-      VDFMA(xri,xii,tfr,tfi,xri_,xii_,yri_,yii_);
+      VZFMA(xri,xii,tfr,tfi,xri_,xii_,yri_,yii_);
       yri_ = _mm512_scalef_pd(xri, ye); VDP(yri_);
       yii_ = _mm512_scalef_pd(xii, ye); VDP(yii_);
       ne = MDOR(ne, _mm512_cmpneq_pd_mask(yri, yri_));

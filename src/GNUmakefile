@@ -24,8 +24,8 @@ EXES=$(SEXES) $(DEXES) $(CEXES) $(ZEXES) $(XEXES)
 
 SOBJS=sbjac2$(SUFX).o sdpscl$(SUFX).o sgsscl$(SUFX).o sjrot$(SUFX).o sjrotf$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o snssvj$(SUFX).o sscale$(SUFX).o sswp$(SUFX).o svjsvd$(SUFX).o
 DOBJS=dbjac2$(SUFX).o ddpscl$(SUFX).o dgsscl$(SUFX).o djrot$(SUFX).o djrotf$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dnssvj$(SUFX).o dscale$(SUFX).o dswp$(SUFX).o dvjsvd$(SUFX).o
-COBJS=cbjac2$(SUFX).o cdpscl$(SUFX).o cmerge$(SUFX).o cjrot$(SUFX).o cjrotf$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cnssvj$(SUFX).o cscale$(SUFX).o csplit$(SUFX).o cvjsvd$(SUFX).o
-ZOBJS=zbjac2$(SUFX).o zdpscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o znssvj$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
+COBJS=cbjac2$(SUFX).o cdpscl$(SUFX).o cgsscl$(SUFX).o cmerge$(SUFX).o cjrot$(SUFX).o cjrotf$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cnssvj$(SUFX).o cscale$(SUFX).o csplit$(SUFX).o cvjsvd$(SUFX).o
+ZOBJS=zbjac2$(SUFX).o zdpscl$(SUFX).o zgsscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o znssvj$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
 XOBJS=aalloc$(SUFX).o common$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o
 ifdef SLEEF
 DOBJS += dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o
@@ -48,6 +48,9 @@ cbjac2$(SUFX).o: cbjac2.c cbjac2.h scjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 cdpscl$(SUFX).o: cdpscl.c cdpscl.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+cgsscl$(SUFX).o: cgsscl.c cgsscl.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 cjrot$(SUFX).o: cjrot.c cjrot.h sjrot.h vecdef.h vec.h common.h $(MKFS)
@@ -193,6 +196,9 @@ zbjac2$(SUFX).o: zbjac2.c zbjac2.h dzjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 zdpscl$(SUFX).o: zdpscl.c zdpscl.h vec.h common.h $(MKFS)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+zgsscl$(SUFX).o: zgsscl.c zgsscl.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 zjrot$(SUFX).o: zjrot.c zjrot.h djrot.h vecdef.h vec.h common.h $(MKFS)
