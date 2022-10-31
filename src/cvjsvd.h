@@ -3,7 +3,7 @@
 
 #include "vec.h"
 
-// work: 5 * n elems
+// work: 6 * n elems
 // iwork: n / VSL elems
 extern fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], float Gr[static restrict VSL], const fnat ldGr[static restrict 1], float Gi[static restrict VSL], const fnat ldGi[static restrict 1], float Vr[static restrict VSL], const fnat ldVr[static restrict 1], float Vi[static restrict VSL], const fnat ldVi[static restrict 1], float eS[static restrict 1], float fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], float work[static restrict VSL], unsigned iwork[static restrict 1]);
 
