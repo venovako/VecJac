@@ -232,7 +232,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         float *const Gq = G + _q * (*ldG);
         w[_pq] = sdpscl_(m, Gq, Gp, e2, f2);
         if (!(isfinite(w[_pq])))
-          nM = fminf(nM, -__LINE__);
+          nM = fminf(nM, (float)-__LINE__);
       }
 #ifdef JTRACE
       Tp += tsc_lap(hz, T, rdtsc_end(rd));

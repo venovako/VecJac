@@ -232,7 +232,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         double *const Gq = G + _q * (*ldG);
         w[_pq] = ddpscl_(m, Gq, Gp, e2, f2);
         if (!(isfinite(w[_pq])))
-          nM = fmin(nM, -__LINE__);
+          nM = fmin(nM, (double)-__LINE__);
       }
 #ifdef JTRACE
       Tp += tsc_lap(hz, T, rdtsc_end(rd));

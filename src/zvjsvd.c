@@ -276,9 +276,9 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         l1[_pq] = creal(z);
         l2[_pq] = cimag(z);
         if (!(isfinite(l2[_pq])))
-          nM = fmin(nM, -__LINE__);
+          nM = fmin(nM, (double)-__LINE__);
         if (!(isfinite(l1[_pq])))
-          nM = fmin(nM, -__LINE__);
+          nM = fmin(nM, (double)-__LINE__);
       }
 #ifdef JTRACE
       Tp += tsc_lap(hz, T, rdtsc_end(rd));
