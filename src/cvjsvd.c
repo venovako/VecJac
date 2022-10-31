@@ -318,11 +318,9 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         float *const Giq = Gi + _q * (*ldGi);
         const float complex z = cdpscl_(m, Grq, Giq, Grp, Gip, e2, f2);
         a21r[_pq] = crealf(z);
-        if (!(isfinite(a21r[_pq])))
-          nMG = fminf(nMG, (float)-__LINE__);
+        nMG = fminf(nMG, (isfinite(a21r[_pq]) ? 0.0f : (float)-__LINE__));
         a21i[_pq] = cimagf(z);
-        if (!(isfinite(a21i[_pq])))
-          nMG = fminf(nMG, (float)-__LINE__);
+        nMG = fminf(nMG, (isfinite(a21i[_pq]) ? 0.0f : (float)-__LINE__));
       }
 #ifdef JTRACE
       Tp += tsc_lap(hz, T, rdtsc_end(rd));
@@ -369,7 +367,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         pc[j] = MS2U(_mm512_cmple_ps_mask(_tol, _a21_));
         if (p[j] = _mm_popcnt_u32(pc[j])) {
           stt += p[j];
-          // TODO: this assumes a11 and a22 are finite.
+          // TODO: this assumes that a11 and a22 are finite.
           // The GS computation can be done with (e1,f1) and (e2,f2) instead.
           register VS _a11 = _mm512_load_ps(a11 + i);
           register VS _a22 = _mm512_load_ps(a22 + i);
@@ -645,7 +643,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       for (fnat j = 0u; j < *n; ++j) {
         float *const Vr_j = Vr + j * (size_t)(*ldVr);
         float *const Vi_j = Vi + j * (size_t)(*ldVi);
-        register const VS _s = _mm512_set1_ps(-sV);
+        register const VS _s = _mm512_set1_ps((float)-sV);
         for (fnat i = 0u; i < *n; i += VSL) {
           float *const Vr_ij = Vr_j + i;
           float *const Vi_ij = Vi_j + i;

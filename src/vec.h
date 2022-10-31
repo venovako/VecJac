@@ -255,6 +255,24 @@
 #define MDXOR(a,b) (__mmask8)_kxor_mask16((a),(b))
 #endif /* ?__AVX512DQ__ */
 #endif /* ?MDXOR */
+#ifdef MDAND
+#error MDAND already defined
+#else /* !MDAND */
+#ifdef __AVX512DQ__
+#define MDAND(a,b) _kand_mask8((a),(b))
+#else /* !__AVX512DQ__ */
+#define MDAND(a,b) (__mmask8)_kand_mask16((a),(b))
+#endif /* ?__AVX512DQ__ */
+#endif /* ?MDAND */
+#ifdef MDANDN
+#error MDANDN already defined
+#else /* !MDANDN */
+#ifdef __AVX512DQ__
+#define MDANDN(a,b) _kandn_mask8((a),(b))
+#else /* !__AVX512DQ__ */
+#define MDANDN(a,b) (__mmask8)_kandn_mask16((a),(b))
+#endif /* ?__AVX512DQ__ */
+#endif /* ?MDANDN */
 
 /* printout */
 

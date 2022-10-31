@@ -6,7 +6,6 @@
 #include "dznrm2.h"
 #include "zdpscl.h"
 #include "zbjac2.h"
-#include "zjrotf.h"
 #include "zjrot.h"
 #include "dswp.h"
 #include "vecdef.h"
@@ -72,39 +71,56 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   (void)fflush(jtr);
 #endif /* JTRACE */
 
-  double M = znormx_(m, n, Gr, ldGr, Gi, ldGi);
-  if (!(M <= DBL_MAX))
+  double MG = znormx_(m, n, Gr, ldGr, Gi, ldGi);
+  if (!(MG <= DBL_MAX))
     return -__LINE__;
-  if (copysign(1.0, M) == -1.0)
+  if (copysign(1.0, MG) == -1.0)
     return -__LINE__;
-
 #ifdef JTRACE
-  (void)fprintf(jtr, "%#.17e\n", M);
+  (void)fprintf(jtr, "%#.17e\n", MG);
   (void)fflush(jtr);
 #endif /* JTRACE */
 
+  double MV = 1.0;
+  if (*iwork) {
+    MV = znormx_(n, n, Vr, ldVr, Vi, ldVi);
+    if (!(MV <= DBL_MAX))
+      return -__LINE__;
+    // a dirty hack to avoid accumulation on a zero matrix
+    if (MV <= 0.0)
+      return -17;
+  }
+  else { // V = I
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,Vr,ldVr,Vi,ldVi,eS,fS)
+#pragma omp parallel for default(none) shared(n,Vr,ldVr,Vi,ldVi)
 #endif /* _OPENMP */
-  for (fnat j = 0u; j < *n; ++j) {
-    register const VD z = _mm512_setzero_pd();
-    double *const Vrj = Vr + j * (size_t)(*ldVr);
-    double *const Vij = Vi + j * (size_t)(*ldVi);
-    for (fnat i = 0u; i < *n; i += VDL) {
-      _mm512_store_pd((Vrj + i), z);
-      _mm512_store_pd((Vij + i), z);
+    for (fnat j = 0u; j < *n; ++j) {
+      register const VD z = _mm512_setzero_pd();
+      double *const Vrj = Vr + j * (size_t)(*ldVr);
+      double *const Vij = Vi + j * (size_t)(*ldVi);
+      for (fnat i = 0u; i < *n; i += VDL) {
+        _mm512_store_pd((Vrj + i), z);
+        _mm512_store_pd((Vij + i), z);
+      }
+      Vrj[j] = 1.0;
     }
-    fS[j] = Vrj[j] = 1.0;
-    eS[j] = -HUGE_VAL;
   }
 
-  if (M == 0.0)
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,eS,fS)
+#endif /* _OPENMP */
+  for (fnat j = 0u; j < *n; ++j) {
+    eS[j] = -HUGE_VAL;
+    fS[j] = 1.0;
+  }
+
+  if (MG == 0.0)
     return 0;
   const double M_m = (DBL_MAX / ((*m << 2u) * M_SQRT2));
   double es = 0.0, fs = 0.0;
   dbl2ef(M_m, &es, &fs);
   const int DBL_MAX_NRM_EXP = (int)es;
-  dbl2ef(M, &es, &fs);
+  dbl2ef(MG, &es, &fs);
   int eM = (int)es;
   int sR = DBL_MAX_ROT_EXP - eM - 1;
   fint sN = DBL_MAX_NRM_EXP - eM - 1;
@@ -115,13 +131,24 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   if (sN) {
     if (zscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
       return -__LINE__;
-    M = scalbn(M, (int)sN);
+    MG = scalbn(MG, (int)sN);
   }
   int sT = (int)sN;
 #ifdef JTRACE
-  (void)fprintf(jtr, "%#.17e\n", M);
+  (void)fprintf(jtr, "%#.17e\n", MG);
   (void)fflush(jtr);
 #endif /* JTRACE */
+
+  dbl2ef(MV, &es, &fs);
+  eM = (int)es;
+  sR = DBL_MAX_ROT_EXP - eM - 1;
+  sN = sR;
+  if (sN) {
+    if (zscale_(n, n, Vr, ldVr, Vi, ldVi, &sN) < 0)
+      return -__LINE__;
+    MV = scalbn(MV, sR);
+  }
+  int sV = sR;
 
   const fnat n_16 = (n_2 >> VDLlg);
 
@@ -134,20 +161,25 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   double *const sat = cat + n_2;
   double *const l1 = sat + n_2;
   double *const l2 = l1 + n_2;
-  double *const w = l2 + n_2;
+  double *const w0 = l2 + n_2;
+  double *const w1 = w0 + n_2;
+  double *const w2 = w1 + n_2;
+  double *const w3 = w2 + n_2;
+  double *const w4 = w3 + n_2;
   unsigned *const p = iwork;
   unsigned *const pc = p + n_16;
 
   if (*swp) {
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(l1,n)
+#pragma omp parallel for default(none) shared(w1,n)
 #endif /* _OPENMP */
     for (fnat i = 0u; i < *n; ++i)
-      l1[i] = 1.0;
+      w1[i] = 1.0;
   }
 
   // see LAPACK's ZGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
+  const double gst = scalb(tol, DBL_MAX_FIN_EXP);
   unsigned sw = 0u;
 
 #ifdef JTRACE
@@ -161,8 +193,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   while (sw < *swp) {
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
-      // rescale according to M if necessary and update M
-      dbl2ef(M, &es, &fs);
+      // rescale G according to MG if necessary and update MG
+      dbl2ef(MG, &es, &fs);
       eM = (int)es;
       sR = DBL_MAX_ROT_EXP - eM - 1;
       sN = DBL_MAX_NRM_EXP - eM - 1;
@@ -174,33 +206,44 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         if (zscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
           return -__LINE__;
         sR = (int)sN;
-        M = scalbn(M, sR);
+        MG = scalbn(MG, sR);
         sT += sR;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(l1,n)
 #endif /* _OPENMP */
         for (fnat i = 0u; i < *n; ++i)
-          l1[i] = 1.0;
+          w1[i] = 1.0;
 #ifdef JTRACE
-        (void)fprintf(jtr, "%#.17e\n", M);
+        (void)fprintf(jtr, "%#.17e\n", MG);
         (void)fflush(jtr);
 #endif /* JTRACE */
       }
+      // rescale V according to MV if necessary and update MV
+      dbl2ef(MV, &es, &fs);
+      eM = (int)es;
+      sR = DBL_MAX_ROT_EXP - eM - 1;
+      sN = sR;
+      if (sN) {
+        if (zscale_(n, n, Vr, ldVr, Vi, ldVi, &sN) < 0)
+          return -__LINE__;
+        MV = scalbn(MV, sR);
+        sV += sR;
+      }
       // compute the norms, overflow-aware
       const unsigned *const r = js + st * (size_t)(*n);
-      double nM = -0.0;
+      double nMG = -0.0;
       bool overflow = false;
       do {
 #ifdef JTRACE
         T = rdtsc_beg(rd);
 #endif /* JTRACE */
-        nM = 0.0;
+        nMG = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,Gr,ldGr,Gi,ldGi,eS,fS,a11,a22,cat,sat,l1) reduction(max:nM)
+#pragma omp parallel for default(none) shared(n,r,m,Gr,ldGr,Gi,ldGi,eS,fS,a11,a22,cat,sat,l1,l2,w1) reduction(max:nMG)
 #endif /* _OPENMP */
         for (fnat pq = 0u; pq < *n; pq += 2u) {
           const fnat _pq = (pq >> 1u);
-          if (!(nM <= DBL_MAX)) {
+          if (!(nMG <= DBL_MAX)) {
             a11[_pq] = NAN;
             a22[_pq] = NAN;
             continue;
@@ -208,25 +251,25 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const fnat pq_ = pq + 1u;
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
-          if (l1[_p] == 1.0) {
+          if (w1[_p] == 1.0) {
             double *const Grp = Gr + _p * (*ldGr);
             double *const Gip = Gi + _p * (*ldGi);
-            nM = fmax(nM, fmin((a11[_pq] = znorm2_(m, Grp, Gip, (eS + _p), (fS + _p), (cat + _pq), (sat + _pq))), HUGE_VAL));
-            if (!(nM <= DBL_MAX)) {
+            nMG = fmax(nMG, fmin((a11[_pq] = znorm2_(m, Grp, Gip, (eS + _p), (fS + _p), (cat + _pq), (sat + _pq))), HUGE_VAL));
+            if (!(nMG <= DBL_MAX)) {
               a22[_pq] = NAN;
               continue;
             }
           }
-          if (l1[_q] == 1.0) {
+          if (w1[_q] == 1.0) {
             double *const Grq = Gr + _q * (*ldGr);
             double *const Giq = Gi + _q * (*ldGi);
-            nM = fmax(nM, fmin((a22[_pq] = znorm2_(m, Grq, Giq, (eS + _q), (fS + _q), (cat + _pq), (sat + _pq))), HUGE_VAL));
+            nMG = fmax(nMG, fmin((a22[_pq] = znorm2_(m, Grq, Giq, (eS + _q), (fS + _q), (l1 + _pq), (l2 + _pq))), HUGE_VAL));
           }
         }
 #ifdef JTRACE
         Tn += tsc_lap(hz, T, rdtsc_end(rd));
 #endif /* JTRACE */
-        if (overflow = !(nM <= DBL_MAX)) {
+        if (overflow = !(nMG <= DBL_MAX)) {
 #ifdef JTRACE
           (void)fprintf(jtr, "sweep=%u, step=%u, M=", sw, st);
           (void)fflush(jtr);
@@ -234,15 +277,15 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           if (zscale_(m, n, Gr, ldGr, Gi, ldGi, &sN) < 0)
             return -__LINE__;
           sR = (int)sN;
-          M = scalbn(M, sR);
+          MG = scalbn(MG, sR);
           sT += sR;
 #ifdef _OPENMP
 #pragma omp parallel for default(none) shared(l1,n)
 #endif /* _OPENMP */
           for (fnat i = 0u; i < *n; ++i)
-            l1[i] = 1.0;
+            w1[i] = 1.0;
 #ifdef JTRACE
-          (void)fprintf(jtr, "%#.17e\n", M);
+          (void)fprintf(jtr, "%#.17e\n", MG);
           (void)fflush(jtr);
 #endif /* JTRACE */
         }
@@ -251,15 +294,15 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #ifdef JTRACE
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
-      nM = 0.0;
+      nMG = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,Gr,ldGr,Gi,ldGi,eS,fS,l1,l2) reduction(min:nM)
+#pragma omp parallel for default(none) shared(n,r,m,Gr,ldGr,Gi,ldGi,eS,fS,a21r,a21i) reduction(min:nMG)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat _pq = (pq >> 1u);
-        if (!(nM >= 0.0)) {
-          l1[_pq] = NAN;
-          l2[_pq] = NAN;
+        if (!(nMG >= 0.0)) {
+          a21r[_pq] = NAN;
+          a21i[_pq] = NAN;
           continue;
         }
         const fnat pq_ = pq + 1u;
@@ -273,43 +316,41 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         double *const Grq = Gr + _q * (*ldGr);
         double *const Giq = Gi + _q * (*ldGi);
         const double complex z = zdpscl_(m, Grq, Giq, Grp, Gip, e2, f2);
-        l1[_pq] = creal(z);
-        l2[_pq] = cimag(z);
-        if (!(isfinite(l2[_pq])))
-          nM = fmin(nM, (double)-__LINE__);
-        if (!(isfinite(l1[_pq])))
-          nM = fmin(nM, (double)-__LINE__);
+        a21r[_pq] = creal(z);
+        nMG = fmin(nMG, (isfinite(a21r[_pq]) ? 0.0 : (double)-__LINE__));
+        a21i[_pq] = cimag(z);
+        nMG = fmin(nMG, (isfinite(a21i[_pq]) ? 0.0 : (double)-__LINE__));
       }
 #ifdef JTRACE
       Tp += tsc_lap(hz, T, rdtsc_end(rd));
 #endif /* JTRACE */
-      if (!(nM >= 0.0)) {
+      if (!(nMG >= 0.0)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
         (void)fflush(jtr);
 #endif /* JTRACE */
-        return (fint)nM;
+        return (fint)nMG;
       }
       // repack data
 #ifdef JTRACE
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,eS,fS,c,cat,sat,w)
+#pragma omp parallel for default(none) shared(n,r,eS,fS,cat,sat,l1,l2)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat pq_ = pq + 1u;
         const fnat _pq = (pq >> 1u);
         const size_t _p = r[pq];
         const size_t _q = r[pq_];
-        c[_pq] = eS[_p];
-        w[_pq] = eS[_q];
-        cat[_pq] = fS[_p];
-        sat[_pq] = fS[_q];
+        cat[_pq] = eS[_p];
+        sat[_pq] = eS[_q];
+        l1[_pq] = fS[_p];
+        l2[_pq] = fS[_q];
       }
       fnat stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,c,cat,sat,l1,l2,w,p,pc,tol) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,cat,sat,l1,l2,w1,w2,w3,w4,p,pc,tol) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
@@ -325,6 +366,23 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         pc[j] = MD2U(_mm512_cmple_pd_mask(_tol, _a21_));
         if (p[j] = _mm_popcnt_u32(pc[j])) {
           stt += p[j];
+          // TODO: this assumes that a11 and a22 are finite.
+          // The GS computation can be done with (e1,f1) and (e2,f2) instead.
+          register VD _a11 = _mm512_load_pd(a11 + i);
+          register VD _a22 = _mm512_load_pd(a22 + i);
+          register const VD _gst = _mm512_set1_pd(gst);
+          // might not yet be sorted, so check both cases
+          register const MD ngs = _mm512_cmplt_pd_mask(_a11, _a22);
+          const unsigned gsp = (MD2U(MDANDN(ngs, _mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a22), _a11))) << VDL);
+          if (gsp) {
+            p[j] |= gsp;
+            stt -= _mm_popcnt_u32(gsp);
+          }
+          const unsigned gsn = (MD2U(MDAND(ngs, _mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a11), _a22))) << VDL);
+          if (gsn) {
+            pc[j] |= gsn;
+            stt -= _mm_popcnt_u32(gsn);
+          }
           // Grammian pre-scaling into the double precision range
           register const VD f1 = _mm512_load_pd(cat + i);
           register const VD f2 = _mm512_load_pd(sat + i);
@@ -344,14 +402,14 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           register const VD d = _mm512_min_pd(_mm512_sub_pd(mxe, E), zero);
           e12 = _mm512_add_pd(e12, d);
           e21 = _mm512_add_pd(e21, d);
-          register const VD _a11 = _mm512_scalef_pd(f12, e12);
-          register const VD _a22 = _mm512_scalef_pd(f21, e21);
+          _a11 = _mm512_scalef_pd(f12, e12);
+          _a22 = _mm512_scalef_pd(f21, e21);
           _a21r = _mm512_scalef_pd(_a21r, d);
           _a21i = _mm512_scalef_pd(_a21i, d);
-          _mm512_store_pd((a11 + i), _a11);
-          _mm512_store_pd((a22 + i), _a22);
-          _mm512_store_pd((a21r + i), _a21r);
-          _mm512_store_pd((a21i + i), _a21i);
+          _mm512_store_pd((w1 + i), _a11);
+          _mm512_store_pd((w2 + i), _a22);
+          _mm512_store_pd((w3 + i), _a21r);
+          _mm512_store_pd((w4 + i), _a21i);
         }
       }
       swt += stt;
@@ -364,17 +422,19 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #else /* !USE_SECANTS */
       const fint _n_2 = (fint)n_2;
 #endif /* ?USE_SECANTS */
-      if (zbjac2i(&_n_2, a11, a22, a21r, a21i, c, cat, sat, l1, l2, p) < 0)
+      if (zbjac2i(&_n_2, w1, w2, w3, w4, c, cat, sat, l1, l2, p) < 0)
         return -__LINE__;
 #ifdef JTRACE
       Te += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(a11,a22,a21r,eS,fS,p,pc,r,n_2)
+#pragma omp parallel for default(none) shared(eS,fS,l1,l2,w0,p,pc,r,n_2)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
+        unsigned gsp = ((p[j] & 0xFFFFFF00u) >> VDL);
+        unsigned gsn = ((pc[j] & 0xFFFFFF00u) >> VDL);
         unsigned trans = (pc[j] & 0xFFu);
         unsigned perm = (p[j] & 0xFFu);
         for (fnat k = 0u; k < VDL; ++k) {
@@ -382,123 +442,176 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const fnat pq = (l << 1u);
           const uint64_t _p = r[pq];
           const uint64_t _q = r[pq + 1u];
-          *(uint64_t*)(a11 + l) = _p;
-          *(uint64_t*)(a22 + l) = _q;
+          *(uint64_t*)(l1 + l) = _p;
+          *(uint64_t*)(l2 + l) = _q;
           if (trans & 1u) {
-            if (perm & 1u)
-              a21r[l] = -2.0;
+            if (gsp & 1u)
+              w0[l] = 3.0;
+            else if (gsn & 1u)
+              w0[l] = -3.0;
+            else if (perm & 1u)
+              w0[l] = -2.0;
             else // no swap
-              a21r[l] = 2.0;
+              w0[l] = 2.0;
           }
           else if (efcmp((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
-            a21r[l] = eS[_p];
+            w0[l] = eS[_p];
             eS[_p] = eS[_q];
-            eS[_q] = a21r[l];
-            a21r[l] = fS[_p];
+            eS[_q] = w0[l];
+            w0[l] = fS[_p];
             fS[_p] = fS[_q];
-            fS[_q] = a21r[l];
-            a21r[l] = -1.0;
+            fS[_q] = w0[l];
+            w0[l] = -1.0;
           }
           else // no swap
-            a21r[l] = 1.0;
+            w0[l] = 1.0;
+          gsp >>= 1u;
+          gsn >>= 1u;
           trans >>= 1u;
           perm >>= 1u;
         }
       }
-      nM = 0.0;
+      nMG = 0.0;
+      double nMV = -0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,l1,n_2) reduction(max:nM)
+#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,a11,a22,a21r,a21i,c,cat,sat,l1,l2,w0,w1,n_2) reduction(max:nMG,nMV)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
         const size_t _p = *(const uint64_t*)(a11 + i);
         const size_t _q = *(const uint64_t*)(a22 + i);
-        l1[_q] = l1[_p] = 0.0;
-        if (!(nM <= DBL_MAX)) {
-          a21i[i] = NAN;
+        w1[_q] = w1[_p] = 0.0;
+        if (!(nMG <= DBL_MAX)) {
+          nMG = HUGE_VAL;
           continue;
         }
-        double _c, _cat, _sat;
-        fint _m, _n;
-        if (a21r[i] == -2.0) {
-          _m = -(fint)*m;
-          _n = -(fint)*n;
-          _c = c[i];
-          _cat = cat[i];
-          _sat = sat[i];
-        }
-        else if (a21r[i] == -1.0) {
-          double *const Gr_p = Gr + _p * (*ldGr);
-          double *const Gr_q = Gr + _q * (*ldGr);
-          if (_m = dswp_(m, Gr_p, Gr_q)) {
-            a21i[i] = (double)_m;
-            nM = HUGE_VAL;
-            continue;
-          }
-          double *const Gi_p = Gi + _p * (*ldGi);
-          double *const Gi_q = Gi + _q * (*ldGi);
-          if (_m = dswp_(m, Gi_p, Gi_q)) {
-            a21i[i] = (double)_m;
-            nM = HUGE_VAL;
-            continue;
-          }
-          double *const Vr_p = Vr + _p * (*ldVr);
-          double *const Vr_q = Vr + _q * (*ldVr);
-          if (_n = dswp_(n, Vr_p, Vr_q)) {
-            a21i[i] = (double)_n;
-            nM = HUGE_VAL;
-            continue;
-          }
-          double *const Vi_p = Vi + _p * (*ldVi);
-          double *const Vi_q = Vi + _q * (*ldVi);
-          if (_n = dswp_(n, Vi_p, Vi_q)) {
-            a21i[i] = (double)_n;
-            nM = HUGE_VAL;
-            continue;
-          }
-          nM = fmax(nM, (a21i[i] = 0.0));
+        if (!(nMV <= DBL_MAX)) {
+          nMV = HUGE_VAL;
           continue;
         }
-        else if (a21r[i] == 1.0) {
-          nM = fmax(nM, (a21i[i] = 0.0));
+        double *const Gr_p = Gr + _p * (*ldGr);
+        double *const Gr_q = Gr + _q * (*ldGr);
+        double *const Gi_p = Gi + _p * (*ldGi);
+        double *const Gi_q = Gi + _q * (*ldGi);
+        double *const Vr_p = Vr + _p * (*ldVr);
+        double *const Vr_q = Vr + _q * (*ldVr);
+        double *const Vi_p = Vi + _p * (*ldVi);
+        double *const Vi_q = Vi + _q * (*ldVi);
+        if (w0[i] == -3.0) {
+          const fint _m = (fint)*m;
+          const double e2[2u] = { eS[_p], eS[_q] };
+          const double f2[2u] = { fS[_p], fS[_q] };
+          const double tG = zgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
+          if (!isfinite(tG)) {
+            nMG = HUGE_VAL;
+            continue;
+          }
+          nMG = fmax(nMG, tG);
+          if (dswp_(n, Vr_p, Vr_q)) {
+            nMV = HUGE_VAL;
+            continue;
+          }
+          if (dswp_(n, Vi_p, Vi_q)) {
+            nMV = HUGE_VAL;
+            continue;
+          }
+          nMV = fmax(nMV, 0.0);
+        }
+        else if (w0[i] == -2.0) {
+          const fint _m = -(fint)*m;
+          const fint _n = -(fint)*n;
+          const double tG = zjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, (c + i), (cat + i), (sat + i));
+          if (!isfinite(tG)) {
+            nMG = HUGE_VAL;
+            continue;
+          }
+          nMG = fmax(nMG, tG);
+          const double tV = zjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
+          if (!isfinite(tV)) {
+            nMV = HUGE_VAL;
+            continue;
+          }
+          nMV = fmax(nMV, tV);
+        }
+        else if (w0[i] == -1.0) {
+          if (dswp_(m, Gr_p, Gr_q)) {
+            nMG = HUGE_VAL;
+            continue;
+          }
+          if (dswp_(m, Gi_p, Gi_q)) {
+            nMG = HUGE_VAL;
+            continue;
+          }
+          if (dswp_(n, Vr_p, Vr_q)) {
+            nMV = HUGE_VAL;
+            continue;
+          }
+          if (dswp_(n, Vi_p, Vi_q)) {
+            nMV = HUGE_VAL;
+            continue;
+          }
+          nMG = fmax(nMG, 0.0);
+          nMV = fmax(nMV, 0.0);
           continue;
         }
-        else if (a21r[i] == 2.0) {
-          _m = (fint)*m;
-          _n = (fint)*n;
-          _c = c[i];
-          _cat = cat[i];
-          _sat = sat[i];
+        else if (w0[i] == 1.0) {
+          nMG = fmax(nMG, 0.0);
+          nMG = fmax(nMV, 0.0);
+          continue;
+        }
+        else if (w0[i] == 2.0) {
+          const fint _m = (fint)*m;
+          const fint _n = (fint)*n;
+          const double tG = zjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, (c + i), (cat + i), (sat + i));
+          if (!isfinite(tG)) {
+            nMG = HUGE_VAL;
+            continue;
+          }
+          nMG = fmax(nMG, tG);
+          const double tV = zjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
+          if (!isfinite(tV)) {
+            nMV = HUGE_VAL;
+            continue;
+          }
+          nMV = fmax(nMV, tV);
+        }
+        else if (w0[i] == 3.0) {
+          const fint _m = (fint)*m;
+          const double e2[2u] = { eS[_p], eS[_q] };
+          const double f2[2u] = { fS[_p], fS[_q] };
+          const double tG = zgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
+          if (!isfinite(tG)) {
+            nMG = HUGE_VAL;
+            continue;
+          }
+          nMG = fmax(nMG, tG);
+          nMV = fmax(nMV, 0.0);
         }
         else { // should never happen
-          a21i[i] = NAN;
-          nM = HUGE_VAL;
+          nMG = HUGE_VAL;
+          nMV = HUGE_VAL;
           continue;
         }
-        a21i[i] = zjrot_(&_m, (Gr + _p * (*ldGr)), (Gi + _p * (*ldGi)), (Gr + _q * (*ldGr)), (Gi + _q * (*ldGi)), &_c, &_cat, &_sat);
-        if (!(a21i[i] >= 0.0) || !(a21i[i] <= DBL_MAX)) {
-          nM = a21i[i] = HUGE_VAL;
-          continue;
-        }
-        else // no overflow
-          nM = fmax(nM, a21i[i]);
-        if (_m = zjrotf_(&_n, (Vr + _p * (*ldVr)), (Vi + _p * (*ldVi)), (Vr + _q * (*ldVr)), (Vi + _q * (*ldVi)), &_c, &_cat, &_sat)) {
-          a21i[i] = (double)_m;
-          nM = HUGE_VAL;
-          continue;
-        }
-        l1[_q] = l1[_p] = 1.0;
+        w1[_q] = w1[_p] = 1.0;
       }
-      M = fmax(M, nM);
-#ifdef JTRACE
-      Tr += tsc_lap(hz, T, rdtsc_end(rd));
-#endif /* JTRACE */
-      if (!(M <= DBL_MAX)) {
+      if (!(MG <= DBL_MAX)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
         (void)fflush(jtr);
 #endif /* JTRACE */
         return -__LINE__;
       }
+      MG = fmax(MG, nMG);
+      if (!(nMV <= DBL_MAX)) {
+#ifdef JTRACE
+        (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
+        (void)fflush(jtr);
+#endif /* JTRACE */
+        return -__LINE__;
+      }
+      MV = fmax(MV, nMV);
+#ifdef JTRACE
+      Tr += tsc_lap(hz, T, rdtsc_end(rd));
+#endif /* JTRACE */
     }
     if (!swt)
       break;
@@ -522,10 +635,26 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       }
       eS[j] -= sT;
     }
+    if (sV) {
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,Vr,ldVr,Vi,ldVi,sV)
+#endif /* _OPENMP */
+      for (fnat j = 0u; j < *n; ++j) {
+        double *const Vr_j = Vr + j * (size_t)(*ldVr);
+        double *const Vi_j = Vi + j * (size_t)(*ldVi);
+        register const VD _s = _mm512_set1_pd((double)-sV);
+        for (fnat i = 0u; i < *n; i += VDL) {
+          double *const Vr_ij = Vr_j + i;
+          double *const Vi_ij = Vi_j + i;
+          _mm512_store_pd(Vr_ij, _mm512_scalef_pd(_mm512_load_pd(Vr_ij), _s));
+          _mm512_store_pd(Vi_ij, _mm512_scalef_pd(_mm512_load_pd(Vi_ij), _s));
+        }
+      }
+    }
   }
 
 #ifdef JTRACE
-  (void)fprintf(jtr, "sT=%d, M=%#.17e\n", sT, M);
+  (void)fprintf(jtr, "sT=%d, M=%#.17e\n", sT, MG);
   (void)fprintf(jtr, "Tn=%15.9Lf, Tp=%15.9Lf, Ta=%15.9Lf, Te=%15.9Lf, Tr=%15.9Lf\n", Tn, Tp, Ta, Te, Tr);
   (void)fclose(jtr);
 #endif /* JTRACE */
