@@ -252,7 +252,7 @@ fint cbjac2i(const fint n[static restrict 1], const float a11[static restrict VS
 #pragma omp parallel for default(none) shared(_n,a11,a22,a21r,a21i,c,cat,sat,l1,l2,p)
     for (fnat i = 0u; i < _n; i += VSL) {
       const fnat j = (i >> VSLlg);
-      if (p[j]) {
+      if (p[j] & 0xFFFFu) {
         C8JAC2_PARAMS;
         C8JACI_LOOP;
         p[j] = ((p[j] & 0xFFFF0000u) | MS2U(P));
@@ -263,7 +263,7 @@ fint cbjac2i(const fint n[static restrict 1], const float a11[static restrict VS
     C8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VSL) {
       const fnat j = (i >> VSLlg);
-      if (p[j]) {
+      if (p[j] & 0xFFFFu) {
         C8JACI_LOOP;
         p[j] = ((p[j] & 0xFFFF0000u) | MS2U(P));
       }
@@ -277,7 +277,7 @@ fint cbjac2i(const fint n[static restrict 1], const float a11[static restrict VS
 #pragma omp parallel for default(none) shared(_n,a11,a22,a21r,a21i,c,cat,sat,l1,l2,p)
     for (fnat i = 0u; i < _n; i += VSL) {
       const fnat j = (i >> VSLlg);
-      if (p[j]) {
+      if (p[j] & 0xFFFFu) {
         C8JAC2_PARAMS;
         C8JAC2_LOOP;
         p[j] = ((p[j] & 0xFFFF0000u) | MS2U(P));
@@ -288,7 +288,7 @@ fint cbjac2i(const fint n[static restrict 1], const float a11[static restrict VS
     C8JAC2_PARAMS;
     for (fnat i = 0u; i < _n; i += VSL) {
       const fnat j = (i >> VSLlg);
-      if (p[j]) {
+      if (p[j] & 0xFFFFu) {
         C8JAC2_LOOP;
         p[j] = ((p[j] & 0xFFFF0000u) | MS2U(P));
       }
