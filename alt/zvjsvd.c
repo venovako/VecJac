@@ -5,6 +5,7 @@
 #include "znorm2.h"
 #include "dznrm2.h"
 #include "zdpscl.h"
+#include "zgsscl.h"
 #include "zbjac2.h"
 #include "zjrot.h"
 #include "dswp.h"
@@ -384,10 +385,10 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             stt -= _mm_popcnt_u32(gsn);
           }
           // Grammian pre-scaling into the double precision range
-          register const VD f1 = _mm512_load_pd(cat + i);
-          register const VD f2 = _mm512_load_pd(sat + i);
-          register const VD e1 = _mm512_load_pd(c + i);
-          register const VD e2 = _mm512_load_pd(w + i);
+          register const VD f1 = _mm512_load_pd(l1 + i);
+          register const VD f2 = _mm512_load_pd(l2 + i);
+          register const VD e1 = _mm512_load_pd(cat + i);
+          register const VD e2 = _mm512_load_pd(sat + i);
           register VD f12 = _mm512_div_pd(f1, f2);
           register VD e12 = _mm512_sub_pd(e1, e2);
           register VD f21 = _mm512_div_pd(f2, f1);
