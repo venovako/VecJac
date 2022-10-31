@@ -210,7 +210,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         MG = scalbn(MG, sR);
         sT += sR;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(l1,n)
+#pragma omp parallel for default(none) shared(w1,n)
 #endif /* _OPENMP */
         for (fnat i = 0u; i < *n; ++i)
           w1[i] = 1.0;
@@ -281,7 +281,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           MG = scalbn(MG, sR);
           sT += sR;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(l1,n)
+#pragma omp parallel for default(none) shared(w1,n)
 #endif /* _OPENMP */
           for (fnat i = 0u; i < *n; ++i)
             w1[i] = 1.0;
@@ -356,8 +356,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
         // convergence check
-        register VD _a21r = _mm512_load_pd(l1 + i);
-        register VD _a21i = _mm512_load_pd(l2 + i);
+        register VD _a21r = _mm512_load_pd(a21r + i);
+        register VD _a21i = _mm512_load_pd(a21i + i);
         register const VD _zero = _mm512_set1_pd(-0.0);
         register const VD zero = _mm512_setzero_pd();
         register const VD one = _mm512_set1_pd(1.0);
@@ -478,8 +478,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,eS,fS,a11,a22,a21r,a21i,c,cat,sat,l1,l2,w0,w1,n_2) reduction(max:nMG,nMV)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
-        const size_t _p = *(const uint64_t*)(a11 + i);
-        const size_t _q = *(const uint64_t*)(a22 + i);
+        const size_t _p = *(const uint64_t*)(l1 + i);
+        const size_t _q = *(const uint64_t*)(l2 + i);
         w1[_q] = w1[_p] = 0.0;
         if (!(nMG <= DBL_MAX)) {
           nMG = HUGE_VAL;
@@ -594,7 +594,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         }
         w1[_q] = w1[_p] = 1.0;
       }
-      if (!(MG <= DBL_MAX)) {
+      if (!(nMG <= DBL_MAX)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
         (void)fflush(jtr);
