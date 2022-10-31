@@ -9,15 +9,15 @@ float sgsscl_(const fint m[static restrict 1], const float t[static restrict 1],
     return -7.0f;
   if (*m & VSL_1)
     return -1.0f;
-  if (!(fabsf(*t) < HUGE_VALF))
+  if (!(fabsf(*t) <= FLT_MAX))
     return -2.0f;
   if (IS_NOT_ALIGNED(x))
     return -3.0f;
   if (IS_NOT_ALIGNED(y))
     return -4.0f;
-  if (!(e[0u] < HUGE_VALF))
+  if (!(e[0u] <= FLT_MAX))
     return -5.0f;
-  if (!(e[1u] < HUGE_VALF))
+  if (!(e[1u] <= FLT_MAX))
     return -5.5f;
   if (!(f[0u] >= 1.0f) || !(f[0u] < 2.0f))
     return -6.0f;
@@ -29,11 +29,11 @@ float sgsscl_(const fint m[static restrict 1], const float t[static restrict 1],
     return 0.0f;
 
   const float ex = e[0u];
-  if (!(ex > -HUGE_VALF))
+  if (!(ex >= -FLT_MAX))
     return 0.0f;
 
   const float ey = e[1u];
-  if (!(ey > -HUGE_VALF))
+  if (!(ey >= -FLT_MAX))
     return 0.0f;
 
   const float fx = f[0u];

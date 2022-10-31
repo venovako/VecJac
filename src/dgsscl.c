@@ -9,15 +9,15 @@ double dgsscl_(const fint m[static restrict 1], const double t[static restrict 1
     return -7.0;
   if (*m & VDL_1)
     return -1.0;
-  if (!(fabs(*t) < HUGE_VAL))
+  if (!(fabs(*t) <= DBL_MAX))
     return -2.0;
   if (IS_NOT_ALIGNED(x))
     return -3.0;
   if (IS_NOT_ALIGNED(y))
     return -4.0;
-  if (!(e[0u] < HUGE_VAL))
+  if (!(e[0u] <= DBL_MAX))
     return -5.0;
-  if (!(e[1u] < HUGE_VAL))
+  if (!(e[1u] <= DBL_MAX))
     return -5.5;
   if (!(f[0u] >= 1.0) || !(f[0u] < 2.0))
     return -6.0;
@@ -29,11 +29,11 @@ double dgsscl_(const fint m[static restrict 1], const double t[static restrict 1
     return 0.0;
 
   const double ex = e[0u];
-  if (!(ex > -HUGE_VAL))
+  if (!(ex >= -DBL_MAX))
     return 0.0;
 
   const double ey = e[1u];
-  if (!(ey > -HUGE_VAL))
+  if (!(ey >= -DBL_MAX))
     return 0.0;
 
   const double fx = f[0u];

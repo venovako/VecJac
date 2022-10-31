@@ -32,15 +32,15 @@ double zgsscl_(const fint m[static restrict 1], const double tr[static restrict 
 #endif /* !NDEBUG */
 
   if (!*m)
-    return -0.0;
+    return 0.0;
 
   const double ex = e[0u];
   if (!(ex >= -DBL_MAX))
-    return -0.0;
+    return 0.0;
 
   const double ey = e[1u];
   if (!(ey >= -DBL_MAX))
-    return -0.0;
+    return 0.0;
 
   const double fx = f[0u];
   const double fy = f[1u];
@@ -49,7 +49,6 @@ double zgsscl_(const fint m[static restrict 1], const double tr[static restrict 
   register const VD y_e = _mm512_set1_pd(-ey);
   register const VD _zero = _mm512_set1_pd(-0.0);
   register VD M = _mm512_setzero_pd();
-  register MD ne = MDXOR(ne, ne);
 
   if (*m < 0) { // transform x and permute
     const double fx_y = (fx / fy);
@@ -77,8 +76,6 @@ double zgsscl_(const fint m[static restrict 1], const double tr[static restrict 
       VZFMA(yri,yii,tfr,tfi,yri_,yii_,xri_,xii_);
       xri_ = _mm512_scalef_pd(yri, xe); VDP(xri_);
       xii_ = _mm512_scalef_pd(yii, xe); VDP(xii_);
-      ne = MDOR(ne, _mm512_cmpneq_pd_mask(xri, xri_));
-      ne = MDOR(ne, _mm512_cmpneq_pd_mask(xii, xii_));
       _mm512_store_pd(yr_i, xri_);
       _mm512_store_pd(yi_i, xii_);
       xri_ = VDABS(xri_);
@@ -109,8 +106,6 @@ double zgsscl_(const fint m[static restrict 1], const double tr[static restrict 
       VZFMA(xri,xii,tfr,tfi,xri_,xii_,yri_,yii_);
       yri_ = _mm512_scalef_pd(xri, ye); VDP(yri_);
       yii_ = _mm512_scalef_pd(xii, ye); VDP(yii_);
-      ne = MDOR(ne, _mm512_cmpneq_pd_mask(yri, yri_));
-      ne = MDOR(ne, _mm512_cmpneq_pd_mask(yii, yii_));
       _mm512_store_pd(yr_i, yri_);
       _mm512_store_pd(yi_i, yii_);
       yri_ = VDABS(yri_);
@@ -120,6 +115,5 @@ double zgsscl_(const fint m[static restrict 1], const double tr[static restrict 
     }
   }
 
-  const double r = _mm512_reduce_max_pd(M);
-  return (MD2U(ne) ? r : -r);
+  return _mm512_reduce_max_pd(M);
 }

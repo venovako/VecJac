@@ -7,7 +7,6 @@
 #include "cdpscl.h"
 #include "cgsscl.h"
 #include "cbjac2.h"
-#include "cjrotf.h"
 #include "cjrot.h"
 #include "sswp.h"
 #include "vecdef.h"
@@ -495,7 +494,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             nMG = HUGE_VALF;
             continue;
           }
-          nMG = fmaxf(nMG, fabsf(tG));
+          nMG = fmaxf(nMG, tG);
           if (sswp_(n, Vr_p, Vr_q)) {
             nMV = HUGE_VALF;
             continue;
@@ -514,8 +513,8 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             nMG = HUGE_VALF;
             continue;
           }
-          nMG = fmaxf(nMG, fabsf(tG));
-          const float tV = cjrotf_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
+          nMG = fmaxf(nMG, tG);
+          const float tV = cjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;
@@ -556,8 +555,8 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             nMG = HUGE_VALF;
             continue;
           }
-          nMG = fmaxf(nMG, fabsf(tG));
-          const float tV = cjrotf_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
+          nMG = fmaxf(nMG, tG);
+          const float tV = cjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;
@@ -573,7 +572,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             nMG = HUGE_VALF;
             continue;
           }
-          nMG = fmaxf(nMG, fabsf(tG));
+          nMG = fmaxf(nMG, tG);
           nMV = fmaxf(nMV, 0.0f);
         }
         else { // should never happen

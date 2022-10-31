@@ -32,15 +32,15 @@ float cgsscl_(const fint m[static restrict 1], const float tr[static restrict 1]
 #endif /* !NDEBUG */
 
   if (!*m)
-    return -0.0f;
+    return 0.0f;
 
   const float ex = e[0u];
   if (!(ex >= -FLT_MAX))
-    return -0.0f;
+    return 0.0f;
 
   const float ey = e[1u];
   if (!(ey >= -FLT_MAX))
-    return -0.0f;
+    return 0.0f;
 
   const float fx = f[0u];
   const float fy = f[1u];
@@ -49,7 +49,6 @@ float cgsscl_(const fint m[static restrict 1], const float tr[static restrict 1]
   register const VS y_e = _mm512_set1_ps(-ey);
   register const VS _zerof = _mm512_set1_ps(-0.0f);
   register VS M = _mm512_setzero_ps();
-  register MS ne = _kxor_mask16(ne, ne);
 
   if (*m < 0) { // transform x and permute
     const float fx_y = (fx / fy);
@@ -77,8 +76,6 @@ float cgsscl_(const fint m[static restrict 1], const float tr[static restrict 1]
       VCFMA(yri,yii,tfr,tfi,yri_,yii_,xri_,xii_);
       xri_ = _mm512_scalef_ps(yri, xe); VSP(xri_);
       xii_ = _mm512_scalef_ps(yii, xe); VSP(xii_);
-      ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(xri, xri_));
-      ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(xii, xii_));
       _mm512_store_ps(yr_i, xri_);
       _mm512_store_ps(yi_i, xii_);
       xri_ = VSABS(xri_);
@@ -109,8 +106,6 @@ float cgsscl_(const fint m[static restrict 1], const float tr[static restrict 1]
       VCFMA(xri,xii,tfr,tfi,xri_,xii_,yri_,yii_);
       yri_ = _mm512_scalef_ps(xri, ye); VSP(yri_);
       yii_ = _mm512_scalef_ps(xii, ye); VSP(yii_);
-      ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(yri, yri_));
-      ne = _kor_mask16(ne, _mm512_cmpneq_ps_mask(yii, yii_));
       _mm512_store_ps(yr_i, yri_);
       _mm512_store_ps(yi_i, yii_);
       yri_ = VSABS(yri_);
@@ -120,6 +115,5 @@ float cgsscl_(const fint m[static restrict 1], const float tr[static restrict 1]
     }
   }
 
-  const float r = _mm512_reduce_max_ps(M);
-  return (MS2U(ne) ? r : -r);
+  return _mm512_reduce_max_ps(M);
 }
