@@ -370,8 +370,9 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           register VS _a22 = _mm512_load_ps(a22 + i);
           register const VS _gst = _mm512_set1_ps(gst);
           // might not yet be sorted, so check both cases
-          p[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a22), _a11)) << VSL);
-          pc[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a11), _a22)) << VSL);
+          // TODO: FIX GS
+          // p[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a22), _a11)) << VSL);
+          // pc[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a11), _a22)) << VSL);
           // Grammian pre-scaling into the single precision range
           register const VS f1 = _mm512_load_ps(cat + i);
           register const VS f2 = _mm512_load_ps(sat + i);
@@ -477,9 +478,6 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           nMV = HUGE_VALF;
           continue;
         }
-        const float _c = c[i];
-        const float _cat = cat[i];
-        const float _sat = sat[i];
         float *const Gr_p = Gr + _p * (*ldGr);
         float *const Gr_q = Gr + _q * (*ldGr);
         float *const Gi_p = Gi + _p * (*ldGi);
@@ -511,13 +509,13 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         else if (w[i] == -2.0f) {
           const fint _m = -(fint)*m;
           const fint _n = -(fint)*n;
-          const float tG = cjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, &_c, &_cat, &_sat);
+          const float tG = cjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, (c + i), (cat + i), (sat + i));
           if (!isfinite(tG)) {
             nMG = HUGE_VALF;
             continue;
           }
           nMG = fmaxf(nMG, fabsf(tG));
-          const float tV = cjrotf_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, &_c, &_cat, &_sat);
+          const float tV = cjrotf_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;
@@ -553,13 +551,13 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         else if (w[i] == 2.0f) {
           const fint _m = (fint)*m;
           const fint _n = (fint)*n;
-          const float tG = cjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, &_c, &_cat, &_sat);
+          const float tG = cjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, (c + i), (cat + i), (sat + i));
           if (!isfinite(tG)) {
             nMG = HUGE_VALF;
             continue;
           }
           nMG = fmaxf(nMG, fabsf(tG));
-          const float tV = cjrotf_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, &_c, &_cat, &_sat);
+          const float tV = cjrotf_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;

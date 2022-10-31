@@ -280,8 +280,9 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           register VS _a22 = _mm512_load_ps(a22 + i);
           register const VS _gst = _mm512_set1_ps(gst);
           // might not yet be sorted, so check both cases
-          p[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a22), _a11)) << VSL);
-          pc[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a11), _a22)) << VSL);
+          // TODO: FIX GS
+          // p[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a22), _a11)) << VSL);
+          // pc[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a11), _a22)) << VSL);
           // Grammian pre-scaling into the single precision range
           register const VS f1 = _mm512_load_ps(l1 + i);
           register const VS f2 = _mm512_load_ps(l2 + i);
