@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   if (salloc2_(&n, &n, &V, &ldV) < 0)
     return 7;
 
-  float *const w = (float*)aligned_alloc(VA, (8u * (n * sizeof(float))));
+  float *const w = (float*)aligned_alloc(VA, (7u * (n * sizeof(float))));
   if (!w)
     return 8;
   float *const eS = w;

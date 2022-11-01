@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   if (dalloc2_(&n, &n, &V, &ldV) < 0)
     return 7;
 
-  double *const w = (double*)aligned_alloc(VA, (8u * (n * sizeof(double))));
+  double *const w = (double*)aligned_alloc(VA, (7u * (n * sizeof(double))));
   if (!w)
     return 8;
   double *const eS = w;
