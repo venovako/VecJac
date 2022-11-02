@@ -60,53 +60,36 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   (void)fflush(jtr);
 #endif /* JTRACE */
 
-  float MG = snormx_(m, n, G, ldG);
-  if (!(MG <= FLT_MAX))
+  float M = snormx_(m, n, G, ldG);
+  if (!(M <= FLT_MAX))
     return -__LINE__;
-  if (copysignf(1.0f, MG) == -1.0f)
+  if (copysignf(1.0f, M) == -1.0f)
     return -__LINE__;
+
 #ifdef JTRACE
-  (void)fprintf(jtr, "%#.9e\n", MG);
+  (void)fprintf(jtr, "%#.9e\n", M);
   (void)fflush(jtr);
 #endif /* JTRACE */
 
-  float MV = 1.0f;
-  if (*iwork) {
-    MV = snormx_(n, n, V, ldV);
-    if (!(MV <= FLT_MAX))
-      return -__LINE__;
-    // a dirty hack to avoid accumulation on a zero matrix
-    if (MV <= 0.0f)
-      return -13;
-  }
-  else { // V = I
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,V,ldV)
-#endif /* _OPENMP */
-    for (fnat j = 0u; j < *n; ++j) {
-      register const VS z = _mm512_setzero_ps();
-      float *const Vj = V + j * (size_t)(*ldV);
-      for (fnat i = 0u; i < *n; i += VSL)
-        _mm512_store_ps((Vj + i), z);
-      Vj[j] = 1.0f;
-    }
-  }
-
-#ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,eS,fS)
+#pragma omp parallel for default(none) shared(n,V,ldV,eS,fS)
 #endif /* _OPENMP */
   for (fnat j = 0u; j < *n; ++j) {
+    register const VS z = _mm512_setzero_ps();
+    float *const Vj = V + j * (size_t)(*ldV);
+    for (fnat i = 0u; i < *n; i += VSL)
+      _mm512_store_ps((Vj + i), z);
+    fS[j] = Vj[j] = 1.0f;
     eS[j] = -HUGE_VALF;
-    fS[j] = 1.0f;
   }
 
-  if (MG == 0.0f)
+  if (M == 0.0f)
     return 0;
   const float M_m = (FLT_MAX / (*m << 1u));
   float es = 0.0f, fs = 0.0f;
   flt2ef(M_m, &es, &fs);
   const int FLT_MAX_NRM_EXP = (int)es;
-  flt2ef(MG, &es, &fs);
+  flt2ef(M, &es, &fs);
   int eM = (int)es;
   int sR = FLT_MAX_ROT_EXP - eM;
   fint sN = FLT_MAX_NRM_EXP - eM - 1;
@@ -117,24 +100,13 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   if (sN) {
     if (sscale_(m, n, G, ldG, &sN) < 0)
       return -__LINE__;
-    MG = scalbnf(MG, (int)sN);
+    M = scalbnf(M, (int)sN);
   }
   int sT = (int)sN;
 #ifdef JTRACE
-  (void)fprintf(jtr, "%#.9e\n", MG);
+  (void)fprintf(jtr, "%#.9e\n", M);
   (void)fflush(jtr);
 #endif /* JTRACE */
-
-  flt2ef(MV, &es, &fs);
-  eM = (int)es;
-  sR = FLT_MAX_ROT_EXP - eM;
-  sN = sR;
-  if (sN) {
-    if (sscale_(n, n, V, ldV, &sN) < 0)
-      return -__LINE__;
-    MV = scalbnf(MV, sR);
-  }
-  int sV = sR;
 
   const fnat n_32 = (n_2 >> VSLlg);
 
@@ -145,19 +117,9 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   float *const at = c + n_2;
   float *const l1 = at + n_2;
   float *const l2 = l1 + n_2;
-  float *const w0 = l2 + n_2;
-  float *const w1 = w0 + n_2;
-  float *const w2 = w1 + n_2;
+  float *const w = l2 + n_2;
   unsigned *const p = iwork;
   unsigned *const pc = p + n_32;
-
-  if (*swp) {
-#ifdef _OPENMP
-#pragma omp parallel for default(none) shared(w1,n)
-#endif /* _OPENMP */
-    for (fnat i = 0u; i < *n; ++i)
-      w1[i] = 1.0f;
-  }
 
   // see LAPACK's SGESVJ
   const float tol = sqrtf((float)(*m)) * scalbnf(FLT_EPSILON, -1);
@@ -175,8 +137,8 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   while (sw < *swp) {
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
-      // rescale G according to MG if necessary and update MG
-      flt2ef(MG, &es, &fs);
+      // rescale according to M if necessary and update M
+      flt2ef(M, &es, &fs);
       eM = (int)es;
       sR = FLT_MAX_ROT_EXP - eM;
       sN = FLT_MAX_NRM_EXP - eM - 1;
@@ -188,44 +150,28 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         if (sscale_(m, n, G, ldG, &sN) < 0)
           return -__LINE__;
         sR = (int)sN;
-        MG = scalbnf(MG, sR);
+        M = scalbnf(M, sR);
         sT += sR;
-#ifdef _OPENMP
-#pragma omp parallel for default(none) shared(w1,n)
-#endif /* _OPENMP */
-        for (fnat i = 0u; i < *n; ++i)
-          w1[i] = 1.0f;
 #ifdef JTRACE
-        (void)fprintf(jtr, "%#.9e\n", MG);
+        (void)fprintf(jtr, "%#.9e\n", M);
         (void)fflush(jtr);
 #endif /* JTRACE */
       }
-      // rescale V according to MV if necessary and update MV
-      flt2ef(MV, &es, &fs);
-      eM = (int)es;
-      sR = FLT_MAX_ROT_EXP - eM;
-      sN = sR;
-      if (sN) {
-        if (sscale_(n, n, V, ldV, &sN) < 0)
-          return -__LINE__;
-        MV = scalbnf(MV, sR);
-        sV += sR;
-      }
       // compute the norms, overflow-aware
       const unsigned *const r = js + st * (size_t)(*n);
-      float nMG = -0.0f;
+      float nM = -0.0f;
       bool overflow = false;
       do {
 #ifdef JTRACE
         T = rdtsc_beg(rd);
 #endif /* JTRACE */
-        nMG = 0.0f;
+        nM = 0.0f;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,c,at,l1,l2) reduction(max:nMG)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,c,at,l1) reduction(max:nM)
 #endif /* _OPENMP */
         for (fnat pq = 0u; pq < *n; pq += 2u) {
           const fnat _pq = (pq >> 1u);
-          if (!(nMG <= FLT_MAX)) {
+          if (!(nM <= FLT_MAX)) {
             a11[_pq] = NAN;
             a22[_pq] = NAN;
             continue;
@@ -233,23 +179,19 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           const fnat pq_ = pq + 1u;
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
-          if (w1[_p] == 1.0f) {
-            float *const Gp = G + _p * (*ldG);
-            nMG = fmaxf(nMG, fminf((a11[_pq] = snorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VALF));
-            if (!(nMG <= FLT_MAX)) {
-              a22[_pq] = NAN;
-              continue;
-            }
+          float *const Gp = G + _p * (*ldG);
+          nM = fmaxf(nM, fminf((a11[_pq] = snorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VALF));
+          if (!(nM <= FLT_MAX)) {
+            a22[_pq] = NAN;
+            continue;
           }
-          if (w1[_q] == 1.0f) {
-            float *const Gq = G + _q * (*ldG);
-            nMG = fmaxf(nMG, fminf((a22[_pq] = snorm2_(m, Gq, (eS + _q), (fS + _q), (l1 + _pq), (l2 + _pq))), HUGE_VALF));
-          }
+          float *const Gq = G + _q * (*ldG);
+          nM = fmaxf(nM, fminf((a22[_pq] = snorm2_(m, Gq, (eS + _q), (fS + _q), (c + _pq), (at + _pq))), HUGE_VALF));
         }
 #ifdef JTRACE
         Tn += tsc_lap(hz, T, rdtsc_end(rd));
 #endif /* JTRACE */
-        if (overflow = !(nMG <= FLT_MAX)) {
+        if (overflow = !(nM <= FLT_MAX)) {
 #ifdef JTRACE
           (void)fprintf(jtr, "sweep=%u, step=%u, M=", sw, st);
           (void)fflush(jtr);
@@ -257,15 +199,10 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           if (sscale_(m, n, G, ldG, &sN) < 0)
             return -__LINE__;
           sR = (int)sN;
-          MG = scalbnf(MG, sR);
+          M = scalbnf(M, sR);
           sT += sR;
-#ifdef _OPENMP
-#pragma omp parallel for default(none) shared(w1,n)
-#endif /* _OPENMP */
-          for (fnat i = 0u; i < *n; ++i)
-            w1[i] = 1.0f;
 #ifdef JTRACE
-          (void)fprintf(jtr, "%#.9e\n", MG);
+          (void)fprintf(jtr, "%#.9e\n", M);
           (void)fflush(jtr);
 #endif /* JTRACE */
         }
@@ -274,14 +211,14 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #ifdef JTRACE
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
-      nMG = 0.0f;
+      nM = 0.0f;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a21) reduction(min:nMG)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,w) reduction(min:nM)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat _pq = (pq >> 1u);
-        if (!(nMG >= 0.0f)) {
-          a21[_pq] = NAN;
+        if (!(nM >= 0.0f)) {
+          w[_pq] = NAN;
           continue;
         }
         const fnat pq_ = pq + 1u;
@@ -292,18 +229,19 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         const float f2[2u] = { fS[_q], fS[_p] };
         float *const Gp = G + _p * (*ldG);
         float *const Gq = G + _q * (*ldG);
-        a21[_pq] = sdpscl_(m, Gq, Gp, e2, f2);
-        nMG = fminf(nMG, (isfinite(a21[_pq]) ? 0.0f : (float)-__LINE__));
+        w[_pq] = sdpscl_(m, Gq, Gp, e2, f2);
+        if (!(isfinite(w[_pq])))
+          nM = fminf(nM, (float)-__LINE__);
       }
 #ifdef JTRACE
       Tp += tsc_lap(hz, T, rdtsc_end(rd));
 #endif /* JTRACE */
-      if (!(nMG >= 0.0f)) {
+      if (!(nM >= 0.0f)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
         (void)fflush(jtr);
 #endif /* JTRACE */
-        return (fint)nMG;
+        return (fint)nM;
       }
       // repack data
 #ifdef JTRACE
@@ -324,12 +262,12 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       }
       fnat stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,c,at,l1,l2,w0,w1,w2,p,pc,tol,gst) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,c,at,l1,l2,w,p,pc,tol,gst) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VSL) {
         const fnat j = (i >> VSLlg);
         // convergence check
-        register VS _a21 = _mm512_load_ps(a21 + i);
+        register VS _a21 = _mm512_load_ps(w + i);
         register const VS _zerof = _mm512_set1_ps(-0.0f);
         register const VS zerof = _mm512_setzero_ps();
         register const VS _tol = _mm512_set1_ps(tol);
@@ -337,23 +275,13 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         pc[j] = MS2U(_mm512_cmple_ps_mask(_tol, _a21_));
         if (p[j] = _mm_popcnt_u32(pc[j])) {
           stt += p[j];
-          // TODO: this assumes that a11 and a22 are finite.
-          // The GS computation can be done with (e1,f1) and (e2,f2) instead.
           register VS _a11 = _mm512_load_ps(a11 + i);
           register VS _a22 = _mm512_load_ps(a22 + i);
           register const VS _gst = _mm512_set1_ps(gst);
           // might not yet be sorted, so check both cases
-          register const MS ngs = _mm512_cmplt_ps_mask(_a11, _a22);
-          const unsigned gsp = (MS2U(_kandn_mask16(ngs, _mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a22), _a11))) << VSL);
-          if (gsp) {
-            p[j] |= gsp;
-            stt -= _mm_popcnt_u32(gsp);
-          }
-          const unsigned gsn = (MS2U(_kand_mask16(ngs, _mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a11), _a22))) << VSL);
-          if (gsn) {
-            pc[j] |= gsn;
-            stt -= _mm_popcnt_u32(gsn);
-          }
+          // TODO: FIX GS
+          // p[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a22), _a11)) << VSL);
+          // pc[j] |= (MS2U(_mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a11), _a22)) << VSL);
           // Grammian pre-scaling into the single precision range
           register const VS f1 = _mm512_load_ps(l1 + i);
           register const VS f2 = _mm512_load_ps(l2 + i);
@@ -376,9 +304,9 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _a11 = _mm512_scalef_ps(f12, e12);
           _a22 = _mm512_scalef_ps(f21, e21);
           _a21 = _mm512_scalef_ps(_a21, d);
-          _mm512_store_ps((w0 + i), _a11);
-          _mm512_store_ps((w1 + i), _a22);
-          _mm512_store_ps((w2 + i), _a21);
+          _mm512_store_ps((a11 + i), _a11);
+          _mm512_store_ps((a22 + i), _a22);
+          _mm512_store_ps((a21 + i), _a21);
         }
       }
       swt += stt;
@@ -391,14 +319,14 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #else /* !USE_SECANTS */
       const fint _n_2 = (fint)n_2;
 #endif /* ?USE_SECANTS */
-      if (sbjac2i(&_n_2, w0, w1, w2, c, at, l1, l2, p) < 0)
+      if (sbjac2i(&_n_2, a11, a22, a21, c, at, l1, l2, p) < 0)
         return -__LINE__;
 #ifdef JTRACE
       Te += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(eS,fS,l1,l2,w0,p,pc,r,n_2)
+#pragma omp parallel for default(none) shared(a11,a22,a21,eS,fS,p,pc,r,n_2)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VSL) {
         const fnat j = (i >> VSLlg);
@@ -411,8 +339,8 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           const fnat pq = (l << 1u);
           const unsigned _p = r[pq];
           const unsigned _q = r[pq + 1u];
-          *(unsigned*)(l1 + l) = _p;
-          *(unsigned*)(l2 + l) = _q;
+          *(unsigned*)(a11 + l) = _p;
+          *(unsigned*)(a22 + l) = _q;
           if (trans & 1u) {
             if (gsp & 1u)
               a21[l] = 3.0f;
@@ -424,147 +352,128 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
               a21[l] = 2.0f;
           }
           else if (efcmpf((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
-            w0[l] = eS[_p];
+            a21[l] = eS[_p];
             eS[_p] = eS[_q];
-            eS[_q] = w0[l];
-            w0[l] = fS[_p];
+            eS[_q] = a21[l];
+            a21[l] = fS[_p];
             fS[_p] = fS[_q];
-            fS[_q] = w0[l];
+            fS[_q] = a21[l];
             a21[l] = -1.0f;
           }
           else // no swap
-            w0[l] = 1.0f;
+            a21[l] = 1.0f;
           gsp >>= 1u;
           gsn >>= 1u;
           trans >>= 1u;
           perm >>= 1u;
         }
       }
-      nMG = 0.0f;
-      float nMV = -0.0f;
+      nM = 0.0f;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,eS,fS,a21,c,at,l1,l2,w0,w1,n_2) reduction(max:nMG,nMV)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,l1,w,eS,fS,n_2) reduction(max:nM)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
-        const unsigned _p = *(const unsigned*)(l1 + i);
-        const unsigned _q = *(const unsigned*)(l2 + i);
-        w1[_q] = w1[_p] = 0.0f;
-        if (!(nMG <= FLT_MAX)) {
-          nMG = HUGE_VALF;
+        const unsigned _p = *(const unsigned*)(a11 + i);
+        const unsigned _q = *(const unsigned*)(a22 + i);
+        if (!(nM <= FLT_MAX)) {
+          w[i] = NAN;
           continue;
         }
-        if (!(nMV <= FLT_MAX)) {
-          nMV = HUGE_VALF;
+        float _at, _c;
+        fint _m, _n;
+        if (a21[i] == -3.0f) {
+          _m = -(fint)*m;
+          _n = -(fint)*n;
+          _at = w[i];
+          float e[2u] = { eS[_p], eS[_q] };
+          float f[2u] = { fS[_p], fS[_q] };
+          w[i] = sgsscl_(&_m, &_at, (G + _p * (*ldG)), (G + _q * (*ldG)), e, f);
+          if (!(w[i] >= 0.0f) || !(w[i] <= FLT_MAX)) {
+            nM = w[i] = HUGE_VALF;
+            continue;
+          }
+          else // no overflow
+            nM = fmaxf(nM, w[i]);
           continue;
         }
-        float *const G_p = G + _p * (*ldG);
-        float *const G_q = G + _q * (*ldG);
-        float *const V_p = V + _p * (*ldV);
-        float *const V_q = V + _q * (*ldV);
-        if (w0[i] == -3.0f) {
-          const fint _m = -(fint)*m;
-          const float e2[2u] = { eS[_p], eS[_q] };
-          const float f2[2u] = { fS[_p], fS[_q] };
-          const float tG = sgsscl_(&_m, (a21 + i), G_p, G_q, e2, f2);
-          if (!isfinite(tG)) {
-            nMG = HUGE_VALF;
-            continue;
-          }
-          nMG = fmaxf(nMG, tG);
-          if (sswp_(n, V_p, V_q)) {
-            nMV = HUGE_VAL;
-            continue;
-          }
-          nMV = fmaxf(nMV, 0.0f);
+        else if (a21[i] == -2.0f) {
+          _m = -(fint)*m;
+          _n = -(fint)*n;
+          _c = c[i];
+          _at = at[i];
         }
-        else if (w0[i] == -2.0f) {
-          const fint _m = -(fint)*m;
-          const fint _n = -(fint)*n;
-          const float tG = sjrot_(&_m, G_p, G_q, (c + i), (at + i));
-          if (!isfinite(tG)) {
-            nMG = HUGE_VALF;
+        else if (a21[i] == -1.0f) {
+          float *const Gp = G + _p * (*ldG);
+          float *const Gq = G + _q * (*ldG);
+          if (_m = sswp_(m, Gp, Gq)) {
+            w[i] = (float)_m;
+            nM = HUGE_VALF;
             continue;
           }
-          nMG = fmaxf(nMG, tG);
-          const float tV = sjrot_(&_n, V_p, V_q, (c + i), (at + i));
-          if (!isfinite(tV)) {
-            nMV = HUGE_VALF;
+          float *const Vp = V + _p * (*ldV);
+          float *const Vq = V + _q * (*ldV);
+          if (_n = sswp_(n, Vp, Vq)) {
+            w[i] = (float)_n;
+            nM = HUGE_VALF;
             continue;
           }
-          nMV = fmaxf(nMV, tV);
-        }
-        else if (w0[i] == -1.0f) {
-          if (sswp_(m, G_p, G_q)) {
-            nMG = HUGE_VALF;
-            continue;
-          }
-          nMG = fmaxf(nMG, 0.0f);
-          if (sswp_(n, V_p, V_q)) {
-            nMV = HUGE_VALF;
-            continue;
-          }
-          nMV = fmaxf(nMV, 0.0f);
+          nM = fmaxf(nM, (w[i] = 0.0f));
           continue;
         }
-        else if (w0[i] == 1.0f) {
-          nMG = fmaxf(nMG, 0.0f);
-          nMV = fmaxf(nMV, 0.0f);
+        else if (a21[i] == 1.0f) {
+          nM = fmaxf(nM, (w[i] = 0.0f));
           continue;
         }
-        else if (w0[i] == 2.0f) {
-          const fint _m = (fint)*m;
-          const fint _n = (fint)*n;
-          const float tG = sjrot_(&_m, G_p, G_q, (c + i), (at + i));
-          if (!isfinite(tG)) {
-            nMG = HUGE_VALF;
-            continue;
-          }
-          nMG = fmaxf(nMG, tG);
-          const float tV = sjrot_(&_n, V_p, V_q, (c + i), (at + i));
-          if (!isfinite(tV)) {
-            nMV = HUGE_VALF;
-            continue;
-          }
-          nMV = fmaxf(nMV, tV);
+        else if (a21[i] == 2.0f) {
+          _m = (fint)*m;
+          _n = (fint)*n;
+          _c = c[i];
+          _at = at[i];
         }
         else if (a21[i] == 3.0f) {
-          const fint _m = (fint)*m;
-          const float e2[2u] = { eS[_p], eS[_q] };
-          const float f2[2u] = { fS[_p], fS[_q] };
-          const float tG = sgsscl_(&_m, (a21 + i), G_p, G_q, e2, f2);
-          if (!isfinite(tG)) {
-            nMG = HUGE_VALF;
+          _m = (fint)*m;
+          _n = (fint)*n;
+          _at = w[i];
+          float e[2u] = { eS[_p], eS[_q] };
+          float f[2u] = { fS[_p], fS[_q] };
+          w[i] = sgsscl_(&_m, &_at, (G + _p * (*ldG)), (G + _q * (*ldG)), e, f);
+          if (!(w[i] >= 0.0f) || !(w[i] <= FLT_MAX)) {
+            nM = w[i] = HUGE_VALF;
             continue;
           }
-          nMG = fmaxf(nMG, tG);
-          nMV = fmaxf(nMV, 0.0f);
-        }
-        else { // should never happen
-          nMG = HUGE_VALF;
-          nMV = HUGE_VALF;
+          else // no overflow
+            nM = fmaxf(nM, w[i]);
           continue;
         }
-        w1[_q] = w1[_p] = 1.0f;
+        else { // should never happen
+          w[i] = NAN;
+          nM = HUGE_VALF;
+          continue;
+        }
+        w[i] = sjrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_c, &_at);
+        if (!(w[i] >= 0.0f) || !(w[i] <= FLT_MAX)) {
+          nM = w[i] = HUGE_VALF;
+          continue;
+        }
+        else // no overflow
+          nM = fmaxf(nM, w[i]);
+        if (_m = sjrotf_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_c, &_at)) {
+          w[i] = (float)_m;
+          nM = HUGE_VALF;
+          continue;
+        }
       }
-      if (!(nMG <= FLT_MAX)) {
-#ifdef JTRACE
-        (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
-        (void)fflush(jtr);
-#endif /* JTRACE */
-        return -__LINE__;
-      }
-      MG = fmaxf(MG, nMG);
-      if (!(nMV <= FLT_MAX)) {
-#ifdef JTRACE
-        (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
-        (void)fflush(jtr);
-#endif /* JTRACE */
-        return -__LINE__;
-      }
-      MV = fmaxf(MV, nMV);
+      M = fmaxf(M, nM);
 #ifdef JTRACE
       Tr += tsc_lap(hz, T, rdtsc_end(rd));
 #endif /* JTRACE */
+      if (!(M <= FLT_MAX)) {
+#ifdef JTRACE
+        (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
+        (void)fflush(jtr);
+#endif /* JTRACE */
+        return -__LINE__;
+      }
     }
     if (!swt)
       break;
@@ -585,23 +494,10 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       }
       eS[j] -= sT;
     }
-    if (sV) {
-#ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,V,ldV,sV)
-#endif /* _OPENMP */
-      for (fnat j = 0u; j < *n; ++j) {
-        float *const Vj = V + j * (size_t)(*ldV);
-        register const VS _s = _mm512_set1_ps((float)-sV);
-        for (fnat i = 0u; i < *n; i += VSL) {
-          float *const Vij = Vj + i;
-          _mm512_store_ps(Vij, _mm512_scalef_ps(_mm512_load_ps(Vij), _s));
-        }
-      }
-    }
   }
 
 #ifdef JTRACE
-  (void)fprintf(jtr, "sT=%d, M=%#.9e\n", sT, MG);
+  (void)fprintf(jtr, "sT=%d, M=%#.9e\n", sT, M);
   (void)fprintf(jtr, "Tn=%15.9Lf, Tp=%15.9Lf, Ta=%15.9Lf, Te=%15.9Lf, Tr=%15.9Lf\n", Tn, Tp, Ta, Te, Tr);
   (void)fclose(jtr);
 #endif /* JTRACE */
