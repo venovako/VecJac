@@ -8,6 +8,7 @@
 #include "sgsscl.h"
 #include "sbjac2.h"
 #include "sjrot.h"
+#include "sjrotf.h"
 #include "sswp.h"
 #include "vecdef.h"
 #include "sefops.h"
