@@ -31,6 +31,12 @@
 #define VDEFLE(e0,e1,f0,f1) MDOR(_mm512_cmplt_pd_mask(e0,e1),_mm512_mask_cmple_pd_mask(_mm512_cmpeq_pd_mask(e0,e1),f0,f1))
 #endif /* ?VDEFLE */
 
+#ifdef VDEFLT
+#error VDEFLT already defined
+#else /* !VDEFLT */
+#define VDEFLT(e0,e1,f0,f1) MDOR(_mm512_cmplt_pd_mask(e0,e1),_mm512_mask_cmplt_pd_mask(_mm512_cmpeq_pd_mask(e0,e1),f0,f1))
+#endif /* ?VDEFLT */
+
 #ifdef DBL_MAX_FIN_EXP
 #error DBL_MAX_FIN_EXP already defined
 #else /* !DBL_MAX_FIN_EXP */
