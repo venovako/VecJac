@@ -22,6 +22,18 @@
 #define DBL_MAX_ROT_EXP 1021
 #endif /* ?DBL_MAX_ROT_EXP */
 
+#ifdef SWAP_EFS
+#error SWAP_EFS already defined
+#else /* !SWAP_EFS */
+#define SWAP_EFS(t) \
+  t = eS[_p];       \
+  eS[_p] = eS[_q];  \
+  eS[_q] = t;       \
+  t = fS[_p];       \
+  fS[_p] = fS[_q];  \
+  fS[_q] = t
+#endif /* ?SWAP_EFS */
+
 fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], double Gr[static restrict VDL], const fnat ldGr[static restrict 1], double Gi[static restrict VDL], const fnat ldGi[static restrict 1], double Vr[static restrict VDL], const fnat ldVr[static restrict 1], double Vi[static restrict VDL], const fnat ldVi[static restrict 1], double eS[static restrict 1], double fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], double work[static restrict VDL], unsigned iwork[static restrict 1])
 {
   const fnat n_2 = (*n >> 1u);
@@ -455,12 +467,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
               w0[l] = 2.0;
           }
           else if (efcmp((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
-            w0[l] = eS[_p];
-            eS[_p] = eS[_q];
-            eS[_q] = w0[l];
-            w0[l] = fS[_p];
-            fS[_p] = fS[_q];
-            fS[_q] = w0[l];
+            SWAP_EFS(w0[l]);
             w0[l] = -1.0;
           }
           else // no swap
@@ -500,7 +507,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const fint _m = -(fint)*m;
           const double e2[2u] = { eS[_p], eS[_q] };
           const double f2[2u] = { fS[_p], fS[_q] };
-          const double tG = zgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
+          double tG = zgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
           if (!isfinite(tG)) {
             nMG = HUGE_VAL;
             continue;
@@ -515,17 +522,23 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             continue;
           }
           nMV = fmax(nMV, 0.0);
+          SWAP_EFS(tG);
+          w1[_q] = 1.0;
+          continue;
         }
         else if (w0[i] == -2.0) {
           const fint _m = -(fint)*m;
           const fint _n = -(fint)*n;
-          const double tG = zjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, (c + i), (cat + i), (sat + i));
+          const double *const _c = (c + i);
+          const double *const _cat = (cat + i);
+          const double *const _sat = (sat + i);
+          const double tG = zjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, _c, _cat, _sat);
           if (!isfinite(tG)) {
             nMG = HUGE_VAL;
             continue;
           }
           nMG = fmax(nMG, tG);
-          const double tV = zjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
+          const double tV = zjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, _c, _cat, _sat);
           if (!isfinite(tV)) {
             nMV = HUGE_VAL;
             continue;
@@ -561,13 +574,16 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         else if (w0[i] == 2.0) {
           const fint _m = (fint)*m;
           const fint _n = (fint)*n;
-          const double tG = zjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, (c + i), (cat + i), (sat + i));
+          const double *const _c = (c + i);
+          const double *const _cat = (cat + i);
+          const double *const _sat = (sat + i);
+          const double tG = zjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, _c, _cat, _sat);
           if (!isfinite(tG)) {
             nMG = HUGE_VAL;
             continue;
           }
           nMG = fmax(nMG, tG);
-          const double tV = zjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
+          const double tV = zjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, _c, _cat, _sat);
           if (!isfinite(tV)) {
             nMV = HUGE_VAL;
             continue;
@@ -578,13 +594,16 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const fint _m = (fint)*m;
           const double e2[2u] = { eS[_p], eS[_q] };
           const double f2[2u] = { fS[_p], fS[_q] };
-          const double tG = zgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
+          double tG = zgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
           if (!isfinite(tG)) {
             nMG = HUGE_VAL;
             continue;
           }
           nMG = fmax(nMG, tG);
           nMV = fmax(nMV, 0.0);
+          SWAP_EFS(tG);
+          w1[_q] = 1.0;
+          continue;
         }
         else { // should never happen
           nMG = HUGE_VAL;

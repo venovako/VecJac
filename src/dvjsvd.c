@@ -22,6 +22,18 @@
 #define DBL_MAX_ROT_EXP 1022
 #endif /* ?DBL_MAX_ROT_EXP */
 
+#ifdef SWAP_EFS
+#error SWAP_EFS already defined
+#else /* !SWAP_EFS */
+#define SWAP_EFS(t) \
+  t = eS[_p];       \
+  eS[_p] = eS[_q];  \
+  eS[_q] = t;       \
+  t = fS[_p];       \
+  fS[_p] = fS[_q];  \
+  fS[_q] = t
+#endif /* ?SWAP_EFS */
+
 fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], double G[static restrict VDL], const fnat ldG[static restrict 1], double V[static restrict VDL], const fnat ldV[static restrict 1], double eS[static restrict 1], double fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], double work[static restrict VDL], unsigned iwork[static restrict 1])
 {
   const fnat n_2 = (*n >> 1u);
@@ -423,12 +435,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
               w0[l] = 2.0;
           }
           else if (efcmp((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
-            w0[l] = eS[_p];
-            eS[_p] = eS[_q];
-            eS[_q] = w0[l];
-            w0[l] = fS[_p];
-            fS[_p] = fS[_q];
-            fS[_q] = w0[l];
+            SWAP_EFS(w0[l]);
             w0[l] = -1.0;
           }
           else // no swap
@@ -464,7 +471,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const fint _m = -(fint)*m;
           const double e2[2u] = { eS[_p], eS[_q] };
           const double f2[2u] = { fS[_p], fS[_q] };
-          const double tG = dgsscl_(&_m, (a21 + i), G_p, G_q, e2, f2);
+          double tG = dgsscl_(&_m, (a21 + i), G_p, G_q, e2, f2);
           if (!isfinite(tG)) {
             nMG = HUGE_VAL;
             continue;
@@ -475,6 +482,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             continue;
           }
           nMV = fmax(nMV, 0.0);
+          SWAP_EFS(tG);
+          w1[_q] = 1.0;
+          continue;
         }
         else if (w0[i] == -2.0) {
           const fint _m = -(fint)*m;
@@ -541,6 +551,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           }
           nMG = fmax(nMG, tG);
           nMV = fmax(nMV, 0.0);
+          SWAP_EFS(tG);
+          w1[_q] = 1.0;
+          continue;
         }
         else { // should never happen
           nMG = HUGE_VAL;

@@ -22,6 +22,18 @@
 #define FLT_MAX_ROT_EXP 125
 #endif /* ?FLT_MAX_ROT_EXP */
 
+#ifdef SWAP_EFS
+#error SWAP_EFS already defined
+#else /* !SWAP_EFS */
+#define SWAP_EFS(t) \
+  t = eS[_p];       \
+  eS[_p] = eS[_q];  \
+  eS[_q] = t;       \
+  t = fS[_p];       \
+  fS[_p] = fS[_q];  \
+  fS[_q] = t
+#endif /* ?SWAP_EFS */
+
 fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], float Gr[static restrict VSL], const fnat ldGr[static restrict 1], float Gi[static restrict VSL], const fnat ldGi[static restrict 1], float Vr[static restrict VSL], const fnat ldVr[static restrict 1], float Vi[static restrict VSL], const fnat ldVi[static restrict 1], float eS[static restrict 1], float fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], float work[static restrict VSL], unsigned iwork[static restrict 1])
 {
   const fnat n_2 = (*n >> 1u);
@@ -455,12 +467,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
               w0[l] = 2.0f;
           }
           else if (efcmpf((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
-            w0[l] = eS[_p];
-            eS[_p] = eS[_q];
-            eS[_q] = w0[l];
-            w0[l] = fS[_p];
-            fS[_p] = fS[_q];
-            fS[_q] = w0[l];
+            SWAP_EFS(w0[l]);
             w0[l] = -1.0f;
           }
           else // no swap
@@ -500,7 +507,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           const fint _m = -(fint)*m;
           const float e2[2u] = { eS[_p], eS[_q] };
           const float f2[2u] = { fS[_p], fS[_q] };
-          const float tG = cgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
+          float tG = cgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
           if (!isfinite(tG)) {
             nMG = HUGE_VALF;
             continue;
@@ -515,17 +522,23 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             continue;
           }
           nMV = fmaxf(nMV, 0.0f);
+          SWAP_EFS(tG);
+          w1[_q] = 1.0f;
+          continue;
         }
         else if (w0[i] == -2.0f) {
           const fint _m = -(fint)*m;
           const fint _n = -(fint)*n;
-          const float tG = cjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, (c + i), (cat + i), (sat + i));
+          const float *const _c = (c + i);
+          const float *const _cat = (cat + i);
+          const float *const _sat = (sat + i);
+          const float tG = cjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, _c, _cat, _sat);
           if (!isfinite(tG)) {
             nMG = HUGE_VALF;
             continue;
           }
           nMG = fmaxf(nMG, tG);
-          const float tV = cjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
+          const float tV = cjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, _c, _cat, _sat);
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;
@@ -561,13 +574,16 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         else if (w0[i] == 2.0f) {
           const fint _m = (fint)*m;
           const fint _n = (fint)*n;
-          const float tG = cjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, (c + i), (cat + i), (sat + i));
+          const float *const _c = (c + i);
+          const float *const _cat = (cat + i);
+          const float *const _sat = (sat + i);
+          const float tG = cjrot_(&_m, Gr_p, Gi_p, Gr_q, Gi_q, _c, _cat, _sat);
           if (!isfinite(tG)) {
             nMG = HUGE_VALF;
             continue;
           }
           nMG = fmaxf(nMG, tG);
-          const float tV = cjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, (c + i), (cat + i), (sat + i));
+          const float tV = cjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, _c, _cat, _sat);
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;
@@ -578,13 +594,16 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           const fint _m = (fint)*m;
           const float e2[2u] = { eS[_p], eS[_q] };
           const float f2[2u] = { fS[_p], fS[_q] };
-          const float tG = cgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
+          float tG = cgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
           if (!isfinite(tG)) {
             nMG = HUGE_VALF;
             continue;
           }
           nMG = fmaxf(nMG, tG);
           nMV = fmaxf(nMV, 0.0f);
+          SWAP_EFS(tG);
+          w1[_q] = 1.0f;
+          continue;
         }
         else { // should never happen
           nMG = HUGE_VALF;
