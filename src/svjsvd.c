@@ -471,7 +471,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           }
           nMG = fmaxf(nMG, tG);
           if (sswp_(n, V_p, V_q)) {
-            nMV = HUGE_VAL;
+            nMV = HUGE_VALF;
             continue;
           }
           nMV = fmaxf(nMV, 0.0f);

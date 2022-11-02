@@ -60,36 +60,52 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   (void)fflush(jtr);
 #endif /* JTRACE */
 
-  double M = dnormx_(m, n, G, ldG);
-  if (!(M <= DBL_MAX))
+  double MG = dnormx_(m, n, G, ldG);
+  if (!(MG <= DBL_MAX))
     return -__LINE__;
-  if (copysign(1.0, M) == -1.0)
+  if (copysign(1.0, MG) == -1.0)
     return -__LINE__;
-
 #ifdef JTRACE
-  (void)fprintf(jtr, "%#.17e\n", M);
+  (void)fprintf(jtr, "%#.17e\n", MG);
   (void)fflush(jtr);
 #endif /* JTRACE */
 
+  double MV = 1.0;
+  if (*iwork) {
+    MV = dnormx_(n, n, V, ldV);
+    if (!(MV <= DBL_MAX))
+      return -__LINE__;
+    // a dirty hack to avoid accumulation on a zero matrix
+    if (MV <= 0.0)
+      return -13;
+  }
+  else { // V = I
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,V,ldV,eS,fS)
+#pragma omp parallel for default(none) shared(n,V,ldV)
 #endif /* _OPENMP */
   for (fnat j = 0u; j < *n; ++j) {
     register const VD z = _mm512_setzero_pd();
     double *const Vj = V + j * (size_t)(*ldV);
     for (fnat i = 0u; i < *n; i += VDL)
       _mm512_store_pd((Vj + i), z);
-    fS[j] = Vj[j] = 1.0;
-    eS[j] = -HUGE_VAL;
+    Vj[j] = 1.0;
   }
 
-  if (M == 0.0)
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,eS,fS)
+#endif /* _OPENMP */
+  for (fnat j = 0u; j < *n; ++j) {
+    eS[j] = -HUGE_VAL;
+    fS[j] = 1.0;
+  }
+
+  if (MG == 0.0)
     return 0;
   const double M_m = (DBL_MAX / (*m << 1u));
   double es = 0.0, fs = 0.0;
   dbl2ef(M_m, &es, &fs);
   const int DBL_MAX_NRM_EXP = (int)es;
-  dbl2ef(M, &es, &fs);
+  dbl2ef(MG, &es, &fs);
   int eM = (int)es;
   int sR = DBL_MAX_ROT_EXP - eM;
   fint sN = DBL_MAX_NRM_EXP - eM - 1;
@@ -100,13 +116,24 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   if (sN) {
     if (dscale_(m, n, G, ldG, &sN) < 0)
       return -__LINE__;
-    M = scalbn(M, (int)sN);
+    MG = scalbn(MG, (int)sN);
   }
   int sT = (int)sN;
 #ifdef JTRACE
-  (void)fprintf(jtr, "%#.17e\n", M);
+  (void)fprintf(jtr, "%#.17e\n", MG);
   (void)fflush(jtr);
 #endif /* JTRACE */
+
+  dbl2ef(MV, &es, &fs);
+  eM = (int)es;
+  sR = DBL_MAX_ROT_EXP - eM;
+  sN = sR;
+  if (sN) {
+    if (dscale_(n, n, V, ldV, &sN) < 0)
+      return -__LINE__;
+    MV = scalbn(MV, sR);
+  }
+  int sV = sR;
 
   const fnat n_16 = (n_2 >> VDLlg);
 
@@ -117,9 +144,19 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   double *const at = c + n_2;
   double *const l1 = at + n_2;
   double *const l2 = l1 + n_2;
-  double *const w = l2 + n_2;
+  double *const w0 = l2 + n_2;
+  double *const w1 = w0 + n_2;
+  double *const w2 = w1 + n_2;
   unsigned *const p = iwork;
   unsigned *const pc = p + n_16;
+
+  if (*swp) {
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(w1,n)
+#endif /* _OPENMP */
+    for (fnat i = 0u; i < *n; ++i)
+      w1[i] = 1.0;
+  }
 
   // see LAPACK's DGESVJ
   const double tol = sqrt((double)(*m)) * scalbn(DBL_EPSILON, -1);
@@ -137,8 +174,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   while (sw < *swp) {
     size_t swt = 0u;
     for (unsigned st = 0u; st < *stp; ++st) {
-      // rescale according to M if necessary and update M
-      dbl2ef(M, &es, &fs);
+      // rescale G according to MG if necessary and update MG
+      dbl2ef(MG, &es, &fs);
       eM = (int)es;
       sR = DBL_MAX_ROT_EXP - eM;
       sN = DBL_MAX_NRM_EXP - eM - 1;
@@ -150,28 +187,44 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         if (dscale_(m, n, G, ldG, &sN) < 0)
           return -__LINE__;
         sR = (int)sN;
-        M = scalbn(M, sR);
+        MG = scalbn(MG, sR);
         sT += sR;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(w1,n)
+#endif /* _OPENMP */
+        for (fnat i = 0u; i < *n; ++i)
+          w1[i] = 1.0;
 #ifdef JTRACE
-        (void)fprintf(jtr, "%#.17e\n", M);
+        (void)fprintf(jtr, "%#.17e\n", MG);
         (void)fflush(jtr);
 #endif /* JTRACE */
       }
+      // rescale V according to MV if necessary and update MV
+      dbl2ef(MV, &es, &fs);
+      eM = (int)es;
+      sR = DBL_MAX_ROT_EXP - eM;
+      sN = sR;
+      if (sN) {
+        if (dscale_(n, n, V, ldV, &sN) < 0)
+          return -__LINE__;
+        MV = scalbn(MV, sR);
+        sV += sR;
+      }
       // compute the norms, overflow-aware
       const unsigned *const r = js + st * (size_t)(*n);
-      double nM = -0.0;
+      double nMG = -0.0;
       bool overflow = false;
       do {
 #ifdef JTRACE
         T = rdtsc_beg(rd);
 #endif /* JTRACE */
-        nM = 0.0;
+        nMG = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,c,at,l1) reduction(max:nM)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a11,a22,c,at,l1,l2,w1) reduction(max:nMG)
 #endif /* _OPENMP */
         for (fnat pq = 0u; pq < *n; pq += 2u) {
           const fnat _pq = (pq >> 1u);
-          if (!(nM <= DBL_MAX)) {
+          if (!(nMG <= DBL_MAX)) {
             a11[_pq] = NAN;
             a22[_pq] = NAN;
             continue;
@@ -179,19 +232,23 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const fnat pq_ = pq + 1u;
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
-          double *const Gp = G + _p * (size_t)(*ldG);
-          nM = fmax(nM, fmin((a11[_pq] = dnorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VAL));
-          if (!(nM <= DBL_MAX)) {
-            a22[_pq] = NAN;
-            continue;
+          if (w1[_p] == 1.0) {
+            double *const Gp = G + _p * (size_t)(*ldG);
+            nMG = fmax(nMG, fmin((a11[_pq] = dnorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VAL));
+            if (!(nMG <= DBL_MAX)) {
+              a22[_pq] = NAN;
+              continue;
+            }
           }
-          double *const Gq = G + _q * (size_t)(*ldG);
-          nM = fmax(nM, fmin((a22[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (c + _pq), (at + _pq))), HUGE_VAL));
+          if (w1[_q] == 1.0) {
+            double *const Gq = G + _q * (size_t)(*ldG);
+            nMG = fmax(nMG, fmin((a22[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (l1 + _pq), (l2 + _pq))), HUGE_VAL));
+          }
         }
 #ifdef JTRACE
         Tn += tsc_lap(hz, T, rdtsc_end(rd));
 #endif /* JTRACE */
-        if (overflow = !(nM <= DBL_MAX)) {
+        if (overflow = !(nMG <= DBL_MAX)) {
 #ifdef JTRACE
           (void)fprintf(jtr, "sweep=%u, step=%u, M=", sw, st);
           (void)fflush(jtr);
@@ -199,10 +256,15 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           if (dscale_(m, n, G, ldG, &sN) < 0)
             return -__LINE__;
           sR = (int)sN;
-          M = scalbn(M, sR);
+          MG = scalbn(MG, sR);
           sT += sR;
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(w1,n)
+#endif /* _OPENMP */
+          for (fnat i = 0u; i < *n; ++i)
+            w1[i] = 1.0;
 #ifdef JTRACE
-          (void)fprintf(jtr, "%#.17e\n", M);
+          (void)fprintf(jtr, "%#.17e\n", MG);
           (void)fflush(jtr);
 #endif /* JTRACE */
         }
@@ -211,14 +273,14 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #ifdef JTRACE
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
-      nM = 0.0;
+      nMG = 0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,w) reduction(min:nM)
+#pragma omp parallel for default(none) shared(n,r,m,G,ldG,eS,fS,a21) reduction(min:nMG)
 #endif /* _OPENMP */
       for (fnat pq = 0u; pq < *n; pq += 2u) {
         const fnat _pq = (pq >> 1u);
-        if (!(nM >= 0.0)) {
-          w[_pq] = NAN;
+        if (!(nMG >= 0.0)) {
+          a21[_pq] = NAN;
           continue;
         }
         const fnat pq_ = pq + 1u;
@@ -229,19 +291,18 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         const double f2[2u] = { fS[_q], fS[_p] };
         double *const Gp = G + _p * (size_t)(*ldG);
         double *const Gq = G + _q * (size_t)(*ldG);
-        w[_pq] = ddpscl_(m, Gq, Gp, e2, f2);
-        if (!(isfinite(w[_pq])))
-          nM = fmin(nM, (double)-__LINE__);
+        a21[_pq] = ddpscl_(m, Gq, Gp, e2, f2);
+        nMG = fmin(nMG, (isfinite(a21[_pq]) ? 0.0 : (double)-__LINE__));
       }
 #ifdef JTRACE
       Tp += tsc_lap(hz, T, rdtsc_end(rd));
 #endif /* JTRACE */
-      if (!(nM >= 0.0)) {
+      if (!(nMG >= 0.0)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
         (void)fflush(jtr);
 #endif /* JTRACE */
-        return (fint)nM;
+        return (fint)nMG;
       }
       // repack data
 #ifdef JTRACE
@@ -267,7 +328,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
         // convergence check
-        register VD _a21 = _mm512_load_pd(w + i);
+        register VD _a21 = _mm512_load_pd(a21 + i);
         register const VD _zero = _mm512_set1_pd(-0.0);
         register const VD zero = _mm512_setzero_pd();
         register const VD _tol = _mm512_set1_pd(tol);
@@ -275,11 +336,22 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         pc[j] = MD2U(_mm512_cmple_pd_mask(_tol, _a21_));
         if (p[j] = _mm_popcnt_u32(pc[j])) {
           stt += p[j];
+          // TODO: Fix the GS computation with (e1,f1) and (e2,f2).
           register VD _a11 = _mm512_load_pd(a11 + i);
           register VD _a22 = _mm512_load_pd(a22 + i);
           register const VD _gst = _mm512_set1_pd(gst);
           // might not yet be sorted, so check both cases
-          // TODO: Fix the GS computation with (e1,f1) and (e2,f2).
+          register const MD ngs = _mm512_cmplt_pd_mask(_a11, _a22);
+          const unsigned gsp = (MD2U(MDANDN(ngs, _mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a22), _a11))) << VDL);
+          if (gsp) {
+            p[j] |= gsp;
+            stt -= _mm_popcnt_u32(gsp);
+          }
+          const unsigned gsn = (MD2U(MDAND(ngs, _mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a11), _a22))) << VDL);
+          if (gsn) {
+            pc[j] |= gsn;
+            stt -= _mm_popcnt_u32(gsn);
+          }
           // Grammian pre-scaling into the double precision range
           register const VD f1 = _mm512_load_pd(l1 + i);
           register const VD f2 = _mm512_load_pd(l2 + i);
@@ -302,9 +374,9 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           _a11 = _mm512_scalef_pd(f12, e12);
           _a22 = _mm512_scalef_pd(f21, e21);
           _a21 = _mm512_scalef_pd(_a21, d);
-          _mm512_store_pd((a11 + i), _a11);
-          _mm512_store_pd((a22 + i), _a22);
-          _mm512_store_pd((a21 + i), _a21);
+          _mm512_store_pd((w0 + i), _a11);
+          _mm512_store_pd((w1 + i), _a22);
+          _mm512_store_pd((w2 + i), _a21);
         }
       }
       swt += stt;
@@ -317,19 +389,19 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
 #else /* !USE_SECANTS */
       const fint _n_2 = (fint)n_2;
 #endif /* ?USE_SECANTS */
-      if (dbjac2i(&_n_2, a11, a22, a21, c, at, l1, l2, p) < 0)
+      if (dbjac2i(&_n_2, w0, w1, w2, c, at, l1, l2, p) < 0)
         return -__LINE__;
 #ifdef JTRACE
       Te += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(a11,a22,a21,eS,fS,p,pc,r,n_2)
+#pragma omp parallel for default(none) shared(eS,fS,l1,l2,w0,p,pc,r,n_2)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
-        unsigned gsp = ((pc[j] & 0xFF0000u) >> VDL2);
-        unsigned gsn = ((pc[j] & 0xFF00u) >> VDL);
+        unsigned gsp = ((p[j] & 0xFFFFFF00u) >> VDL);
+        unsigned gsn = ((pc[j] & 0xFFFFFF00u) >> VDL);
         unsigned trans = (pc[j] & 0xFFu);
         unsigned perm = (p[j] & 0xFFu);
         for (fnat k = 0u; k < VDL; ++k) {
@@ -337,141 +409,164 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const fnat pq = (l << 1u);
           const uint64_t _p = r[pq];
           const uint64_t _q = r[pq + 1u];
-          *(uint64_t*)(a11 + l) = _p;
-          *(uint64_t*)(a22 + l) = _q;
+          *(uint64_t*)(l1 + l) = _p;
+          *(uint64_t*)(l2 + l) = _q;
           if (trans & 1u) {
             if (gsp & 1u)
-              a21[l] = 3.0;
+              w0[l] = 3.0;
             else if (gsn & 1u)
-              a21[l] = -3.0;
+              w0[l] = -3.0;
             else if (perm & 1u)
-              a21[l] = -2.0;
+              w0[l] = -2.0;
             else // no swap
-              a21[l] = 2.0;
+              w0[l] = 2.0;
           }
           else if (efcmp((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
-            a21[l] = eS[_p];
+            w0[l] = eS[_p];
             eS[_p] = eS[_q];
-            eS[_q] = a21[l];
-            a21[l] = fS[_p];
+            eS[_q] = w0[l];
+            w0[l] = fS[_p];
             fS[_p] = fS[_q];
-            fS[_q] = a21[l];
-            a21[l] = -1.0;
+            fS[_q] = w0[l];
+            w0[l] = -1.0;
           }
           else // no swap
-            a21[l] = 1.0;
+            w0[l] = 1.0;
           gsp >>= 1u;
           gsn >>= 1u;
           trans >>= 1u;
           perm >>= 1u;
         }
       }
-      nM = 0.0;
+      nMG = 0.0;
+      double nMV = -0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,a11,a22,a21,c,at,l1,w,eS,fS,n_2) reduction(max:nM)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,eS,fS,a21,c,at,l1,l2,w0,w1,n_2) reduction(max:nMG,nMV)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
-        const size_t _p = *(const uint64_t*)(a11 + i);
-        const size_t _q = *(const uint64_t*)(a22 + i);
-        if (!(nM <= DBL_MAX)) {
-          w[i] = NAN;
+        const size_t _p = *(const uint64_t*)(l1 + i);
+        const size_t _q = *(const uint64_t*)(l2 + i);
+        w1[_q] = w1[_p] = 0.0;
+        if (!(nMG <= DBL_MAX)) {
+          nMG = HUGE_VALUE;
           continue;
         }
-        double _at, _c;
-        fint _m, _n;
-        if (a21[i] == -3.0) {
-          _m = -(fint)*m;
-          _n = -(fint)*n;
-          _at = w[i];
-          double e[2u] = { eS[_p], eS[_q] };
-          double f[2u] = { fS[_p], fS[_q] };
-          w[i] = dgsscl_(&_m, &_at, (G + _p * (size_t)(*ldG)), (G + _q * (size_t)(*ldG)), e, f);
-          if (!(w[i] >= 0.0) || !(w[i] <= DBL_MAX)) {
-            nM = w[i] = HUGE_VAL;
+        if (!(nMV <= DBL_MAX)) {
+          nMV = HUGE_VALUE;
+          continue;
+        }
+        double *const G_p = G + _p * (size_t)(*ldG);
+        double *const G_q = G + _q * (size_t)(*ldG);
+        double *const V_p = V + _p * (size_t)(*ldV);
+        double *const V_q = V + _q * (size_t)(*ldV);
+        if (w0[i] == -3.0) {
+          const fint _m = -(fint)*m;
+          const double e2[2u] = { eS[_p], eS[_q] };
+          const double f2[2u] = { fS[_p], fS[_q] };
+          const double tG = dgsscl_(&_m, (a21 + i), G_p, G_q, e2, f2);
+          if (!isfinite(tG)) {
+            nMG = HUGE_VAL;
             continue;
           }
-          else // no overflow
-            nM = fmax(nM, w[i]);
-          continue;
-        }
-        else if (a21[i] == -2.0) {
-          _m = -(fint)*m;
-          _n = -(fint)*n;
-          _c = c[i];
-          _at = at[i];
-        }
-        else if (a21[i] == -1.0) {
-          double *const Gp = G + _p * (size_t)(*ldG);
-          double *const Gq = G + _q * (size_t)(*ldG);
-          if (_m = dswp_(m, Gp, Gq)) {
-            w[i] = (double)_m;
-            nM = HUGE_VAL;
+          nMG = fmax(nMG, tG);
+          if (dswp_(n, V_p, V_q)) {
+            nMV = HUGE_VAL;
             continue;
           }
-          double *const Vp = V + _p * (size_t)(*ldV);
-          double *const Vq = V + _q * (size_t)(*ldV);
-          if (_n = dswp_(n, Vp, Vq)) {
-            w[i] = (double)_n;
-            nM = HUGE_VAL;
+          nMV = fmax(nMV, 0.0);
+        }
+        else if (w0[i] == -2.0) {
+          const fint _m = -(fint)*m;
+          const fint _n = -(fint)*n;
+          const double *const _c = (c + i);
+          const double *const _at = (at + i);
+          const double tG = djrot_(&_m, G_p, G_q, _c, _at);
+          if (!isfinite(tG)) {
+            nMG = HUGE_VAL;
             continue;
           }
-          nM = fmax(nM, (w[i] = 0.0));
-          continue;
-        }
-        else if (a21[i] == 1.0) {
-          nM = fmax(nM, (w[i] = 0.0));
-          continue;
-        }
-        else if (a21[i] == 2.0) {
-          _m = (fint)*m;
-          _n = (fint)*n;
-          _c = c[i];
-          _at = at[i];
-        }
-        else if (a21[i] == 3.0) {
-          _m = (fint)*m;
-          _n = (fint)*n;
-          _at = w[i];
-          double e[2u] = { eS[_p], eS[_q] };
-          double f[2u] = { fS[_p], fS[_q] };
-          w[i] = dgsscl_(&_m, &_at, (G + _p * (size_t)(*ldG)), (G + _q * (size_t)(*ldG)), e, f);
-          if (!(w[i] >= 0.0) || !(w[i] <= DBL_MAX)) {
-            nM = w[i] = HUGE_VAL;
+          nMG = fmax(nMG, tG);
+          const double tV = djrot_(&_n, V_p, V_q, _c, _at);
+          if (!isfinite(tV)) {
+            nMV = HUGE_VAL;
             continue;
           }
-          else // no overflow
-            nM = fmax(nM, w[i]);
+          nMV = fmax(nMV, tV);
+        }
+        else if (w0[i] == -1.0) {
+          if (dswp_(m, G_p, G_q)) {
+            nMG = HUGE_VAL;
+            continue;
+          }
+          nMG = fmax(nMG, 0.0);
+          if (dswp_(n, V_p, V_q)) {
+            nMV = HUGE_VAL;
+            continue;
+          }
+          nMV = fmax(nMV, 0.0);
           continue;
+        }
+        else if (w0[i] == 1.0) {
+          nMG = fmax(nMG, 0.0);
+          nMV = fmax(nMV, 0.0);
+          continue;
+        }
+        else if (w0[i] == 2.0) {
+          const fint _m = (fint)*m;
+          const fint _n = (fint)*n;
+          const double *const _c = (c + i);
+          const double *const _at = (at + i);
+          const double tG = djrot_(&_m, G_p, G_q, _c, _at);
+          if (!isfinite(tG)) {
+            nMG = HUGE_VAL;
+            continue;
+          }
+          nMG = fmax(nMG, tG);
+          const double tV = djrot_(&_n, V_p, V_q, _c, _at);
+          if (!isfinite(tV)) {
+            nMV = HUGE_VAL;
+            continue;
+          }
+          nMV = fmax(nMV, tV);
+        }
+        else if (w0[i] == 3.0) {
+          const fint _m = (fint)*m;
+          const double e2[2u] = { eS[_p], eS[_q] };
+          const double f2[2u] = { fS[_p], fS[_q] };
+          const double tG = dgsscl_(&_m, (a21 + i), G_p, G_q, e2, f2);
+          if (!isfinite(tG)) {
+            nMG = HUGE_VAL;
+            continue;
+          }
+          nMG = fmax(nMG, tG);
+          nMV = fmax(nMV, 0.0);
         }
         else { // should never happen
-          w[i] = NAN;
-          nM = HUGE_VAL;
+          nMG = HUGE_VAL;
+          nMV = HUGE_VAL;
           continue;
         }
-        w[i] = djrot_(&_m, (G + _p * (size_t)(*ldG)), (G + _q * (size_t)(*ldG)), &_c, &_at);
-        if (!(w[i] >= 0.0) || !(w[i] <= DBL_MAX)) {
-          nM = w[i] = HUGE_VAL;
-          continue;
-        }
-        else // no overflow
-          nM = fmax(nM, w[i]);
-        if (_m = djrotf_(&_n, (V + _p * (size_t)(*ldV)), (V + _q * (size_t)(*ldV)), &_c, &_at)) {
-          w[i] = (double)_m;
-          nM = HUGE_VAL;
-          continue;
-        }
+        w1[_q] = w1[_p] = 1.0;
       }
-      M = fmax(M, nM);
-#ifdef JTRACE
-      Tr += tsc_lap(hz, T, rdtsc_end(rd));
-#endif /* JTRACE */
-      if (!(M <= DBL_MAX)) {
+      if (!(nMG <= DBL_MAX)) {
 #ifdef JTRACE
         (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
         (void)fflush(jtr);
 #endif /* JTRACE */
         return -__LINE__;
       }
+      MG = fmax(MG, nMG);
+      if (!(nMV <= DBL_MAX)) {
+#ifdef JTRACE
+        (void)fprintf(jtr, "sweep=%u, step=%u\n", sw, st);
+        (void)fflush(jtr);
+#endif /* JTRACE */
+        return -__LINE__;
+      }
+      MV = fmax(MV, nMV);
+#ifdef JTRACE
+      Tr += tsc_lap(hz, T, rdtsc_end(rd));
+#endif /* JTRACE */
     }
     if (!swt)
       break;
@@ -492,10 +587,23 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       }
       eS[j] -= sT;
     }
+    if (sV) {
+#ifdef _OPENMP
+#pragma omp parallel for default(none) shared(n,V,ldV,sV)
+#endif /* _OPENMP */
+      for (fnat j = 0u; j < *n; ++j) {
+        double *const Vj = V + j * (size_t)(*ldV);
+        register const VD _s = _mm512_set1_pd((double)-sV);
+        for (fnat i = 0u; i < *n; i += VDL) {
+          double *const Vij = Vj + i;
+          _mm512_store_pd(Vij, _mm512_scalef_pd(_mm512_load_pd(Vij), _s));
+        }
+      }
+    }
   }
 
 #ifdef JTRACE
-  (void)fprintf(jtr, "sT=%d, M=%#.17e\n", sT, M);
+  (void)fprintf(jtr, "sT=%d, M=%#.17e\n", sT, MG);
   (void)fprintf(jtr, "Tn=%15.9Lf, Tp=%15.9Lf, Ta=%15.9Lf, Te=%15.9Lf, Tr=%15.9Lf\n", Tn, Tp, Ta, Te, Tr);
   (void)fclose(jtr);
 #endif /* JTRACE */
