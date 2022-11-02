@@ -253,10 +253,14 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
               continue;
             }
           }
+          else
+            a11[_pq] = scalb(fS[_p], eS[_p]);
           if (w1[_q] == 1.0) {
             double *const Gq = G + _q * (size_t)(*ldG);
             nMG = fmax(nMG, fmin((a22[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (l1 + _pq), (l2 + _pq))), HUGE_VAL));
           }
+          else
+            a22[_pq] = scalb(fS[_q], eS[_q]);
         }
 #ifdef JTRACE
         Tn += tsc_lap(hz, T, rdtsc_end(rd));

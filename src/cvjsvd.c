@@ -273,11 +273,15 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
               continue;
             }
           }
+          else
+            a11[_pq] = scalbf(fS[_p], eS[_p]);
           if (w1[_q] == 1.0f) {
             float *const Grq = Gr + _q * (size_t)(*ldGr);
             float *const Giq = Gi + _q * (size_t)(*ldGi);
             nMG = fmaxf(nMG, fminf((a22[_pq] = cnorm2_(m, Grq, Giq, (eS + _q), (fS + _q), (l1 + _pq), (l2 + _pq))), HUGE_VALF));
           }
+          else
+            a22[_pq] = scalbf(fS[_q], eS[_q]);
         }
 #ifdef JTRACE
         Tn += tsc_lap(hz, T, rdtsc_end(rd));

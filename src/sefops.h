@@ -27,6 +27,12 @@
 #define VSEFLE(e0,e1,f0,f1) _kor_mask16(_mm512_cmplt_ps_mask(e0,e1),_mm512_mask_cmple_ps_mask(_mm512_cmpeq_ps_mask(e0,e1),f0,f1))
 #endif /* ?VSEFLE */
 
+#ifdef VSEFLT
+#error VSEFLT already defined
+#else /* !VSEFLT */
+#define VSEFLT(e0,e1,f0,f1) _kor_mask16(_mm512_cmplt_ps_mask(e0,e1),_mm512_mask_cmplt_ps_mask(_mm512_cmpeq_ps_mask(e0,e1),f0,f1))
+#endif /* ?VSEFLT */
+
 #ifdef FLT_MAX_FIN_EXP
 #error FLT_MAX_FIN_EXP already defined
 #else /* !FLT_MAX_FIN_EXP */

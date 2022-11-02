@@ -253,10 +253,14 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
               continue;
             }
           }
+          else
+            a11[_pq] = scalbf(fS[_p], eS[_p]);
           if (w1[_q] == 1.0f) {
             float *const Gq = G + _q * (size_t)(*ldG);
             nMG = fmaxf(nMG, fminf((a22[_pq] = snorm2_(m, Gq, (eS + _q), (fS + _q), (l1 + _pq), (l2 + _pq))), HUGE_VALF));
           }
+          else
+            a22[_pq] = scalbf(fS[_q], eS[_q]);
         }
 #ifdef JTRACE
         Tn += tsc_lap(hz, T, rdtsc_end(rd));
@@ -336,7 +340,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       }
       fnat stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,c,at,l1,l2,w0,w1,w2,p,pc,tol,gst) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a21,c,at,l1,l2,w0,w1,w2,p,pc,tol,gst) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VSL) {
         const fnat j = (i >> VSLlg);
@@ -349,27 +353,32 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         pc[j] = MS2U(_mm512_cmple_ps_mask(_tol, _a21_));
         if (p[j] = _mm_popcnt_u32(pc[j])) {
           stt += p[j];
-          // TODO: Fix the GS computation with (e1,f1) and (e2,f2).
-          register VS _a11 = _mm512_load_ps(a11 + i);
-          register VS _a22 = _mm512_load_ps(a22 + i);
+          register const VS f1 = _mm512_load_ps(l1 + i);
+          register const VS f2 = _mm512_load_ps(l2 + i);
+          register const VS e1 = _mm512_load_ps(c + i);
+          register const VS e2 = _mm512_load_ps(at + i);
           register const VS _gst = _mm512_set1_ps(gst);
           // might not yet be sorted, so check both cases
-          register const MS ngs = _mm512_cmplt_ps_mask(_a11, _a22);
-          const unsigned gsp = (MS2U(_kandn_mask16(ngs, _mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a22), _a11))) << VSL);
+          register const MS ngs = VSEFLT(e1,e2,f1,f2);
+          register VS maf = _mm512_mask_blend_ps(ngs, f2, f1);
+          register VS mae = _mm512_mask_blend_ps(ngs, e2, e1);
+          register const VS Maf = _mm512_mask_blend_ps(ngs, f1, f2);
+          register const VS Mae = _mm512_mask_blend_ps(ngs, e1, e2);
+          maf = _mm512_mul_ps(_gst, maf);
+          mae = _mm512_add_ps(mae, _mm512_getexp_ps(maf));
+          maf = VSMANT(maf);
+          register const MS cgs = VSEFLT(mae,Mae,maf,Maf);
+          const unsigned gsp = (MS2U(_kandn_mask16(ngs,cgs)) << VSL);
           if (gsp) {
             p[j] |= gsp;
             stt -= _mm_popcnt_u32(gsp);
           }
-          const unsigned gsn = (MS2U(_kand_mask16(ngs, _mm512_cmplt_ps_mask(_mm512_mul_ps(_gst, _a11), _a22))) << VSL);
+          const unsigned gsn = (MS2U(_kand_mask16(ngs,cgs)) << VSL);
           if (gsn) {
             pc[j] |= gsn;
             stt -= _mm_popcnt_u32(gsn);
           }
           // Grammian pre-scaling into the single precision range
-          register const VS f1 = _mm512_load_ps(l1 + i);
-          register const VS f2 = _mm512_load_ps(l2 + i);
-          register const VS e1 = _mm512_load_ps(c + i);
-          register const VS e2 = _mm512_load_ps(at + i);
           register VS f12 = _mm512_div_ps(f1, f2);
           register VS e12 = _mm512_sub_ps(e1, e2);
           register VS f21 = _mm512_div_ps(f2, f1);
@@ -384,8 +393,8 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           register const VS d = _mm512_min_ps(_mm512_sub_ps(mxe, E), zerof);
           e12 = _mm512_add_ps(e12, d);
           e21 = _mm512_add_ps(e21, d);
-          _a11 = _mm512_scalef_ps(f12, e12);
-          _a22 = _mm512_scalef_ps(f21, e21);
+          register const VS _a11 = _mm512_scalef_ps(f12, e12);
+          register const VS _a22 = _mm512_scalef_ps(f21, e21);
           _a21 = _mm512_scalef_ps(_a21, d);
           _mm512_store_ps((w0 + i), _a11);
           _mm512_store_ps((w1 + i), _a22);
