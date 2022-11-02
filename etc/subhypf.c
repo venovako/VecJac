@@ -10,11 +10,8 @@
 
 int main() {
   size_t c = 0u;
-  for (float f = FLT_TRUE_MIN; f < FLT_MIN; f = nextafterf(f, FLT_MIN)) {
+  for (float f = FLT_TRUE_MIN; f < FLT_MIN; f = nextafterf(f, FLT_MIN))
     if (hypotf(f, f) == f)
-      ++c;
-  }
-  (void)fprintf(stdout, "float = %zu\n", c);
-  (void)fflush(stdout);
+      (void)printf("%zu: %#15.9E (= %#A)\n", ++c, f, f);
   return EXIT_SUCCESS;
 }
