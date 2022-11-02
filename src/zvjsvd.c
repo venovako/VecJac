@@ -363,7 +363,7 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       }
       fnat stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,cat,sat,l1,l2,w1,w2,w3,w4,p,pc,tol,gst) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a21r,a21i,cat,sat,l1,l2,w1,w2,w3,w4,p,pc,tol,gst) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);
@@ -379,27 +379,32 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         pc[j] = MD2U(_mm512_cmple_pd_mask(_tol, _a21_));
         if (p[j] = _mm_popcnt_u32(pc[j])) {
           stt += p[j];
-          // TODO: Fix the GS computation with (e1,f1) and (e2,f2).
-          register VD _a11 = _mm512_load_pd(a11 + i);
-          register VD _a22 = _mm512_load_pd(a22 + i);
+          register const VD f1 = _mm512_load_pd(l1 + i);
+          register const VD f2 = _mm512_load_pd(l2 + i);
+          register const VD e1 = _mm512_load_pd(cat + i);
+          register const VD e2 = _mm512_load_pd(sat + i);
           register const VD _gst = _mm512_set1_pd(gst);
           // might not yet be sorted, so check both cases
-          register const MD ngs = _mm512_cmplt_pd_mask(_a11, _a22);
-          const unsigned gsp = (MD2U(MDANDN(ngs, _mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a22), _a11))) << VDL);
+          register const MD ngs = VDEFLT(e1,e2,f1,f2);
+          register VD maf = _mm512_mask_blend_pd(ngs, f2, f1);
+          register VD mae = _mm512_mask_blend_pd(ngs, e2, e1);
+          register const VD Maf = _mm512_mask_blend_pd(ngs, f1, f2);
+          register const VD Mae = _mm512_mask_blend_pd(ngs, e1, e2);
+          maf = _mm512_mul_pd(_gst, maf);
+          mae = _mm512_add_pd(mae, _mm512_getexp_pd(maf));
+          maf = VDMANT(maf);
+          register const MD cgs = VDEFLT(mae,Mae,maf,Maf);
+          const unsigned gsp = (MD2U(MDANDN(ngs,cgs)) << VDL);
           if (gsp) {
             p[j] |= gsp;
             stt -= _mm_popcnt_u32(gsp);
           }
-          const unsigned gsn = (MD2U(MDAND(ngs, _mm512_cmplt_pd_mask(_mm512_mul_pd(_gst, _a11), _a22))) << VDL);
+          const unsigned gsn = (MD2U(MDAND(ngs,cgs)) << VDL);
           if (gsn) {
             pc[j] |= gsn;
             stt -= _mm_popcnt_u32(gsn);
           }
           // Grammian pre-scaling into the double precision range
-          register const VD f1 = _mm512_load_pd(l1 + i);
-          register const VD f2 = _mm512_load_pd(l2 + i);
-          register const VD e1 = _mm512_load_pd(cat + i);
-          register const VD e2 = _mm512_load_pd(sat + i);
           register VD f12 = _mm512_div_pd(f1, f2);
           register VD e12 = _mm512_sub_pd(e1, e2);
           register VD f21 = _mm512_div_pd(f2, f1);
@@ -414,8 +419,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           register const VD d = _mm512_min_pd(_mm512_sub_pd(mxe, E), zero);
           e12 = _mm512_add_pd(e12, d);
           e21 = _mm512_add_pd(e21, d);
-          _a11 = _mm512_scalef_pd(f12, e12);
-          _a22 = _mm512_scalef_pd(f21, e21);
+          register const VD _a11 = _mm512_scalef_pd(f12, e12);
+          register const VD _a22 = _mm512_scalef_pd(f21, e21);
           _a21r = _mm512_scalef_pd(_a21r, d);
           _a21i = _mm512_scalef_pd(_a21i, d);
           _mm512_store_pd((w1 + i), _a11);
