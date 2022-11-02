@@ -67,7 +67,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #ifdef JTRACE
   FILE *const jtr = fopen((const char*)work, "w");
   if (!jtr)
-    return -13;
+    return -__LINE__;
   (void)fprintf(jtr, "M=");
   (void)fflush(jtr);
 #endif /* JTRACE */
@@ -351,7 +351,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       }
       fnat stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,cat,sat,l1,l2,w1,w2,w3,w4,p,pc,tol) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,cat,sat,l1,l2,w1,w2,w3,w4,p,pc,tol,gst) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VSL) {
         const fnat j = (i >> VSLlg);
@@ -498,7 +498,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         float *const Vi_p = Vi + _p * (*ldVi);
         float *const Vi_q = Vi + _q * (*ldVi);
         if (w0[i] == -3.0f) {
-          const fint _m = (fint)*m;
+          const fint _m = -(fint)*m;
           const float e2[2u] = { eS[_p], eS[_q] };
           const float f2[2u] = { fS[_p], fS[_q] };
           const float tG = cgsscl_(&_m, (a21r + i), (a21i + i), Gr_p, Gi_p, Gr_q, Gi_q, e2, f2);
@@ -542,6 +542,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             nMG = HUGE_VALF;
             continue;
           }
+          nMG = fmaxf(nMG, 0.0f);
           if (sswp_(n, Vr_p, Vr_q)) {
             nMV = HUGE_VALF;
             continue;
@@ -550,13 +551,12 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             nMV = HUGE_VALF;
             continue;
           }
-          nMG = fmaxf(nMG, 0.0f);
           nMV = fmaxf(nMV, 0.0f);
           continue;
         }
         else if (w0[i] == 1.0) {
           nMG = fmaxf(nMG, 0.0f);
-          nMG = fmaxf(nMV, 0.0f);
+          nMV = fmaxf(nMV, 0.0f);
           continue;
         }
         else if (w0[i] == 2.0f) {
