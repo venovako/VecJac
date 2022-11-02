@@ -253,8 +253,8 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
           if (w1[_p] == 1.0f) {
-            float *const Grp = Gr + _p * (*ldGr);
-            float *const Gip = Gi + _p * (*ldGi);
+            float *const Grp = Gr + _p * (size_t)(*ldGr);
+            float *const Gip = Gi + _p * (size_t)(*ldGi);
             nMG = fmaxf(nMG, fminf((a11[_pq] = cnorm2_(m, Grp, Gip, (eS + _p), (fS + _p), (cat + _pq), (sat + _pq))), HUGE_VALF));
             if (!(nMG <= FLT_MAX)) {
               a22[_pq] = NAN;
@@ -262,8 +262,8 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             }
           }
           if (w1[_q] == 1.0f) {
-            float *const Grq = Gr + _q * (*ldGr);
-            float *const Giq = Gi + _q * (*ldGi);
+            float *const Grq = Gr + _q * (size_t)(*ldGr);
+            float *const Giq = Gi + _q * (size_t)(*ldGi);
             nMG = fmaxf(nMG, fminf((a22[_pq] = cnorm2_(m, Grq, Giq, (eS + _q), (fS + _q), (l1 + _pq), (l2 + _pq))), HUGE_VALF));
           }
         }
@@ -312,10 +312,10 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         // pack the norms
         const float e2[2u] = { eS[_q], eS[_p] };
         const float f2[2u] = { fS[_q], fS[_p] };
-        float *const Grp = Gr + _p * (*ldGr);
-        float *const Gip = Gi + _p * (*ldGi);
-        float *const Grq = Gr + _q * (*ldGr);
-        float *const Giq = Gi + _q * (*ldGi);
+        float *const Grp = Gr + _p * (size_t)(*ldGr);
+        float *const Gip = Gi + _p * (size_t)(*ldGi);
+        float *const Grq = Gr + _q * (size_t)(*ldGr);
+        float *const Giq = Gi + _q * (size_t)(*ldGi);
         const float complex z = cdpscl_(m, Grq, Giq, Grp, Gip, e2, f2);
         a21r[_pq] = crealf(z);
         nMG = fminf(nMG, (isfinite(a21r[_pq]) ? 0.0f : (float)-__LINE__));
@@ -489,14 +489,14 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           nMV = HUGE_VALF;
           continue;
         }
-        float *const Gr_p = Gr + _p * (*ldGr);
-        float *const Gr_q = Gr + _q * (*ldGr);
-        float *const Gi_p = Gi + _p * (*ldGi);
-        float *const Gi_q = Gi + _q * (*ldGi);
-        float *const Vr_p = Vr + _p * (*ldVr);
-        float *const Vr_q = Vr + _q * (*ldVr);
-        float *const Vi_p = Vi + _p * (*ldVi);
-        float *const Vi_q = Vi + _q * (*ldVi);
+        float *const Gr_p = Gr + _p * (size_t)(*ldGr);
+        float *const Gr_q = Gr + _q * (size_t)(*ldGr);
+        float *const Gi_p = Gi + _p * (size_t)(*ldGi);
+        float *const Gi_q = Gi + _q * (size_t)(*ldGi);
+        float *const Vr_p = Vr + _p * (size_t)(*ldVr);
+        float *const Vr_q = Vr + _q * (size_t)(*ldVr);
+        float *const Vi_p = Vi + _p * (size_t)(*ldVi);
+        float *const Vi_q = Vi + _q * (size_t)(*ldVi);
         if (w0[i] == -3.0f) {
           const fint _m = -(fint)*m;
           const float e2[2u] = { eS[_p], eS[_q] };

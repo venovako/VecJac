@@ -253,8 +253,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
           if (w1[_p] == 1.0) {
-            double *const Grp = Gr + _p * (*ldGr);
-            double *const Gip = Gi + _p * (*ldGi);
+            double *const Grp = Gr + _p * (size_t)(*ldGr);
+            double *const Gip = Gi + _p * (size_t)(*ldGi);
             nMG = fmax(nMG, fmin((a11[_pq] = znorm2_(m, Grp, Gip, (eS + _p), (fS + _p), (cat + _pq), (sat + _pq))), HUGE_VAL));
             if (!(nMG <= DBL_MAX)) {
               a22[_pq] = NAN;
@@ -262,8 +262,8 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             }
           }
           if (w1[_q] == 1.0) {
-            double *const Grq = Gr + _q * (*ldGr);
-            double *const Giq = Gi + _q * (*ldGi);
+            double *const Grq = Gr + _q * (size_t)(*ldGr);
+            double *const Giq = Gi + _q * (size_t)(*ldGi);
             nMG = fmax(nMG, fmin((a22[_pq] = znorm2_(m, Grq, Giq, (eS + _q), (fS + _q), (l1 + _pq), (l2 + _pq))), HUGE_VAL));
           }
         }
@@ -312,10 +312,10 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         // pack the norms
         const double e2[2u] = { eS[_q], eS[_p] };
         const double f2[2u] = { fS[_q], fS[_p] };
-        double *const Grp = Gr + _p * (*ldGr);
-        double *const Gip = Gi + _p * (*ldGi);
-        double *const Grq = Gr + _q * (*ldGr);
-        double *const Giq = Gi + _q * (*ldGi);
+        double *const Grp = Gr + _p * (size_t)(*ldGr);
+        double *const Gip = Gi + _p * (size_t)(*ldGi);
+        double *const Grq = Gr + _q * (size_t)(*ldGr);
+        double *const Giq = Gi + _q * (size_t)(*ldGi);
         const double complex z = zdpscl_(m, Grq, Giq, Grp, Gip, e2, f2);
         a21r[_pq] = creal(z);
         nMG = fmin(nMG, (isfinite(a21r[_pq]) ? 0.0 : (double)-__LINE__));
@@ -489,14 +489,14 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           nMV = HUGE_VAL;
           continue;
         }
-        double *const Gr_p = Gr + _p * (*ldGr);
-        double *const Gr_q = Gr + _q * (*ldGr);
-        double *const Gi_p = Gi + _p * (*ldGi);
-        double *const Gi_q = Gi + _q * (*ldGi);
-        double *const Vr_p = Vr + _p * (*ldVr);
-        double *const Vr_q = Vr + _q * (*ldVr);
-        double *const Vi_p = Vi + _p * (*ldVi);
-        double *const Vi_q = Vi + _q * (*ldVi);
+        double *const Gr_p = Gr + _p * (size_t)(*ldGr);
+        double *const Gr_q = Gr + _q * (size_t)(*ldGr);
+        double *const Gi_p = Gi + _p * (size_t)(*ldGi);
+        double *const Gi_q = Gi + _q * (size_t)(*ldGi);
+        double *const Vr_p = Vr + _p * (size_t)(*ldVr);
+        double *const Vr_q = Vr + _q * (size_t)(*ldVr);
+        double *const Vi_p = Vi + _p * (size_t)(*ldVi);
+        double *const Vi_q = Vi + _q * (size_t)(*ldVi);
         if (w0[i] == -3.0) {
           const fint _m = -(fint)*m;
           const double e2[2u] = { eS[_p], eS[_q] };

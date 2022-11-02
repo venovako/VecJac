@@ -180,13 +180,13 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           const fnat pq_ = pq + 1u;
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
-          float *const Gp = G + _p * (*ldG);
+          float *const Gp = G + _p * (size_t)(*ldG);
           nM = fmaxf(nM, fminf((a11[_pq] = snorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VALF));
           if (!(nM <= FLT_MAX)) {
             a22[_pq] = NAN;
             continue;
           }
-          float *const Gq = G + _q * (*ldG);
+          float *const Gq = G + _q * (size_t)(*ldG);
           nM = fmaxf(nM, fminf((a22[_pq] = snorm2_(m, Gq, (eS + _q), (fS + _q), (c + _pq), (at + _pq))), HUGE_VALF));
         }
 #ifdef JTRACE
@@ -228,8 +228,8 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         // pack the norms
         const float e2[2u] = { eS[_q], eS[_p] };
         const float f2[2u] = { fS[_q], fS[_p] };
-        float *const Gp = G + _p * (*ldG);
-        float *const Gq = G + _q * (*ldG);
+        float *const Gp = G + _p * (size_t)(*ldG);
+        float *const Gq = G + _q * (size_t)(*ldG);
         w[_pq] = sdpscl_(m, Gq, Gp, e2, f2);
         if (!(isfinite(w[_pq])))
           nM = fminf(nM, (float)-__LINE__);
@@ -388,7 +388,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _at = w[i];
           float e[2u] = { eS[_p], eS[_q] };
           float f[2u] = { fS[_p], fS[_q] };
-          w[i] = sgsscl_(&_m, &_at, (G + _p * (*ldG)), (G + _q * (*ldG)), e, f);
+          w[i] = sgsscl_(&_m, &_at, (G + _p * (size_t)(*ldG)), (G + _q * (size_t)(*ldG)), e, f);
           if (!(w[i] >= 0.0f) || !(w[i] <= FLT_MAX)) {
             nM = w[i] = HUGE_VALF;
             continue;
@@ -404,15 +404,15 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _at = at[i];
         }
         else if (a21[i] == -1.0f) {
-          float *const Gp = G + _p * (*ldG);
-          float *const Gq = G + _q * (*ldG);
+          float *const Gp = G + _p * (size_t)(*ldG);
+          float *const Gq = G + _q * (size_t)(*ldG);
           if (_m = sswp_(m, Gp, Gq)) {
             w[i] = (float)_m;
             nM = HUGE_VALF;
             continue;
           }
-          float *const Vp = V + _p * (*ldV);
-          float *const Vq = V + _q * (*ldV);
+          float *const Vp = V + _p * (size_t)(*ldV);
+          float *const Vq = V + _q * (size_t)(*ldV);
           if (_n = sswp_(n, Vp, Vq)) {
             w[i] = (float)_n;
             nM = HUGE_VALF;
@@ -437,7 +437,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _at = w[i];
           float e[2u] = { eS[_p], eS[_q] };
           float f[2u] = { fS[_p], fS[_q] };
-          w[i] = sgsscl_(&_m, &_at, (G + _p * (*ldG)), (G + _q * (*ldG)), e, f);
+          w[i] = sgsscl_(&_m, &_at, (G + _p * (size_t)(*ldG)), (G + _q * (size_t)(*ldG)), e, f);
           if (!(w[i] >= 0.0f) || !(w[i] <= FLT_MAX)) {
             nM = w[i] = HUGE_VALF;
             continue;
@@ -451,14 +451,14 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           nM = HUGE_VALF;
           continue;
         }
-        w[i] = sjrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_c, &_at);
+        w[i] = sjrot_(&_m, (G + _p * (size_t)(*ldG)), (G + _q * (size_t)(*ldG)), &_c, &_at);
         if (!(w[i] >= 0.0f) || !(w[i] <= FLT_MAX)) {
           nM = w[i] = HUGE_VALF;
           continue;
         }
         else // no overflow
           nM = fmaxf(nM, w[i]);
-        if (_m = sjrotf_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_c, &_at)) {
+        if (_m = sjrotf_(&_n, (V + _p * (size_t)(*ldV)), (V + _q * (size_t)(*ldV)), &_c, &_at)) {
           w[i] = (float)_m;
           nM = HUGE_VALF;
           continue;

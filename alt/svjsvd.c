@@ -234,7 +234,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
           if (w1[_p] == 1.0f) {
-            float *const Gp = G + _p * (*ldG);
+            float *const Gp = G + _p * (size_t)(*ldG);
             nMG = fmaxf(nMG, fminf((a11[_pq] = snorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VALF));
             if (!(nMG <= FLT_MAX)) {
               a22[_pq] = NAN;
@@ -242,7 +242,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             }
           }
           if (w1[_q] == 1.0f) {
-            float *const Gq = G + _q * (*ldG);
+            float *const Gq = G + _q * (size_t)(*ldG);
             nMG = fmaxf(nMG, fminf((a22[_pq] = snorm2_(m, Gq, (eS + _q), (fS + _q), (l1 + _pq), (l2 + _pq))), HUGE_VALF));
           }
         }
@@ -290,8 +290,8 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         // pack the norms
         const float e2[2u] = { eS[_q], eS[_p] };
         const float f2[2u] = { fS[_q], fS[_p] };
-        float *const Gp = G + _p * (*ldG);
-        float *const Gq = G + _q * (*ldG);
+        float *const Gp = G + _p * (size_t)(*ldG);
+        float *const Gq = G + _q * (size_t)(*ldG);
         a21[_pq] = sdpscl_(m, Gq, Gp, e2, f2);
         nMG = fminf(nMG, (isfinite(a21[_pq]) ? 0.0f : (float)-__LINE__));
       }
@@ -457,10 +457,10 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           nMV = HUGE_VALF;
           continue;
         }
-        float *const G_p = G + _p * (*ldG);
-        float *const G_q = G + _q * (*ldG);
-        float *const V_p = V + _p * (*ldV);
-        float *const V_q = V + _q * (*ldV);
+        float *const G_p = G + _p * (size_t)(*ldG);
+        float *const G_q = G + _q * (size_t)(*ldG);
+        float *const V_p = V + _p * (size_t)(*ldV);
+        float *const V_q = V + _q * (size_t)(*ldV);
         if (w0[i] == -3.0f) {
           const fint _m = -(fint)*m;
           const float e2[2u] = { eS[_p], eS[_q] };
@@ -480,13 +480,15 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         else if (w0[i] == -2.0f) {
           const fint _m = -(fint)*m;
           const fint _n = -(fint)*n;
-          const float tG = sjrot_(&_m, G_p, G_q, (c + i), (at + i));
+          const float *const _c = (c + i);
+          const float *const _at = (at + i);
+          const float tG = sjrot_(&_m, G_p, G_q, _c, _at);
           if (!isfinite(tG)) {
             nMG = HUGE_VALF;
             continue;
           }
           nMG = fmaxf(nMG, tG);
-          const float tV = sjrot_(&_n, V_p, V_q, (c + i), (at + i));
+          const float tV = sjrot_(&_n, V_p, V_q, _c, _at);
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;
@@ -514,20 +516,22 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         else if (w0[i] == 2.0f) {
           const fint _m = (fint)*m;
           const fint _n = (fint)*n;
-          const float tG = sjrot_(&_m, G_p, G_q, (c + i), (at + i));
+          const float *const _c = (c + i);
+          const float *const _at = (at + i);
+          const float tG = sjrot_(&_m, G_p, G_q, _c, _at);
           if (!isfinite(tG)) {
             nMG = HUGE_VALF;
             continue;
           }
           nMG = fmaxf(nMG, tG);
-          const float tV = sjrot_(&_n, V_p, V_q, (c + i), (at + i));
+          const float tV = sjrot_(&_n, V_p, V_q, _c, _at);
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;
           }
           nMV = fmaxf(nMV, tV);
         }
-        else if (a21[i] == 3.0f) {
+        else if (w0[i] == 3.0f) {
           const fint _m = (fint)*m;
           const float e2[2u] = { eS[_p], eS[_q] };
           const float f2[2u] = { fS[_p], fS[_q] };

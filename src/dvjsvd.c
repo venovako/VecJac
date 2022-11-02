@@ -180,13 +180,13 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const fnat pq_ = pq + 1u;
           const size_t _p = r[pq];
           const size_t _q = r[pq_];
-          double *const Gp = G + _p * (*ldG);
+          double *const Gp = G + _p * (size_t)(*ldG);
           nM = fmax(nM, fmin((a11[_pq] = dnorm2_(m, Gp, (eS + _p), (fS + _p), (c + _pq), (at + _pq))), HUGE_VAL));
           if (!(nM <= DBL_MAX)) {
             a22[_pq] = NAN;
             continue;
           }
-          double *const Gq = G + _q * (*ldG);
+          double *const Gq = G + _q * (size_t)(*ldG);
           nM = fmax(nM, fmin((a22[_pq] = dnorm2_(m, Gq, (eS + _q), (fS + _q), (c + _pq), (at + _pq))), HUGE_VAL));
         }
 #ifdef JTRACE
@@ -228,8 +228,8 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
         // pack the norms
         const double e2[2u] = { eS[_q], eS[_p] };
         const double f2[2u] = { fS[_q], fS[_p] };
-        double *const Gp = G + _p * (*ldG);
-        double *const Gq = G + _q * (*ldG);
+        double *const Gp = G + _p * (size_t)(*ldG);
+        double *const Gq = G + _q * (size_t)(*ldG);
         w[_pq] = ddpscl_(m, Gq, Gp, e2, f2);
         if (!(isfinite(w[_pq])))
           nM = fmin(nM, (double)-__LINE__);
@@ -388,7 +388,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           _at = w[i];
           double e[2u] = { eS[_p], eS[_q] };
           double f[2u] = { fS[_p], fS[_q] };
-          w[i] = dgsscl_(&_m, &_at, (G + _p * (*ldG)), (G + _q * (*ldG)), e, f);
+          w[i] = dgsscl_(&_m, &_at, (G + _p * (size_t)(*ldG)), (G + _q * (size_t)(*ldG)), e, f);
           if (!(w[i] >= 0.0) || !(w[i] <= DBL_MAX)) {
             nM = w[i] = HUGE_VAL;
             continue;
@@ -404,15 +404,15 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           _at = at[i];
         }
         else if (a21[i] == -1.0) {
-          double *const Gp = G + _p * (*ldG);
-          double *const Gq = G + _q * (*ldG);
+          double *const Gp = G + _p * (size_t)(*ldG);
+          double *const Gq = G + _q * (size_t)(*ldG);
           if (_m = dswp_(m, Gp, Gq)) {
             w[i] = (double)_m;
             nM = HUGE_VAL;
             continue;
           }
-          double *const Vp = V + _p * (*ldV);
-          double *const Vq = V + _q * (*ldV);
+          double *const Vp = V + _p * (size_t)(*ldV);
+          double *const Vq = V + _q * (size_t)(*ldV);
           if (_n = dswp_(n, Vp, Vq)) {
             w[i] = (double)_n;
             nM = HUGE_VAL;
@@ -437,7 +437,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           _at = w[i];
           double e[2u] = { eS[_p], eS[_q] };
           double f[2u] = { fS[_p], fS[_q] };
-          w[i] = dgsscl_(&_m, &_at, (G + _p * (*ldG)), (G + _q * (*ldG)), e, f);
+          w[i] = dgsscl_(&_m, &_at, (G + _p * (size_t)(*ldG)), (G + _q * (size_t)(*ldG)), e, f);
           if (!(w[i] >= 0.0) || !(w[i] <= DBL_MAX)) {
             nM = w[i] = HUGE_VAL;
             continue;
@@ -451,14 +451,14 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           nM = HUGE_VAL;
           continue;
         }
-        w[i] = djrot_(&_m, (G + _p * (*ldG)), (G + _q * (*ldG)), &_c, &_at);
+        w[i] = djrot_(&_m, (G + _p * (size_t)(*ldG)), (G + _q * (size_t)(*ldG)), &_c, &_at);
         if (!(w[i] >= 0.0) || !(w[i] <= DBL_MAX)) {
           nM = w[i] = HUGE_VAL;
           continue;
         }
         else // no overflow
           nM = fmax(nM, w[i]);
-        if (_m = djrotf_(&_n, (V + _p * (*ldV)), (V + _q * (*ldV)), &_c, &_at)) {
+        if (_m = djrotf_(&_n, (V + _p * (size_t)(*ldV)), (V + _q * (size_t)(*ldV)), &_c, &_at)) {
           w[i] = (double)_m;
           nM = HUGE_VAL;
           continue;
