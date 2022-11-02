@@ -610,7 +610,6 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           }
           nMG = fmaxf(nMG, tG);
           nMV = fmaxf(nMV, 0.0f);
-          SWAP_EFS(tG);
           w1[_q] = 1.0f;
           continue;
         }

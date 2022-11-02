@@ -610,7 +610,6 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           }
           nMG = fmax(nMG, tG);
           nMV = fmax(nMV, 0.0);
-          SWAP_EFS(tG);
           w1[_q] = 1.0;
           continue;
         }
