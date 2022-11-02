@@ -441,8 +441,8 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         for (fnat k = 0u; k < VSL; ++k) {
           const fnat l = (i + k);
           const fnat pq = (l << 1u);
-          const uint64_t _p = r[pq];
-          const uint64_t _q = r[pq + 1u];
+          const unsigned _p = r[pq];
+          const unsigned _q = r[pq + 1u];
           *(unsigned*)(l1 + l) = _p;
           *(unsigned*)(l2 + l) = _q;
           if (trans & 1u) {
@@ -554,7 +554,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           nMV = fmaxf(nMV, 0.0f);
           continue;
         }
-        else if (w0[i] == 1.0) {
+        else if (w0[i] == 1.0f) {
           nMG = fmaxf(nMG, 0.0f);
           nMV = fmaxf(nMV, 0.0f);
           continue;

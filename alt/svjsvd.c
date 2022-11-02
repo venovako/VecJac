@@ -415,13 +415,13 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           *(unsigned*)(l2 + l) = _q;
           if (trans & 1u) {
             if (gsp & 1u)
-              a21[l] = 3.0f;
+              w0[l] = 3.0f;
             else if (gsn & 1u)
-              a21[l] = -3.0f;
+              w0[l] = -3.0f;
             else if (perm & 1u)
-              a21[l] = -2.0f;
+              w0[l] = -2.0f;
             else // no swap
-              a21[l] = 2.0f;
+              w0[l] = 2.0f;
           }
           else if (efcmpf((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
             w0[l] = eS[_p];
