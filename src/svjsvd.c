@@ -337,8 +337,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         pc[j] = MS2U(_mm512_cmple_ps_mask(_tol, _a21_));
         if (p[j] = _mm_popcnt_u32(pc[j])) {
           stt += p[j];
-          // TODO: this assumes that a11 and a22 are finite.
-          // The GS computation can be done with (e1,f1) and (e2,f2) instead.
+          // TODO: Fix the GS computation with (e1,f1) and (e2,f2).
           register VS _a11 = _mm512_load_ps(a11 + i);
           register VS _a22 = _mm512_load_ps(a22 + i);
           register const VS _gst = _mm512_set1_ps(gst);

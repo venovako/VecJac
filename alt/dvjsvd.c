@@ -7,7 +7,6 @@
 #include "ddpscl.h"
 #include "dgsscl.h"
 #include "dbjac2.h"
-#include "djrotf.h"
 #include "djrot.h"
 #include "dswp.h"
 #include "vecdef.h"
