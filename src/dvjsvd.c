@@ -544,7 +544,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           const fint _m = (fint)*m;
           const double e2[2u] = { eS[_p], eS[_q] };
           const double f2[2u] = { fS[_p], fS[_q] };
-          const double tG = dgsscl_(&_m, (a21 + i), G_p, G_q, e2, f2);
+          double tG = dgsscl_(&_m, (a21 + i), G_p, G_q, e2, f2);
           if (!isfinite(tG)) {
             nMG = HUGE_VAL;
             continue;
