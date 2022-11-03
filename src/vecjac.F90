@@ -536,6 +536,7 @@ MODULE VECJAC
   END INTERFACE
 
   ! !!! FOR xVJSVD ROUTINES: !!!
+  ! if JTRACE is defined, WORK should start with a nul-terminated name of the trace file to be written
   ! set IWORK(1) to 0 if V is to be set to I, or to something else if V is preset
 
   ! ASSUMES (MOD(N,2) .EQ. 0) .AND. (MOD(N/2,VSL) .EQ. 0)
