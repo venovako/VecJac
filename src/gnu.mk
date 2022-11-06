@@ -2,6 +2,10 @@ ifdef SLEEF
 $(error SLEEF is not yet supported with GCC)
 endif # SLEEF
 SHELL=/bin/bash
+ARCH=$(shell uname)
+ifneq ($(ARCH),Linux)
+$(error GCC build is only supported on Linux)
+endif # !Linux
 ifndef CPU
 CPU=native
 endif # !CPU
