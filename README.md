@@ -10,9 +10,10 @@ arXiv:[2202.08361](https://arxiv.org/abs/2202.08361 "Vectorization of the Jacobi
 
 ### Prerequisites
 
-A recent Intel CPU (with at least the AVX512F instruction subset) and oneAPI Base and HPC Toolkits (e.g., 2021.2 or newer) on a 64-bit Linux (e.g., CentOS 7.9) are required; macOS (e.g., Big Sur) should also be supported (not tested).
+A recent Intel CPU (with at least the AVX512F instruction subset) and oneAPI Base and HPC Toolkits (e.g., 2021.2 or newer) on a 64-bit Linux (e.g., CentOS 7.9) are required; macOS (e.g., Big Sur) should also be supported (not but has not been tested) with the Intel compilers.
 
-First, clone and build [JACSD](https://github.com/venovako/JACSD) repository, with the same parent directory as this one.  In fact, only the ``jstrat`` library is required to be built there.
+First, clone and build [JACSD](https://github.com/venovako/JACSD) repository, with the same parent directory as this one has (e.g., ``venovako/JACSD`` and ``venovako/VecJac``).
+In fact, only the ``jstrat`` library is required to be built there, with the same compilers and the (no-)debug mode as it is meant to be used here.
 
 ### Make options
 
@@ -20,13 +21,13 @@ Run ``make`` in the ``src`` subdirectory as follows:
 ```bash
 make [COMPILER=x64|x64x|x200|gnu] [x64[x] ? CPU=...] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [all|clean|help]
 ```
-where ``COMPILER`` should be set to ``x64`` for Xeon processors with icc/icpc/ifort, to ``x64x`` for Xeons with icx/icpx/ifx, or to ``x200`` for Xeon Phi KNLs (for which only the classic, non-LLVM compilers icc/icpc/ifort are supported), respectively.
+where ``COMPILER`` should be set to ``x64`` for Xeon processors with icc/icpc/ifort, to ``x64x`` for Xeons with icx/icpx/ifx (might work only from the version 2022.2 onwards!), or to ``x200`` for Xeon Phi KNLs (for which only the classic, non-LLVM compilers icc/icpc/ifort are supported), respectively.
 Here, ``NDEBUG`` should be set to the desired optimization level (``3`` is a sensible choice).
 As a hack, setting ``MKL`` *explicitly* to ``sequential`` turns off OpenMP (otherwise it is turned on, unless debugging).
-If ``COMPILER=x64[x]`` then the ``CPU`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``) or left undefined to take the default value of ``Host``.
+If ``COMPILER`` is set to ``x64``, ``x64x``, or ``gnu``, then the ``CPU`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``, or its lowercase variant for ``gnu``) or left undefined to take the default value of ``Host``.
 Other options should not be used unless their consequences are fully understood.
 For example, ``make COMPILER=x64 NDEBUG=3 clean all`` will trigger a full, release-mode rebuild for Xeons.
-GNU compilers might work, but the SLEEF-related parts cannot yet be built, and ``SLEEF`` has to remain unset.
+GNU compilers might work, but the [SLEEF](https://sleef.org)-related parts cannot yet be built, and ``SLEEF`` has to remain unset.
 
 ## Running
 
