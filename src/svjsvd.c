@@ -590,6 +590,10 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       Tr += tsc_lap(hz, T, rdtsc_end(rd));
 #endif /* JTRACE */
     }
+#ifdef JTRACE
+    (void)fprintf(jtr, "%3u %zu\n", sw, swt);
+    (void)fflush(jtr);
+#endif /* JTRACE */
     if (!swt)
       break;
     ++sw;
