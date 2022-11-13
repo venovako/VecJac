@@ -41,7 +41,7 @@ MKL=sequential
 endif # !LAPACK
 endif # !MKL
 DBGFLAGS=-traceback -diag-disable=10397 #-DJTRACE
-FPUFLAGS=-DUSE_2SUM -fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -qsimd-honor-fp-model -qsimd-serialize-fp-reduction #-fimf-use-svml=true
+FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -qsimd-honor-fp-model -qsimd-serialize-fp-reduction #-fimf-use-svml=true
 ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
@@ -53,7 +53,7 @@ OPTFLAGS=-O0 -xHost -qopt-multi-version-aggressive -qopt-zmm-usage=high
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug parallel -debug pubnames -DPRINTOUT=stderr
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
-LIBFLAGS=-static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -I. -I../../JACSD/jstrat -DUSE_INL
+LIBFLAGS=-static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM -DUSE_SECANTS
 ifdef SLEEF
 LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF

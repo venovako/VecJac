@@ -44,7 +44,7 @@ MKL=sequential
 endif # !LAPACK
 endif # !MKL
 DBGFLAGS=-traceback -diag-disable=10397,10441 #-DJTRACE
-FPUFLAGS=-DUSE_2SUM -fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -qsimd-honor-fp-model -qsimd-serialize-fp-reduction #-fimf-use-svml=true
+FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz -no-complex-limited-range -no-fast-transcendentals -prec-div -prec-sqrt -qsimd-honor-fp-model -qsimd-serialize-fp-reduction #-fimf-use-svml=true
 ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
@@ -59,7 +59,7 @@ DBGFLAGS += -debug parallel
 endif # Linux
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
-LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL
+LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM -DUSE_SECANTS
 ifdef SLEEF
 LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF

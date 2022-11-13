@@ -45,7 +45,7 @@ endif # !LAPACK
 endif # !MKL
 OPTFLAGS=-march=$(CPU)
 DBGFLAGS= #-DJTRACE
-FPUFLAGS=-DUSE_EXTENDED -DUSE_2SUM -ffp-contract=fast
+FPUFLAGS=-DUSE_EXTENDED -ffp-contract=fast
 ifdef NDEBUG
 OPTFLAGS += -O$(NDEBUG) -fgcse-las -fgcse-sm -fipa-pta -ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts -fvect-cost-model=unlimited -fvariable-expansion-in-unroller
 DBGFLAGS += -DNDEBUG -fopt-info-optimized-vec
@@ -54,7 +54,7 @@ else # DEBUG
 OPTFLAGS += -O$(DEBUG)
 DBGFLAGS += -$(DEBUG) -DPRINTOUT=stderr
 endif # ?NDEBUG
-LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL
+LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM -DUSE_SECANTS
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
 endif # MKL
