@@ -3,10 +3,10 @@
 #ifdef USE_2SUM
 #include "s2sum.h"
 #include "vecdef.h"
-#ifdef INMULSUM
-#error INMULSUM already defined
-#else /* !INMULSUM */
-#define INMULSUM(x,y,s,t,s_,t_)       \
+#ifdef MUL2SUM
+#error MUL2SUM already defined
+#else /* !MUL2SUM */
+#define MUL2SUM(x,y,s,t,s_,t_)       \
   xy = _mm512_mul_round_ps(x, y, rni);\
   a = s;                              \
   xy_ = _mm512_fmsub_ps(x, y, xy);    \
@@ -15,15 +15,7 @@
   a = s_;                             \
   b = _mm512_add_ps(xy_, t_);         \
   TwoSum(a,b,a_,b_,s_,t_)
-#endif /* ?INMULSUM */
-#ifdef OUTSUM
-#error OUTSUM already defined
-#else /* !OUTSUM */
-#define OUTSUM(x,y)    \
-  a = x;               \
-  b = y;               \
-  TwoSum(a,b,a_,b_,x,y)
-#endif /* ?OUTSUM */
+#endif /* ?MUL2SUM */
 #endif /* USE_2SUM */
 
 float complex cdpscl_(const fnat m[static restrict 1], const float xr[static restrict VSL], const float xi[static restrict VSL], const float yr[static restrict VSL], const float yi[static restrict VSL], const float e[static restrict 2], const float f[static restrict 2])
@@ -64,23 +56,14 @@ float complex cdpscl_(const fnat m[static restrict 1], const float xr[static res
   // USE_2SUM: Kahan + Graillat & al.
 #ifdef USE_2SUM
   register const VS _zerof = _mm512_set1_ps(-0.0f);
-  register VS sXrYr = _mm512_setzero_ps();
-  register VS tXrYr = _mm512_setzero_ps();
-  register VS sXiYi = _mm512_setzero_ps();
-  register VS tXiYi = _mm512_setzero_ps();
-  register VS sXrYi = _mm512_setzero_ps();
-  register VS tXrYi = _mm512_setzero_ps();
-  register VS sXiYr = _mm512_setzero_ps();
-  register VS tXiYr = _mm512_setzero_ps();
-  register VS sXrYr_ = _mm512_setzero_ps();
-  register VS tXrYr_ = _mm512_setzero_ps();
-  register VS sXiYi_ = _mm512_setzero_ps();
-  register VS tXiYi_ = _mm512_setzero_ps();
-  register VS sXrYi_ = _mm512_setzero_ps();
-  register VS tXrYi_ = _mm512_setzero_ps();
-  register VS sXiYr_ = _mm512_setzero_ps();
-  register VS tXiYr_ = _mm512_setzero_ps();
-  register VS a, b, a_, b_, xy, xy_;
+  register VS sr = _mm512_setzero_ps();
+  register VS tr = _mm512_setzero_ps();
+  register VS sr_ = _mm512_setzero_ps();
+  register VS tr_ = _mm512_setzero_ps();
+  register VS si = _mm512_setzero_ps();
+  register VS ti = _mm512_setzero_ps();
+  register VS si_ = _mm512_setzero_ps();
+  register VS ti_ = _mm512_setzero_ps();
   const int rni = (_MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC);
   for (fnat i = 0u; i < *m; i += VSL) {
     register VS xri = _mm512_load_ps(xr + i);
@@ -91,11 +74,12 @@ float complex cdpscl_(const fnat m[static restrict 1], const float xr[static res
     yri = _mm512_scalef_ps(yri, ye); VSP(yri);
     yii = _mm512_scalef_ps(yii, ye); VSP(yii);
     xii = _mm512_scalef_ps(xii, xe); VSP(xii);
-    INMULSUM(xri,yri,sXrYr,tXrYr,sXrYr_,tXrYr_);
-    INMULSUM(xii,yii,sXiYi,tXiYi,sXiYi_,tXiYi_);
+    register VS a, b, a_, b_, xy, xy_;
+    MUL2SUM(xri,yri,sr,tr,sr_,tr_);
+    MUL2SUM(xii,yii,sr,tr,sr_,tr_);
     xii = VSNEG(xii); VSP(xii);
-    INMULSUM(xri,yii,sXrYi,tXrYi,sXrYi_,tXrYi_);
-    INMULSUM(xii,yri,sXiYr,tXiYr,sXiYr_,tXiYr_);
+    MUL2SUM(xri,yii,si,ti,si_,ti_);
+    MUL2SUM(xii,yri,si,ti,si_,ti_);
   }
 #else /* !USE_2SUM */
   register VS pr = _mm512_setzero_ps();
@@ -119,18 +103,8 @@ float complex cdpscl_(const fnat m[static restrict 1], const float xr[static res
   const float fx = f[0u];
   const float fy = f[1u];
 #ifdef USE_2SUM
-  OUTSUM(tXrYr_,tXiYi_);
-  OUTSUM(sXrYr_,sXiYi_);
-  OUTSUM(tXrYr,tXiYi);
-  OUTSUM(sXrYr,sXiYi);
-  const float nur =
-    _mm512_reduce_add_ps(sXrYr) + (_mm512_reduce_add_ps(sXiYi) + (_mm512_reduce_add_ps(tXrYr) + (_mm512_reduce_add_ps(tXiYi) + (_mm512_reduce_add_ps(sXrYr_) + (_mm512_reduce_add_ps(sXiYi_) + (_mm512_reduce_add_ps(tXrYr_) + _mm512_reduce_add_ps(tXiYi_)))))));
-  OUTSUM(tXrYi_,tXiYr_);
-  OUTSUM(sXrYi_,sXiYr_);
-  OUTSUM(tXrYi,tXiYr);
-  OUTSUM(sXrYi,sXiYr);
-  const float nui =
-    _mm512_reduce_add_ps(sXrYi) + (_mm512_reduce_add_ps(sXiYr) + (_mm512_reduce_add_ps(tXrYi) + (_mm512_reduce_add_ps(tXiYr) + (_mm512_reduce_add_ps(sXrYi_) + (_mm512_reduce_add_ps(sXiYr_) + (_mm512_reduce_add_ps(tXrYi_) + _mm512_reduce_add_ps(tXiYr_)))))));
+  const float nur = (_mm512_reduce_add_ps(sr) + (_mm512_reduce_add_ps(tr) + (_mm512_reduce_add_ps(sr_) + _mm512_reduce_add_ps(tr_))));
+  const float nui = (_mm512_reduce_add_ps(si) + (_mm512_reduce_add_ps(ti) + (_mm512_reduce_add_ps(si_) + _mm512_reduce_add_ps(ti_))));
 #else /* !USE_2SUM */
   const float nur = _mm512_reduce_add_ps(pr);
   const float nui = _mm512_reduce_add_ps(pi);
