@@ -47,7 +47,7 @@ aalloc$(SUFX).o: aalloc.c aalloc.h vec.h common.h $(MKFS)
 cbjac2$(SUFX).o: cbjac2.c cbjac2.h scjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-cdpscl$(SUFX).o: cdpscl.c cdpscl.h vec.h common.h $(MKFS)
+cdpscl$(SUFX).o: cdpscl.c cdpscl.h s2sum.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 cgsscl$(SUFX).o: cgsscl.c cgsscl.h vecdef.h vec.h common.h $(MKFS)
@@ -195,7 +195,7 @@ wnrme$(SUFX).o: wnrme.c wnrme.h common.h $(MKFS)
 zbjac2$(SUFX).o: zbjac2.c zbjac2.h dzjac2.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-zdpscl$(SUFX).o: zdpscl.c zdpscl.h vec.h common.h $(MKFS)
+zdpscl$(SUFX).o: zdpscl.c zdpscl.h d2sum.h vecdef.h vec.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 zgsscl$(SUFX).o: zgsscl.c zgsscl.h vecdef.h vec.h common.h $(MKFS)
