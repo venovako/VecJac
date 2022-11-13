@@ -59,13 +59,21 @@ LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM -DUSE_SECANTS
 ifdef SLEEF
 LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF
+ifdef CR_MATH
+LIBFLAGS += -DUSE_CR_MATH
+endif # CR_MATH
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
 endif # MKL
 ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
-LDFLAGS=-L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
+ifdef CR_MATH
+LDFLAGS=$(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o -L. -lvecjac$(SUFX)
+else # !CR_MATH
+LDFLAGS=
+endif # ?CR_MATH
+LDFLAGS += -L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
 ifdef SLEEF
 ifeq ($(wildcard $(SLEEF)/lib64),)
 LDFLAGS += -L$(SLEEF)/lib -Wl,-rpath=$(SLEEF)/lib

@@ -182,7 +182,7 @@ static inline void _zlaev2(const double A[static restrict 1], const double Br[st
 {
   const double _Br = *Br;
   const double _Bi = *Bi;
-  const double _B = hypot(_Br, _Bi);
+  const double _B = cr_hypot(_Br, _Bi);
   _dlaev2(A, &_B, C, RT1, RT2, CS1, SNr);
   if (_B == 0.0)
     *SNi = copysign(0.0, *SNr);
@@ -198,7 +198,7 @@ static inline void _claev2(const float A[static restrict 1], const float Br[stat
 {
   const float _Br = *Br;
   const float _Bi = *Bi;
-  const float _B = hypotf(_Br, _Bi);
+  const float _B = cr_hypotf(_Br, _Bi);
   _slaev2(A, &_B, C, RT1, RT2, CS1, SNr);
   if (_B == 0.0f)
     *SNi = copysignf(0.0f, *SNr);

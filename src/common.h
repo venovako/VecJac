@@ -22,6 +22,18 @@ extern __float128 __sqrtq(__float128);
 #endif /* !USE_EXTENDED */
 #endif /* ?__ICC */
 
+#ifdef USE_CR_MATH
+extern float cr_hypotf(float x, float y);
+extern double cr_hypot(double x, double y);
+#else /* !USE_CR_MATH */
+#ifndef cr_hypotf
+#define cr_hypotf hypotf
+#endif /* !cr_hypotf */
+#ifndef cr_hypot
+#define cr_hypot hypot
+#endif /* !cr_hypot */
+#endif /* ?USE_CR_MATH */
+
 #ifndef CMPLXF
 #define CMPLXF(r,i) ((float)(r) + I * (float)(i))
 #endif /* !CMPLXF */

@@ -11,7 +11,7 @@ double znorm2_(const fnat m[static restrict 1], const double zr[static restrict 
   static const fint incx = 1;
   const double dr = BLAS_D(nrm2)((const fint*)m, zr, &incx);
   const double di = BLAS_D(nrm2)((const fint*)m, zi, &incx);
-  const double d = hypot(dr, di);
+  const double d = cr_hypot(dr, di);
   dbl2ef(d, e0, f0);
   sqef(e0, f0, e1, f1);
   return d;
