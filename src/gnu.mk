@@ -44,7 +44,7 @@ MKL=sequential
 endif # !LAPACK
 endif # !MKL
 OPTFLAGS=-march=$(CPU)
-DBGFLAGS= #-DJTRACE
+DBGFLAGS=-DJTRACE
 FPUFLAGS=-DUSE_EXTENDED -ffp-contract=fast
 ifdef NDEBUG
 OPTFLAGS += -O$(NDEBUG) -fgcse-las -fgcse-sm -fipa-pta -ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts -fvect-cost-model=unlimited -fvariable-expansion-in-unroller
