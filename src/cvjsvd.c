@@ -475,7 +475,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
                 w0[l] = -2.0f;
               else // no swap
                 w0[l] = 2.0f;
-              if (c[l] == 1.0)
+              if (c[l] == 1.0f)
                 ++stt_;
             }
           }
