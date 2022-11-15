@@ -57,5 +57,5 @@ out/
 var/
 
 # AUX
-local.mk
-mac.mk
+src/local.mk
+src/mac.mk

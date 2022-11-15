@@ -433,7 +433,6 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           _mm512_store_ps((w4 + i), _a21i);
         }
       }
-      swt += stt;
 #ifdef JTRACE
       Ta += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
@@ -449,8 +448,9 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       Te += tsc_lap(hz, T, rdtsc_end(rd));
       T = rdtsc_beg(rd);
 #endif /* JTRACE */
+      fnat stt_ = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(eS,fS,l1,l2,w0,p,pc,r,n_2)
+#pragma omp parallel for default(none) shared(eS,fS,c,l1,l2,w0,p,pc,r,n_2) reduction(+:stt_)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VSL) {
         const fnat j = (i >> VSLlg);
@@ -470,10 +470,14 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
               w0[l] = 3.0f;
             else if (gsn & 1u)
               w0[l] = -3.0f;
-            else if (perm & 1u)
-              w0[l] = -2.0f;
-            else // no swap
-              w0[l] = 2.0f;
+            else { // rotation
+              if (perm & 1u)
+                w0[l] = -2.0f;
+              else // no swap
+                w0[l] = 2.0f;
+              if (c[l] == 1.0)
+                ++stt_;
+            }
           }
           else if (efcmpf((eS + _p), (fS + _p), (eS + _q), (fS + _q)) < 0) {
             SWAP_EFS(w0[l]);
@@ -487,6 +491,10 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           perm >>= 1u;
         }
       }
+#ifdef USE_BIG_ONLY
+      stt -= stt_;
+#endif /* USE_BIG_ONLY */
+      swt += stt;
       nMG = 0.0f;
       float nMV = -0.0f;
 #ifdef _OPENMP
