@@ -8,6 +8,7 @@
 #include "cgsscl.h"
 #include "cbjac2.h"
 #include "cjrot.h"
+#include "cjrotf.h"
 #include "sswp.h"
 #include "vecdef.h"
 #include "sefops.h"
@@ -33,6 +34,8 @@
   fS[_p] = fS[_q];  \
   fS[_q] = t
 #endif /* ?SWAP_EFS */
+
+typedef float (*vrot_t)(const fint *const, float *const, float *const, float *const, float *const, const float *const, const float *const, const float *const);
 
 fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], float Gr[static restrict VSL], const fnat ldGr[static restrict 1], float Gi[static restrict VSL], const fnat ldGi[static restrict 1], float Vr[static restrict VSL], const fnat ldVr[static restrict 1], float Vi[static restrict VSL], const fnat ldVi[static restrict 1], float eS[static restrict 1], float fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], float work[static restrict VSL], unsigned iwork[static restrict 1])
 {
@@ -152,16 +155,21 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   (void)fflush(jtr);
 #endif /* JTRACE */
 
-  flt2ef(MV, &es, &fs);
-  eM = (int)es;
-  sR = FLT_MAX_ROT_EXP - eM - 1;
-  sN = sR;
-  if (sN) {
-    if (cscale_(n, n, Vr, ldVr, Vi, ldVi, &sN) < 0)
-      return -__LINE__;
-    MV = scalbnf(MV, sR);
+  if (*iwork) {
+    flt2ef(MV, &es, &fs);
+    eM = (int)es;
+    sR = FLT_MAX_ROT_EXP - eM - 1;
+    sN = sR;
+    if (sN) {
+      if (cscale_(n, n, Vr, ldVr, Vi, ldVi, &sN) < 0)
+        return -__LINE__;
+      MV = scalbnf(MV, sR);
+    }
   }
+  else // V = I
+    sR = 0;
   int sV = sR;
+  const vrot_t vrot = (*iwork ? cjrot_ : cjrotf_);
 
   const fnat n_32 = (n_2 >> VSLlg);
 
@@ -490,7 +498,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       nMG = 0.0f;
       float nMV = -0.0f;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,eS,fS,a21r,a21i,c,cat,sat,l1,l2,w0,w1,n_2) reduction(max:nMG,nMV)
+#pragma omp parallel for default(none) shared(m,n,Gr,ldGr,Gi,ldGi,Vr,ldVr,Vi,ldVi,eS,fS,a21r,a21i,c,cat,sat,l1,l2,w0,w1,n_2,vrot) reduction(max:nMG,nMV)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
         const unsigned _p = *(const unsigned*)(l1 + i);
@@ -547,7 +555,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             continue;
           }
           nMG = fmaxf(nMG, tG);
-          const float tV = cjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, _c, _cat, _sat);
+          const float tV = vrot(&_n, Vr_p, Vi_p, Vr_q, Vi_q, _c, _cat, _sat);
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;
@@ -592,7 +600,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             continue;
           }
           nMG = fmaxf(nMG, tG);
-          const float tV = cjrot_(&_n, Vr_p, Vi_p, Vr_q, Vi_q, _c, _cat, _sat);
+          const float tV = vrot(&_n, Vr_p, Vi_p, Vr_q, Vi_q, _c, _cat, _sat);
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;

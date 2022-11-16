@@ -8,6 +8,7 @@
 #include "dgsscl.h"
 #include "dbjac2.h"
 #include "djrot.h"
+#include "djrotf.h"
 #include "dswp.h"
 #include "vecdef.h"
 #include "defops.h"
@@ -33,6 +34,8 @@
   fS[_p] = fS[_q];  \
   fS[_q] = t
 #endif /* ?SWAP_EFS */
+
+typedef double (*vrot_t)(const fint *const, double *const, double *const, const double *const, const double *const);
 
 fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], double G[static restrict VDL], const fnat ldG[static restrict 1], double V[static restrict VDL], const fnat ldV[static restrict 1], double eS[static restrict 1], double fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], double work[static restrict VDL], unsigned iwork[static restrict 1])
 {
@@ -137,16 +140,21 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
   (void)fflush(jtr);
 #endif /* JTRACE */
 
-  dbl2ef(MV, &es, &fs);
-  eM = (int)es;
-  sR = DBL_MAX_ROT_EXP - eM;
-  sN = sR;
-  if (sN) {
-    if (dscale_(n, n, V, ldV, &sN) < 0)
-      return -__LINE__;
-    MV = scalbn(MV, sR);
+  if (*iwork) {
+    dbl2ef(MV, &es, &fs);
+    eM = (int)es;
+    sR = DBL_MAX_ROT_EXP - eM;
+    sN = sR;
+    if (sN) {
+      if (dscale_(n, n, V, ldV, &sN) < 0)
+        return -__LINE__;
+      MV = scalbn(MV, sR);
+    }
   }
+  else // V = I
+    sR = 0;
   int sV = sR;
+  const vrot_t vrot = (*iwork ? djrot_ : djrotf_);
 
   const fnat n_16 = (n_2 >> VDLlg);
 
@@ -458,7 +466,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       nMG = 0.0;
       double nMV = -0.0;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,eS,fS,a21,c,at,l1,l2,w0,w1,n_2) reduction(max:nMG,nMV)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,eS,fS,a21,c,at,l1,l2,w0,w1,n_2,vrot) reduction(max:nMG,nMV)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
         const size_t _p = *(const uint64_t*)(l1 + i);
@@ -506,7 +514,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             continue;
           }
           nMG = fmax(nMG, tG);
-          const double tV = djrot_(&_n, V_p, V_q, _c, _at);
+          const double tV = vrot(&_n, V_p, V_q, _c, _at);
           if (!isfinite(tV)) {
             nMV = HUGE_VAL;
             continue;
@@ -542,7 +550,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
             continue;
           }
           nMG = fmax(nMG, tG);
-          const double tV = djrot_(&_n, V_p, V_q, _c, _at);
+          const double tV = vrot(&_n, V_p, V_q, _c, _at);
           if (!isfinite(tV)) {
             nMV = HUGE_VAL;
             continue;

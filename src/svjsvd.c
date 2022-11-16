@@ -8,6 +8,7 @@
 #include "sgsscl.h"
 #include "sbjac2.h"
 #include "sjrot.h"
+#include "sjrotf.h"
 #include "sswp.h"
 #include "vecdef.h"
 #include "sefops.h"
@@ -33,6 +34,8 @@
   fS[_p] = fS[_q];  \
   fS[_q] = t
 #endif /* ?SWAP_EFS */
+
+typedef float (*vrot_t)(const fint *const, float *const, float *const, const float *const, const float *const);
 
 fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], float G[static restrict VSL], const fnat ldG[static restrict 1], float V[static restrict VSL], const fnat ldV[static restrict 1], float eS[static restrict 1], float fS[static restrict 1], const unsigned js[static restrict 1], const unsigned stp[static restrict 1], const unsigned swp[static restrict 1], float work[static restrict VSL], unsigned iwork[static restrict 1])
 {
@@ -137,16 +140,21 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
   (void)fflush(jtr);
 #endif /* JTRACE */
 
-  flt2ef(MV, &es, &fs);
-  eM = (int)es;
-  sR = FLT_MAX_ROT_EXP - eM;
-  sN = sR;
-  if (sN) {
-    if (sscale_(n, n, V, ldV, &sN) < 0)
-      return -__LINE__;
-    MV = scalbnf(MV, sR);
+  if (*iwork) {
+    flt2ef(MV, &es, &fs);
+    eM = (int)es;
+    sR = FLT_MAX_ROT_EXP - eM;
+    sN = sR;
+    if (sN) {
+      if (sscale_(n, n, V, ldV, &sN) < 0)
+        return -__LINE__;
+      MV = scalbnf(MV, sR);
+    }
   }
+  else // V = I
+    sR = 0;
   int sV = sR;
+  const vrot_t vrot = (*iwork ? sjrot_ : sjrotf_);
 
   const fnat n_32 = (n_2 >> VSLlg);
 
@@ -458,7 +466,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       nMG = 0.0f;
       float nMV = -0.0f;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,eS,fS,a21,c,at,l1,l2,w0,w1,n_2) reduction(max:nMG,nMV)
+#pragma omp parallel for default(none) shared(m,n,G,ldG,V,ldV,eS,fS,a21,c,at,l1,l2,w0,w1,n_2,vrot) reduction(max:nMG,nMV)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; ++i) {
         const unsigned _p = *(const unsigned*)(l1 + i);
@@ -506,7 +514,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             continue;
           }
           nMG = fmaxf(nMG, tG);
-          const float tV = sjrot_(&_n, V_p, V_q, _c, _at);
+          const float tV = vrot(&_n, V_p, V_q, _c, _at);
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;
@@ -542,7 +550,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
             continue;
           }
           nMG = fmaxf(nMG, tG);
-          const float tV = sjrot_(&_n, V_p, V_q, _c, _at);
+          const float tV = vrot(&_n, V_p, V_q, _c, _at);
           if (!isfinite(tV)) {
             nMV = HUGE_VALF;
             continue;
