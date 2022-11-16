@@ -340,7 +340,7 @@ fint dvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
       }
       fnat stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21,c,at,l1,l2,w0,w1,w2,p,pc,tol,gst) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a21,c,at,l1,l2,w0,w1,w2,p,pc,tol,gst) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VDL) {
         const fnat j = (i >> VDLlg);

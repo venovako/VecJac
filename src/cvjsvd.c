@@ -367,7 +367,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       }
       fnat stt = 0u;
 #ifdef _OPENMP
-#pragma omp parallel for default(none) shared(n_2,a11,a22,a21r,a21i,cat,sat,l1,l2,w1,w2,w3,w4,p,pc,tol,gst) reduction(+:stt)
+#pragma omp parallel for default(none) shared(n_2,a21r,a21i,cat,sat,l1,l2,w1,w2,w3,w4,p,pc,tol,gst) reduction(+:stt)
 #endif /* _OPENMP */
       for (fnat i = 0u; i < n_2; i += VSL) {
         const fnat j = (i >> VSLlg);
