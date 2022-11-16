@@ -2,21 +2,21 @@
 
 #include "vecdef.h"
 
-fint sjrotf_(const fint n[static restrict 1], float x[static restrict VSL], float y[static restrict VSL], const float c[static restrict 1], const float at[static restrict 1])
+float sjrotf_(const fint n[static restrict 1], float x[static restrict VSL], float y[static restrict VSL], const float c[static restrict 1], const float at[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -6;
+    return -6.0f;
   if (*n & VSL_1)
-    return -1;
+    return -1.0f;
   if (IS_NOT_ALIGNED(x))
-    return -2;
+    return -2.0f;
   if (IS_NOT_ALIGNED(y))
-    return -3;
+    return -3.0f;
 #endif /* !NDEBUG */
 
   if (!*n)
-    return 0;
+    return 0.0f;
 
   if (*n < 0) { // permute
     const fnat n_ = (fnat)-*n;
@@ -30,10 +30,10 @@ fint sjrotf_(const fint n[static restrict 1], float x[static restrict VSL], floa
           _mm512_store_ps(yi, x_);
           _mm512_store_ps(xi, y_);
         }
-        return 0;
+        return 0.0f;
       }
       // should never happen
-      return -4;
+      return -4.0f;
     }
     if (*c == 1.0f) {
       register const VS t_ = _mm512_set1_ps(*at);
@@ -66,7 +66,7 @@ fint sjrotf_(const fint n[static restrict 1], float x[static restrict VSL], floa
   else { // no permute
     const fnat n_ = (fnat)*n;
     if (*at == 0.0f)
-      return ((*c == 1.0f) ? 0 : -4);
+      return ((*c == 1.0f) ? 0.0f : -4.0f);
     if (*c == 1.0f) {
       register const VS t_ = _mm512_set1_ps(*at);
       for (fnat i = 0u; i < n_; i += VSL) {
@@ -96,5 +96,5 @@ fint sjrotf_(const fint n[static restrict 1], float x[static restrict VSL], floa
     }
   }
 
-  return 0;
+  return 0.0f;
 }

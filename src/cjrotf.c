@@ -3,33 +3,33 @@
 #include "sjrotf.h"
 #include "vecdef.h"
 
-fint cjrotf_(const fint n[static restrict 1], float xr[static restrict VSL], float xi[static restrict VSL], float yr[static restrict VSL], float yi[static restrict VSL], const float c[static restrict 1], const float cat[static restrict 1], const float sat[static restrict 1])
+float cjrotf_(const fint n[static restrict 1], float xr[static restrict VSL], float xi[static restrict VSL], float yr[static restrict VSL], float yi[static restrict VSL], const float c[static restrict 1], const float cat[static restrict 1], const float sat[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -9;
+    return -9.0f;
   if (*n & VSL_1)
-    return -1;
+    return -1.0f;
   if (IS_NOT_ALIGNED(xr))
-    return -2;
+    return -2.0f;
   if (IS_NOT_ALIGNED(xi))
-    return -3;
+    return -3.0f;
   if (IS_NOT_ALIGNED(yr))
-    return -4;
+    return -4.0f;
   if (IS_NOT_ALIGNED(yi))
-    return -5;
+    return -5.0f;
 #endif /* !NDEBUG */
 
   if (!*n)
-    return 0;
+    return 0.0f;
 
   if (*sat == 0.0f) {
     // real rotation
     if (sjrotf_(n, xr, yr, c, cat))
-      return -10;
+      return -10.0f;
     if (sjrotf_(n, xi, yi, c, cat))
-      return -11;
-    return 0;
+      return -11.0f;
+    return 0.0f;
   }
 
   register const VS cta = _mm512_set1_ps(*cat);
@@ -147,5 +147,5 @@ fint cjrotf_(const fint n[static restrict 1], float xr[static restrict VSL], flo
     }
   }
 
-  return 0;
+  return 0.0f;
 }

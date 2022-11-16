@@ -3,33 +3,33 @@
 #include "djrotf.h"
 #include "vecdef.h"
 
-fint zjrotf_(const fint n[static restrict 1], double xr[static restrict VDL], double xi[static restrict VDL], double yr[static restrict VDL], double yi[static restrict VDL], const double c[static restrict 1], const double cat[static restrict 1], const double sat[static restrict 1])
+double zjrotf_(const fint n[static restrict 1], double xr[static restrict VDL], double xi[static restrict VDL], double yr[static restrict VDL], double yi[static restrict VDL], const double c[static restrict 1], const double cat[static restrict 1], const double sat[static restrict 1])
 {
 #ifndef NDEBUG
   if (IS_NOT_VFPENV)
-    return -9;
+    return -9.0;
   if (*n & VDL_1)
-    return -1;
+    return -1.0;
   if (IS_NOT_ALIGNED(xr))
-    return -2;
+    return -2.0;
   if (IS_NOT_ALIGNED(xi))
-    return -3;
+    return -3.0;
   if (IS_NOT_ALIGNED(yr))
-    return -4;
+    return -4.0;
   if (IS_NOT_ALIGNED(yi))
-    return -5;
+    return -5.0;
 #endif /* !NDEBUG */
 
   if (!*n)
-    return 0;
+    return 0.0;
 
   if (*sat == 0.0) {
     // real rotation
     if (djrotf_(n, xr, yr, c, cat))
-      return -10;
+      return -10.0;
     if (djrotf_(n, xi, yi, c, cat))
-      return -11;
-    return 0;
+      return -11.0;
+    return 0.0;
   }
 
   register const VD cta = _mm512_set1_pd(*cat);
@@ -147,5 +147,5 @@ fint zjrotf_(const fint n[static restrict 1], double xr[static restrict VDL], do
     }
   }
 
-  return 0;
+  return 0.0;
 }
