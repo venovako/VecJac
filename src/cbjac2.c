@@ -149,7 +149,7 @@ fint cbjac2_(const fint n[static restrict 1], const float a11[static restrict VS
       p[i >> VSLlg] = MS2U(P);
     }
     return 0;
-#endif
+#endif /* ?_OPENMP */
   }
   else {
     const fnat _n = (fnat)*n;
