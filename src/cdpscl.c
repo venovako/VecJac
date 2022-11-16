@@ -6,14 +6,14 @@
 #ifdef MUL2SUM
 #error MUL2SUM already defined
 #else /* !MUL2SUM */
-#define MUL2SUM(x,y,s,t,s_,t_)       \
-  xy = _mm512_mul_round_ps(x, y, rni);\
-  a = s;                              \
-  xy_ = _mm512_fmsub_ps(x, y, xy);    \
-  b = _mm512_add_ps(xy, t);           \
-  TwoSum(a,b,a_,b_,s,t);              \
-  a = s_;                             \
-  b = _mm512_add_ps(xy_, t_);         \
+#define MUL2SUM(x,y,s,t,s_,t_)                                                \
+  xy = _mm512_mul_round_ps(x, y, (_MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC));\
+  a = s;                                                                      \
+  xy_ = _mm512_fmsub_ps(x, y, xy);                                            \
+  b = _mm512_add_ps(xy, t);                                                   \
+  TwoSum(a,b,a_,b_,s,t);                                                      \
+  a = s_;                                                                     \
+  b = _mm512_add_ps(xy_, t_);                                                 \
   TwoSum(a,b,a_,b_,s_,t_)
 #endif /* ?MUL2SUM */
 #endif /* USE_2SUM */
@@ -64,7 +64,6 @@ float complex cdpscl_(const fnat m[static restrict 1], const float xr[static res
   register VS ti = _mm512_setzero_ps();
   register VS si_ = _mm512_setzero_ps();
   register VS ti_ = _mm512_setzero_ps();
-  const int rni = (_MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC);
   for (fnat i = 0u; i < *m; i += VSL) {
     register VS xri = _mm512_load_ps(xr + i);
     register VS yri = _mm512_load_ps(yr + i);

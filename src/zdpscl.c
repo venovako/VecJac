@@ -6,14 +6,14 @@
 #ifdef MUL2SUM
 #error MUL2SUM already defined
 #else /* !MUL2SUM */
-#define MUL2SUM(x,y,s,t,s_,t_)       \
-  xy = _mm512_mul_round_pd(x, y, rni);\
-  a = s;                              \
-  xy_ = _mm512_fmsub_pd(x, y, xy);    \
-  b = _mm512_add_pd(xy, t);           \
-  TwoSum(a,b,a_,b_,s,t);              \
-  a = s_;                             \
-  b = _mm512_add_pd(xy_, t_);         \
+#define MUL2SUM(x,y,s,t,s_,t_)                                                \
+  xy = _mm512_mul_round_pd(x, y, (_MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC));\
+  a = s;                                                                      \
+  xy_ = _mm512_fmsub_pd(x, y, xy);                                            \
+  b = _mm512_add_pd(xy, t);                                                   \
+  TwoSum(a,b,a_,b_,s,t);                                                      \
+  a = s_;                                                                     \
+  b = _mm512_add_pd(xy_, t_);                                                 \
   TwoSum(a,b,a_,b_,s_,t_)
 #endif /* ?MUL2SUM */
 #endif /* USE_2SUM */
@@ -65,7 +65,6 @@ double complex zdpscl_(const fnat m[static restrict 1], const double xr[static r
   register VD ti = _mm512_setzero_pd();
   register VD si_ = _mm512_setzero_pd();
   register VD ti_ = _mm512_setzero_pd();
-  const int rni = (_MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC);
   for (fnat i = 0u; i < *m; i += VDL) {
     register VD xri = _mm512_load_pd(xr + i);
     register VD yri = _mm512_load_pd(yr + i);
