@@ -217,7 +217,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       eM = (int)es;
       sR = FLT_MAX_ROT_EXP - eM;
       sN = sR;
-      if (sN) {
+      if (sR < 0) {
         if (sscale_(n, n, V, ldV, &sN) < 0)
           return -__LINE__;
         MV = scalbnf(MV, sR);

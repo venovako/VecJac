@@ -236,7 +236,7 @@ fint cvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
       eM = (int)es;
       sR = FLT_MAX_ROT_EXP - eM - 1;
       sN = sR;
-      if (sN) {
+      if (sR < 0) {
         if (cscale_(n, n, Vr, ldVr, Vi, ldVi, &sN) < 0)
           return -__LINE__;
         MV = scalbnf(MV, sR);
