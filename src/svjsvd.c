@@ -377,15 +377,9 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
           maf = VSMANT(maf);
           register const MS cgs = VSEFLT(mae,Mae,maf,Maf);
           const unsigned gsp = (MS2U(_kandn_mask16(ngs,cgs)) << VSL);
-          if (gsp) {
-            p[j] |= gsp;
-            stt -= _mm_popcnt_u32(gsp);
-          }
+          p[j] |= gsp;
           const unsigned gsn = (MS2U(_kand_mask16(ngs,cgs)) << VSL);
-          if (gsn) {
-            pc[j] |= gsn;
-            stt -= _mm_popcnt_u32(gsn);
-          }
+          pc[j] |= gsn;
           // Grammian pre-scaling into the single precision range
           register VS f12 = _mm512_div_ps(f1, f2);
           register VS e12 = _mm512_sub_ps(e1, e2);

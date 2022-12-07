@@ -407,15 +407,9 @@ fint zvjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], d
           maf = VDMANT(maf);
           register const MD cgs = VDEFLT(mae,Mae,maf,Maf);
           const unsigned gsp = (MD2U(MDANDN(ngs,cgs)) << VDL);
-          if (gsp) {
-            p[j] |= gsp;
-            stt -= _mm_popcnt_u32(gsp);
-          }
+          p[j] |= gsp;
           const unsigned gsn = (MD2U(MDAND(ngs,cgs)) << VDL);
-          if (gsn) {
-            pc[j] |= gsn;
-            stt -= _mm_popcnt_u32(gsn);
-          }
+          pc[j] |= gsn;
           // Grammian pre-scaling into the double precision range
           register VD f12 = _mm512_div_pd(f1, f2);
           register VD e12 = _mm512_sub_pd(e1, e2);
