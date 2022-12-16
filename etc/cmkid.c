@@ -1,4 +1,4 @@
-#ifdef __ICC
+#if (defined(__ICC) || defined(__INTEL_CLANG_COMPILER) || defined(__INTEL_LLVM_COMPILER))
 #include <mathimf.h>
 #else /* !__ICC */
 #include <math.h>

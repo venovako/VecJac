@@ -1,5 +1,5 @@
 // icc -std=c18 -fp-model precise -prec-div -prec-sqrt -no-ftz -diag-disable=10441 subhypf.c
-#ifdef __ICC
+#if (defined(__ICC) || defined(__INTEL_CLANG_COMPILER) || defined(__INTEL_LLVM_COMPILER))
 #include <mathimf.h>
 #else /* !__ICC */
 #include <math.h>

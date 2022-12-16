@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#ifdef __ICC
+#if (defined(__ICC) || defined(__INTEL_CLANG_COMPILER) || defined(__INTEL_LLVM_COMPILER))
 #include <mathimf.h>
 #ifndef USE_EXTENDED
 extern __float128 __copysignq(__float128, __float128);
