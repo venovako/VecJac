@@ -1,6 +1,6 @@
 #include "serial.h"
 
-#if (defined(__ICC) || defined(__INTEL_CLANG_COMPILER) || defined(__INTEL_LLVM_COMPILER))
+#if (defined(__ICC) || defined(__INTEL_COMPILER) || defined(__INTEL_CLANG_COMPILER) || defined(__INTEL_LLVM_COMPILER))
 #include <mathimf.h>
 #else /* !__ICC */
 #ifdef __cplusplus
@@ -50,7 +50,7 @@
 #ifdef LDBL_SQRT_HUGE
 #error LDBL_SQRT_HUGE already defined
 #else /* sqrtl(LDBL_MAX) */
-#define LDBL_SQRT_HUGE 1.090748135619415929404E+2466
+#define LDBL_SQRT_HUGE 1.090748135619415929404E+2466L
 #endif /* ?LDBL_SQRT_HUGE */
 
 /* in the routines below, -es could be returned instead of es */

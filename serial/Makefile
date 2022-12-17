@@ -1,11 +1,18 @@
-CC=icl.exe
+!IFNDEF ICC
+ICC=icl
+!ENDIF # !ICC
+CC=$(ICC).exe
 !IFNDEF CPU
 CPU=Host
 !ENDIF # !CPU
 !IFNDEF NDEBUG
 NDEBUG=3
 !ENDIF # !NDEBUG
-CFLAGS=/nologo /DNDEBUG /Qstd=c18 /O$(NDEBUG) /Qx$(CPU) /Qlong-double /Qopenmp /Qopt-multi-version-aggressive /Qopt-report:5 /fp:precise /Qprotect-parens /Qfma /Qftz- /Qcomplex-limited-range- /Qfast-transcendentals- /Qprec-div /Qprec-sqrt /Ob2 /Qvec-threshold:0 /MD /traceback /Qdiag-disable:10397,10441
+!IF "$(ICC)"=="icl"
+CFLAGS=/nologo /DNDEBUG /Qstd=c18 /O$(NDEBUG) /Qx$(CPU) /Qlong-double /Qopenmp /Qopt-multi-version-aggressive /Qopt-report:5 /fp:precise /Qprotect-parens /Qfma /Qftz- /Qcomplex-limited-range- /Qfast-transcendentals- /Qprec-div /Qprec-sqrt /Ob2 /Qvec-threshold:0 /MD /traceback /Qdiag-disable:10441
+!ELSE # icx
+CFLAGS=/nologo /DNDEBUG /Qstd=c18 /O$(NDEBUG) /Qx$(CPU) /Qlong-double /Qopenmp /Qopt-report:3 /fp:precise /Qprotect-parens /Qfma /Qftz- /Ob2 /Qvec-threshold:0 /Wno-deprecated-declarations /traceback
+!ENDIF # ?ICC
 
 all: tsjac2.exe
 
