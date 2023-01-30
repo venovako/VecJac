@@ -1,10 +1,10 @@
 # VecJac
-Vectorization of the Jacobi-type methods for the SVD and the EVD
+Vectorization of the Jacobi-type methods for the SVD and the 2x2 EVD
 
 (... work in progress ...)
 
 This software is a supplementary material for the paper
-arXiv:[2202.08361](https://arxiv.org/abs/2202.08361 "Vectorization of the Jacobi-type singular value decomposition method") \[math.NA\].
+arXiv:[2202.08361](https://arxiv.org/abs/2202.08361 "Vectorization of a thread-parallel Jacobi singular value decomposition method") \[math.NA\].
 
 ## Building
 

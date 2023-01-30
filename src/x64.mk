@@ -53,7 +53,7 @@ OPTFLAGS=-O$(NDEBUG) -x$(CPU) -qopt-multi-version-aggressive -inline-level=2 -ve
 DBGFLAGS += -DNDEBUG -qopt-report=5
 else # DEBUG
 OPTFLAGS=-O0 -x$(CPU) -qopt-multi-version-aggressive
-DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -DPRINTOUT=stderr
+DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -DPRINTOUT=stderr -D__INTEL_COMPILER_USE_INTRINSIC_PROTOTYPES
 ifneq ($(ARCH),Darwin) # Linux
 DBGFLAGS += -debug parallel
 endif # Linux
