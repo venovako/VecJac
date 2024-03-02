@@ -49,10 +49,10 @@ ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
 ifdef NDEBUG
-OPTFLAGS=-O$(NDEBUG) -x$(CPU) -inline-level=2 -vec-threshold0
+OPTFLAGS=-O$(NDEBUG) -x$(CPU) -inline-level=2 -mprefer-vector-width=512 -vec-threshold0
 DBGFLAGS += -DNDEBUG -qopt-report=3
 else # DEBUG
-OPTFLAGS=-O0 -x$(CPU)
+OPTFLAGS=-O0 -x$(CPU) -mprefer-vector-width=512
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -debug parallel -DPRINTOUT=stderr
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
