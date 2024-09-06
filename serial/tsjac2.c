@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
   }
 
   const size_t n = ((size_t)1u << atoz(argv[3u]));
-  (void)fprintf(stderr, "%llu.\n", n);
+  (void)fprintf(stderr, "%llu.\n", (unsigned long long)n);
   (void)fflush(stderr);
 
   const size_t b = atoz(argv[4u]);
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
         if (w[i] == o)
           ix = i;
       (void)fprintf(stderr, bf, j);
-      (void)fprintf(stderr, ",%11llu,%s;", ix, dtoa(a, (double)o));
+      (void)fprintf(stderr, ",%11llu,%s;", (unsigned long long)ix, dtoa(a, (double)o));
       if (kind == (int)sizeof(float)) {
         (void)fprintf(stderr, "%s,", dtoa(a, ((const float*)ha11)[ix]));
         (void)fprintf(stderr, "%s,", dtoa(a, ((const float*)ha22)[ix]));

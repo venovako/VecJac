@@ -23,4 +23,4 @@ tsjac2.exe: tsjac2.c timer.h serial.o wnrme.o common.o GNUmakefile
 	$(CC) $(CFLAGS) tsjac2.c serial.o wnrme.o common.o -o $@ $(LDFLAGS)
 
 clean:
-	-rm -rfv tsjac2.exe tsjac2.opt* serial.o serial.opt* wnrme.o wnrme.opt* common.o common.opt*
+	-rm -rfv *.exe *.o *.opt*

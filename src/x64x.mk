@@ -25,7 +25,7 @@ FC=ifx
 ifdef SLEEF
 CXX=icpx
 endif # SLEEF
-CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer -rdynamic
+CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer
 ifdef NDEBUG
 ifdef MKL
 ifeq ($(MKL),intel_thread)
@@ -43,8 +43,8 @@ ifndef LAPACK
 MKL=sequential
 endif # !LAPACK
 endif # !MKL
-DBGFLAGS=-traceback -diag-disable=10397 -DJTRACE
-FPUFLAGS=-fp-model $(FPU) -fprotect-parens -fma -no-ftz #-qsimd-honor-fp-model -qsimd-serialize-fp-reduction
+DBGFLAGS=-traceback -DJTRACE
+FPUFLAGS=-fp-model=$(FPU) -fp-speculation=safe -fprotect-parens -fma -no-ftz -fimf-precision=high #-qsimd-honor-fp-model -qsimd-serialize-fp-reduction
 ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
@@ -52,7 +52,7 @@ ifdef NDEBUG
 OPTFLAGS=-O$(NDEBUG) -x$(CPU) -inline-level=2 -mprefer-vector-width=512 -vec-threshold0
 DBGFLAGS += -DNDEBUG -qopt-report=3
 else # DEBUG
-OPTFLAGS=-O0 -x$(CPU) -mprefer-vector-width=512
+OPTFLAGS=-O0 -x$(CPU) -mprefer-vector-width=512 -vec-threshold0
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -debug parallel -DPRINTOUT=stderr
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
@@ -68,11 +68,10 @@ endif # MKL
 ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
+LDFLAGS=-rdynamic -static-libgcc
 ifdef CR_MATH
-LDFLAGS=$(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o -L. -lvecjac$(SUFX)
-else # !CR_MATH
-LDFLAGS=
-endif # ?CR_MATH
+LDFLAGS += $(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o
+endif # CR_MATH
 LDFLAGS += -L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
 ifdef SLEEF
 ifeq ($(wildcard $(SLEEF)/lib64),)
@@ -87,7 +86,7 @@ LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas -lifcoremt
 else # MKL
 LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_intel_$(ABI) -lmkl_$(MKL) -lmkl_core
 endif # ?LAPACK
-LIBFLAGS += -static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
+LIBFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
 ifdef MKL
 ifeq ($(MKL),intel_thread)
 ifeq ($(findstring qopenmp,$(CPUFLAGS)),)
