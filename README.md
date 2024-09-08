@@ -24,10 +24,10 @@ where ``COMPILER`` should be set to ``x64x`` for Xeon processors or to ``x200`` 
 
 The option ``gnu`` selects the GCC family of compilers, for which the [SLEEF](https://sleef.org)-related parts cannot yet be built, and ``SLEEF`` has to remain unset.
 This option might cause the code to miscompile and should *not* be used at the moment!
-Neither ``x64x`` is guaranteed to be safe, since the testing was performed only with the obsolete non-LLVM Intel compilers (see ``x64.mk``).
+Neither ``x64x`` is guaranteed to be safe, since the testing was performed only with the obsolete non-LLVM Intel compilers (see ``src/x64.mk``).
 
 As a hack, setting ``MKL`` *explicitly* to ``sequential`` turns off OpenMP (otherwise it is turned on, unless debugging).
-The ``CPU`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``, or its lowercase variant for ``gnu``) or left undefined to take the default value of ``Host``.
+The ``CPU`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``, or its lowercase variant for ``gnu``) or left undefined to take the default value of ``Host`` (or ``common-avx512`` for ``x200``).
 Other options should not be used unless their consequences are fully understood.
 For example, ``make COMPILER=x64x NDEBUG=3 clean all`` will trigger a full, release-mode rebuild for Xeons.
 
