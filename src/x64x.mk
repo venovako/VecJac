@@ -56,23 +56,21 @@ OPTFLAGS=-O0 -x$(CPU) -mprefer-vector-width=512 -vec-threshold0
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -debug parallel -DPRINTOUT=stderr
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
+LDFLAGS=-rdynamic -static-libgcc
 ifdef SLEEF
 LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF
-ifdef CR_MATH
-LIBFLAGS += -DUSE_CR_MATH
-endif # CR_MATH
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
 endif # MKL
 ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
-LDFLAGS=-rdynamic -static-libgcc
+LDFLAGS += -L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
 ifdef CR_MATH
+LIBFLAGS += -DUSE_CR_MATH
 LDFLAGS += $(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o
 endif # CR_MATH
-LDFLAGS += -L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
 ifdef SLEEF
 ifeq ($(wildcard $(SLEEF)/lib64),)
 LDFLAGS += -L$(SLEEF)/lib -Wl,-rpath=$(SLEEF)/lib

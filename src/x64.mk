@@ -25,7 +25,7 @@ FC=ifort
 ifdef SLEEF
 CXX=icpc
 endif # SLEEF
-CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer -rdynamic
+CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer
 ifdef NDEBUG
 ifdef MKL
 ifeq ($(MKL),intel_thread)
@@ -60,24 +60,21 @@ endif # Linux
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
+LDFLAGS=-rdynamic -static-libgcc
 ifdef SLEEF
 LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF
-ifdef CR_MATH
-LIBFLAGS += -DUSE_CR_MATH
-endif # CR_MATH
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
 endif # MKL
 ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
-ifdef CR_MATH
-LDFLAGS=$(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o -L. -lvecjac$(SUFX)
-else # !CR_MATH
-LDFLAGS=
-endif # ?CR_MATH
 LDFLAGS += -L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
+ifdef CR_MATH
+LIBFLAGS += -DUSE_CR_MATH
+LDFLAGS += $(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o
+endif # CR_MATH
 ifdef SLEEF
 ifdef ($(ARCH),Darwin)
 LDFLAGS += -L$(SLEEF)/lib -Wl,-rpath,$(SLEEF)/lib
@@ -100,7 +97,7 @@ LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_inte
 endif # ?Darwin
 endif # ?LAPACK
 ifneq ($(ARCH),Darwin) # Linux
-LIBFLAGS += -static-libgcc -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
+LIBFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
 endif # Linux
 ifdef MKL
 ifeq ($(MKL),intel_thread)
