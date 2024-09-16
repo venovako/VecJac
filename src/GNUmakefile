@@ -35,7 +35,7 @@ OBJS=$(SOBJS) $(DOBJS) $(COBJS) $(ZOBJS) $(XOBJS)
 all: $(LIBS) $(EXES)
 
 help:
-	@echo "make [COMPILER=x64x|x200|gnu] [CPU=...] [NDEBUG=0|1|2|3|4|5] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [CR_MATH=/path/to/core-math] [all|clean|help]"
+	@echo "make [COMPILER=x64x|x200|gnu] [CPU=...] [NDEBUG=optimization_level] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [CR_MATH=/path/to/core-math] [all|clean|help]"
 	@echo "Setting explicitly MKL to sequential (default) turns off OpenMP (otherwise it is turned on, unless debugging)."
 
 libvecjac$(SUFX).a: $(OBJS) $(MKFS)
