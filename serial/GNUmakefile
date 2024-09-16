@@ -1,6 +1,7 @@
 CC=icx
 ifndef CPU
 CPU=Host
+# common-avx512 for KNLs
 endif # !CPU
 ifndef NDEBUG
 NDEBUG=3

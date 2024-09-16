@@ -2,6 +2,7 @@ SHELL=/bin/bash
 ARCH=$(shell uname)
 ifndef CPU
 CPU=Host
+# common-avx512 for KNLs
 endif # !CPU
 ifndef ABI
 ABI=ilp64

@@ -10,7 +10,10 @@ NVCCFLAGS += -O$(NDEBUG) -opt-info=inline -dlto
 else # !NDEBUG
 NVCCFLAGS += -g -G -v -keep
 endif # ?NDEBUG
-NVCCFLAGS += -Xcompiler=-fopenmp,-march=native -Xptxas=-v,-warn-lmem-usage,-warn-spills
+ifndef CPU
+CPU=native
+endif # !CPU
+NVCCFLAGS += -Xcompiler=-fopenmp,-march=$(CPU) -Xptxas=-v,-warn-lmem-usage,-warn-spills
 
 all: tcubjac2.exe
 
