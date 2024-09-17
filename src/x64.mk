@@ -2,6 +2,7 @@ SHELL=/bin/bash
 ARCH=$(shell uname)
 ifndef CPU
 CPU=Host
+# COMMON-AVX512 for KNLs
 endif # !CPU
 ifndef ABI
 ABI=ilp64
@@ -25,7 +26,7 @@ FC=ifort
 ifdef SLEEF
 CXX=icpc
 endif # SLEEF
-CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer
+CPUFLAGS=-fPIC -fexceptions -fasynchronous-unwind-tables -fno-omit-frame-pointer -qopt-multi-version-aggressive -qopt-zmm-usage=high -vec-threshold0
 ifdef NDEBUG
 ifdef MKL
 ifeq ($(MKL),intel_thread)
@@ -49,10 +50,10 @@ ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
 ifdef NDEBUG
-OPTFLAGS=-O$(NDEBUG) -x$(CPU) -qopt-multi-version-aggressive -inline-level=2 -vec-threshold0
+OPTFLAGS=-O$(NDEBUG) -x$(CPU) -fno-math-errno -inline-level=2
 DBGFLAGS += -DNDEBUG -qopt-report=5
 else # DEBUG
-OPTFLAGS=-O0 -x$(CPU) -qopt-multi-version-aggressive
+OPTFLAGS=-O0 -x$(CPU)
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -DPRINTOUT=stderr -D__INTEL_COMPILER_USE_INTRINSIC_PROTOTYPES
 ifneq ($(ARCH),Darwin) # Linux
 DBGFLAGS += -debug parallel

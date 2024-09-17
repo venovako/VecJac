@@ -26,7 +26,7 @@ FC=ifx
 ifdef SLEEF
 CXX=icpx
 endif # SLEEF
-CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer
+CPUFLAGS=-fPIC -fexceptions -fasynchronous-unwind-tables -fno-omit-frame-pointer -mprefer-vector-width=512 -vec-threshold0
 ifdef NDEBUG
 ifdef MKL
 ifeq ($(MKL),intel_thread)
@@ -50,10 +50,10 @@ ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
 ifdef NDEBUG
-OPTFLAGS=-O$(NDEBUG) -x$(CPU) -inline-level=2 -mprefer-vector-width=512 -vec-threshold0
+OPTFLAGS=-O$(NDEBUG) -x$(CPU) -fno-math-errno -inline-level=2
 DBGFLAGS += -DNDEBUG -qopt-report=3
 else # DEBUG
-OPTFLAGS=-O0 -x$(CPU) -mprefer-vector-width=512 -vec-threshold0
+OPTFLAGS=-O0 -x$(CPU)
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -debug parallel -DPRINTOUT=stderr
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
