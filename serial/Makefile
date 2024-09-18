@@ -1,11 +1,11 @@
 CC=icx.exe
-!IFNDEF CPU
-CPU=Host
-!ENDIF # !CPU
+!IFNDEF MARCH
+MARCH=Host
+!ENDIF # !MARCH
 !IFNDEF NDEBUG
 NDEBUG=3
 !ENDIF # !NDEBUG
-CFLAGS=/nologo /DNDEBUG /Qstd=c18 /O$(NDEBUG) /Qx$(CPU) /Qlong-double /Qopenmp /Qopt-report:3 /fp:precise /Qprotect-parens /Qfma /Qftz- /Ob2 /Qvec-threshold:0 /Wno-deprecated-declarations /traceback
+CFLAGS=/nologo /DNDEBUG /Qstd=c18 /O$(NDEBUG) /Qx$(MARCH) /Qlong-double /Qopenmp /Qopt-report:3 /fp:precise /Qprotect-parens /Qfma /Qftz- /Ob2 /Qvec-threshold:0 /Wno-deprecated-declarations /traceback
 
 all: tsjac2.exe
 

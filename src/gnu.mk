@@ -6,9 +6,9 @@ ARCH=$(shell uname)
 ifneq ($(ARCH),Linux)
 $(error GCC build is only supported on Linux)
 endif # !Linux
-ifndef CPU
-CPU=native
-endif # !CPU
+ifndef MARCH
+MARCH=native
+endif # !MARCH
 ifndef ABI
 ABI=ilp64
 endif # !ABI
@@ -43,7 +43,7 @@ ifndef LAPACK
 MKL=sequential
 endif # !LAPACK
 endif # !MKL
-OPTFLAGS=-march=$(CPU)
+OPTFLAGS=-march=$(MARCH)
 DBGFLAGS=-DJTRACE
 FPUFLAGS=-DUSE_EXTENDED -ffp-contract=fast
 ifdef NDEBUG

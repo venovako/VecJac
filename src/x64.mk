@@ -1,9 +1,9 @@
 SHELL=/bin/bash
 ARCH=$(shell uname)
-ifndef CPU
-CPU=Host
+ifndef MARCH
+MARCH=Host
 # COMMON-AVX512 for KNLs
-endif # !CPU
+endif # !MARCH
 ifndef ABI
 ABI=ilp64
 endif # !ABI
@@ -50,10 +50,10 @@ ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
 ifdef NDEBUG
-OPTFLAGS=-O$(NDEBUG) -x$(CPU) -fno-math-errno -inline-level=2
+OPTFLAGS=-O$(NDEBUG) -x$(MARCH) -fno-math-errno -inline-level=2
 DBGFLAGS += -DNDEBUG -qopt-report=5
 else # DEBUG
-OPTFLAGS=-O0 -x$(CPU)
+OPTFLAGS=-O0 -x$(MARCH)
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -DPRINTOUT=stderr -D__INTEL_COMPILER_USE_INTRINSIC_PROTOTYPES
 ifneq ($(ARCH),Darwin) # Linux
 DBGFLAGS += -debug parallel

@@ -1,8 +1,8 @@
 SHELL=/bin/bash
 ARCH=$(shell uname)
-ifndef CPU
-CPU=common-avx512
-endif # !CPU
+ifndef MARCH
+MARCH=common-avx512
+endif # !MARCH
 ifndef ABI
 ABI=ilp64
 endif # !ABI
@@ -49,10 +49,10 @@ ifeq ($(WP),l)
 FPUFLAGS += -DUSE_EXTENDED
 endif # ?WP
 ifdef NDEBUG
-OPTFLAGS=-O$(NDEBUG) -x$(CPU) -fno-math-errno -inline-level=2
+OPTFLAGS=-O$(NDEBUG) -x$(MARCH) -fno-math-errno -inline-level=2
 DBGFLAGS += -DNDEBUG -qopt-report=3
 else # DEBUG
-OPTFLAGS=-O0 -x$(CPU)
+OPTFLAGS=-O0 -x$(MARCH)
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -debug parallel -DPRINTOUT=stderr
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS

@@ -18,7 +18,7 @@ In fact, only the ``jstrat`` library is required to be built there, with the sam
 
 Run ``make`` in the ``src`` subdirectory as follows:
 ```bash
-make [COMPILER=x64x|x200|gnu] [CPU=...] [NDEBUG=optimization_level] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [CR_MATH=/path/to/core-math] [all|clean|help]
+make [COMPILER=x64x|x200|gnu] [MARCH=...] [NDEBUG=optimization_level] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [CR_MATH=/path/to/core-math] [all|clean|help]
 ```
 where ``COMPILER`` should be set to ``x64x`` for Xeon processors or to ``x200`` for Xeon Phi KNLs, and ``NDEBUG`` to the desired optimization level (``3`` is a sensible choice).
 
@@ -27,7 +27,7 @@ This option might cause the code to miscompile and should *not* be used at the m
 Neither ``x64x`` is guaranteed to be safe, since the testing was performed only with the obsolete non-LLVM Intel compilers (see ``src/x64.mk``).
 
 As a hack, setting ``MKL`` *explicitly* to ``sequential`` turns off OpenMP (otherwise it is turned on, unless debugging).
-The ``CPU`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``, or its lowercase variant for ``gnu``) or left undefined to take the default value of ``Host`` (or ``common-avx512`` for ``x200``).
+The ``MARCH`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``, or its lowercase variant for ``gnu``) or left undefined to take the default value of ``Host`` (or ``common-avx512`` for ``x200``).
 Other options should not be used unless their consequences are fully understood.
 For example, ``make COMPILER=x64x NDEBUG=3 clean all`` will trigger a full, release-mode rebuild for Xeons.
 
