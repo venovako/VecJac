@@ -5,7 +5,7 @@ MARCH=Host
 !IFNDEF NDEBUG
 NDEBUG=3
 !ENDIF # !NDEBUG
-CFLAGS=/nologo /Qstd=c18 /Qlong-double /Qoption,cpp,--extended_float_types /DNDEBUG=$(NDEBUG) /I. /EHsc /O$(NDEBUG) /Qx$(MARCH) /Ob2 /Qopenmp /fp:precise /Qfma /Qftz- /Qopt-report:3 /Qvec-threshold:0 /traceback /Wno-deprecated-declarations /Wno-overriding-option
+CFLAGS=/nologo /Qstd=c18 /Qlong-double /Qoption,cpp,--extended_float_types /DNDEBUG=$(NDEBUG) /I. /MD /EHsc /O$(NDEBUG) /Qx$(MARCH) /Ob2 /Qopenmp /fp:precise /Qfma /Qftz- /Qopt-report:3 /Qvec-threshold:0 /traceback /Wno-deprecated-declarations /Wno-overriding-option
 
 all: tsjac2.exe
 
