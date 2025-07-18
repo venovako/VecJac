@@ -6,7 +6,7 @@ SM=native
 endif # !SM
 NVCCFLAGS=-std=c++20 -expt-relaxed-constexpr -extended-lambda -restrict -arch=$(SM) -extra-device-vectorization -ewp -res-usage -Wno-deprecated-gpu-targets -D_LARGEFILE64_SOURCE
 ifdef NDEBUG
-NVCCFLAGS += -O$(NDEBUG) -opt-info=inline -dlto
+NVCCFLAGS += -O$(NDEBUG) -opt-info=inline
 else # !NDEBUG
 NVCCFLAGS += -g -G -v -keep
 endif # ?NDEBUG
