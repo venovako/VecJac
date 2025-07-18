@@ -2,9 +2,9 @@
 NVCC=nvcc.exe
 !ENDIF # !NVCC
 !IFNDEF SM
-SM=52
+SM=native
 !ENDIF # !SM
-NVCCFLAGS=-std=c++17 -expt-relaxed-constexpr -extended-lambda -restrict -arch=sm_$(SM) -extra-device-vectorization -ewp -res-usage
+NVCCFLAGS=-std=c++20 -expt-relaxed-constexpr -extended-lambda -restrict -arch=$(SM) -extra-device-vectorization -ewp -res-usage -Wno-deprecated-gpu-targets
 !IFDEF NDEBUG
 NVCCFLAGS=$(NVCCFLAGS) -O$(NDEBUG) -opt-info=inline -dlto
 !ELSE # !NDEBUG
