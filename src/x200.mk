@@ -56,7 +56,7 @@ OPTFLAGS=-O0 -x$(MARCH)
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -debug parallel -DPRINTOUT=stderr
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
-LDFLAGS=-rdynamic -static-libgcc
+LDFLAGS=-rdynamic
 ifdef SLEEF
 LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF

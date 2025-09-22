@@ -55,7 +55,7 @@ OPTFLAGS += -O$(DEBUG)
 DBGFLAGS += -$(DEBUG) -DPRINTOUT=stderr
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
-LDFLAGS=-rdynamic -static-libgcc -static-libgfortran -static-libquadmath
+LDFLAGS=-rdynamic
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
 endif # MKL

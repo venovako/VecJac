@@ -18,7 +18,7 @@ In fact, only the ``jstrat`` library is required to be built there, with the sam
 
 Run ``make`` in the ``src`` subdirectory as follows:
 ```bash
-make [COMPILER=x64x|x200|gnu] [MARCH=...] [NDEBUG=optimization_level] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [CR_MATH=/path/to/core-math] [all|clean|help]
+make [COMPILER=x64x|x200|gnu] [MARCH=...] [NDEBUG=0|1|2|3|...|g] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [CR_MATH=/path/to/core-math] [all|clean|help]
 ```
 where ``COMPILER`` should be set to ``x64x`` for Xeon processors or to ``x200`` for Xeon Phi KNLs, and ``NDEBUG`` to the desired optimization level (``3`` is a sensible choice).
 

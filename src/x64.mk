@@ -61,7 +61,7 @@ endif # Linux
 FPUFLAGS += -fp-stack-check
 endif # ?NDEBUG
 LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
-LDFLAGS=-rdynamic -static-libgcc
+LDFLAGS=-rdynamic
 ifdef SLEEF
 LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
 endif # SLEEF
