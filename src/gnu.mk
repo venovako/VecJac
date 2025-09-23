@@ -70,7 +70,7 @@ endif # CR_MATH
 ifdef LAPACK
 LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas
 else # MKL
-LDFLAGS += -L${MKLROOT}/lib/intel64 -Wl,-rpath=${MKLROOT}/lib/intel64 -lmkl_gf_$(ABI) -lmkl_$(MKL) -lmkl_core
+LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath=${MKLROOT}/lib -Wl,--no-as-needed -lmkl_gf_$(ABI) -lmkl_$(MKL) -lmkl_core
 endif # ?LAPACK
 LIBFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
 ifdef MKL
