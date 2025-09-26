@@ -10,7 +10,7 @@
 #define VDBITONIC(x,i,m)                                         \
   {                                                              \
     register const VD px = _mm512_permutexvar_pd(i, x); VDP(px); \
-    register const VD xm = _mm512_min_pd(px, x); VDP(xm);        \
+    register const VD xm = _mm512_min_pd(x, px); VDP(xm);        \
     register const VD xx = _mm512_max_pd(px, x); VDP(xx);        \
     x = _mm512_mask_mov_pd(xm, m, xx); VDP(x);                   \
   }
