@@ -2,14 +2,14 @@
 #include "rnd.h"
 #include "timer.h"
 
-#ifdef TDNORME_SEQSRT
+#ifdef TDNORME_PARSRT
+#include "psort.h"
+#else /* !TDNORME_PARSRT */
 static int dcmp(const double x[static 1], const double y[static 1])
 {
   return ((*x < *y) ? -1 : ((*y < *x) ? 1 : 0));
 }
-#else /* !TDNORME_SEQSRT */
-#include "psort.h"
-#endif /* ?TDNORME_SEQSRT */
+#endif /* ?TDNORME_PARSRT */
 
 int main(int argc, char *argv[])
 {
@@ -121,11 +121,11 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
     (void)fflush(stdout);
 
-#ifdef TDNORME_SEQSRT
-    qsort(x, n, sizeof(double), (int (*)(const void*, const void*))dcmp);
-#else /* !TDNORME_SEQSRT */
+#ifdef TDNORME_PARSRT
     dpsort(n, x);
-#endif /* ?TDNORME_SEQSRT */
+#else /* !TDNORME_PARSRT */
+    qsort(x, n, sizeof(double), (int (*)(const void*, const void*))dcmp);
+#endif /* ?TDNORME_PARSRT */
 
     // use wide precision
     const double sq = wsq(n, x);

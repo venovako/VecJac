@@ -55,7 +55,7 @@ else # DEBUG
 OPTFLAGS=-O0 -x$(MARCH)
 DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -debug parallel -DPRINTOUT=stderr
 endif # ?NDEBUG
-LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
+LIBFLAGS=-I. -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
 LDFLAGS=-rdynamic
 ifdef SLEEF
 LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
@@ -66,7 +66,7 @@ endif # MKL
 ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
-LDFLAGS += -L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
+LDFLAGS += -L. -lvecjac$(SUFX)
 ifdef CR_MATH
 LIBFLAGS += -DUSE_CR_MATH
 LDFLAGS += $(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o

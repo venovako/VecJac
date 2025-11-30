@@ -54,7 +54,7 @@ else # DEBUG
 OPTFLAGS += -O$(DEBUG)
 DBGFLAGS += -$(DEBUG) -DPRINTOUT=stderr
 endif # ?NDEBUG
-LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
+LIBFLAGS=-I. -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
 LDFLAGS=-rdynamic
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
@@ -62,7 +62,7 @@ endif # MKL
 ifeq ($(ABI),ilp64)
 LIBFLAGS += -DMKL_ILP64
 endif # ilp64
-LDFLAGS += -L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
+LDFLAGS += -L. -lvecjac$(SUFX)
 ifdef CR_MATH
 LIBFLAGS += -DUSE_CR_MATH
 LDFLAGS += $(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o

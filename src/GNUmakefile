@@ -136,7 +136,7 @@ laev2$(SUFX).o: laev2.c laev2.h common.h $(MKFS)
 mtxio$(SUFX).o: mtxio.c mtxio.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-pjs$(SUFX).o: pjs.c pjs.h common.h ../../JACSD/jstrat/jstrat.h $(MKFS)
+pjs$(SUFX).o: pjs.c pjs.h common.h $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 rnd$(SUFX).o: rnd.c rnd.h vec.h common.h $(MKFS)
@@ -259,17 +259,17 @@ tzbjac2$(SUFX).exe: tzbjac2.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
 ifdef SLEEF
-psort$(SUFX).o: psort.cpp psort.h $(MKFS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+# psort$(SUFX).o: psort.cpp psort.h $(MKFS)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 tdnorme$(SUFX).o: tdnorme.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-tdnorme$(SUFX).exe: tdnorme$(SUFX).o psort$(SUFX).o wdp$(SUFX).o $(LIBS) $(MKFS)
-	$(CXX) $(CXXFLAGS) tdnorme$(SUFX).o psort$(SUFX).o wdp$(SUFX).o -o $@ $(LDFLAGS) $(FLFLAGS)
+tdnorme$(SUFX).exe: tdnorme$(SUFX).o wdp$(SUFX).o $(LIBS) $(MKFS) # psort$(SUFX).o
+	$(CC) $(CFLAGS) tdnorme$(SUFX).o wdp$(SUFX).o -o $@ $(LDFLAGS) $(FLFLAGS) # psort$(SUFX).o
 endif # SLEEF
 
-tpjs$(SUFX).exe: tpjs.c $(LIBS) ../../JACSD/libjstrat$(DEBUG).a $(MKFS)
+tpjs$(SUFX).exe: tpjs.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS)
 
 tcgesvj$(SUFX).exe: tcgesvj.c $(LIBS) $(MKFS)
@@ -312,6 +312,6 @@ clean:
 	-$(RM) vecjac.mod
 ifdef SLEEF
 	-$(RM) wdp$(SUFX).o wdp$(SUFX).optrpt
-	-$(RM) psort$(SUFX).o psort$(SUFX).optrpt
 	-$(RM) tdnorme$(SUFX).o tdnorme$(SUFX).optrpt
 endif # SLEEF
+# -$(RM) psort$(SUFX).o psort$(SUFX).optrpt

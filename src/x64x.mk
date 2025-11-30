@@ -1,114 +1,57 @@
+# MARCH=common-avx512 for KNLs
 SHELL=/bin/bash
 ARCH=$(shell uname)
-ifndef MARCH
-MARCH=Host
-# common-avx512 for KNLs
-endif # !MARCH
 ifndef ABI
 ABI=ilp64
 endif # !ABI
-ifdef NDEBUG
-DEBUG=
-else # DEBUG
-DEBUG=g
-endif # ?NDEBUG
-ifndef FPU
-FPU=precise
-endif # !FPU
 ifndef WP
 WP=q
 endif # !WP
+SUFX=-$(ABI)_$(WP)
 RM=rm -rfv
 AR=ar
 ARFLAGS=rsv
-CC=icx
-FC=ifx
-ifdef SLEEF
-CXX=icpx
-endif # SLEEF
-CPUFLAGS=-fPIC -fexceptions -fasynchronous-unwind-tables -fno-omit-frame-pointer -mprefer-vector-width=512 -vec-threshold0
-ifdef NDEBUG
-ifdef MKL
-ifeq ($(MKL),intel_thread)
-CPUFLAGS += -qopenmp
-endif # intel_thread
-else # !MKL
-CPUFLAGS += -qopenmp
-endif # ?MKL
-SUFX=-$(ABI)_$(NDEBUG)$(WP)
-else # DEBUG
-SUFX=-$(ABI)_$(DEBUG)$(WP)
-endif # ?NDEBUG
+include ../../libpvn/src/pvn.mk
+CC=$(PVN_CC)
+FC=$(PVN_FC)
+CPPFLAGS=$(PVN_CPPFLAGS)
+CFLAGS=$(PVN_CFLAGS)
+FFLAGS=$(PVN_FCFLAGS)
+LDFLAGS=$(PVN_LDFLAGS)
 ifndef MKL
 ifndef LAPACK
 MKL=sequential
 endif # !LAPACK
 endif # !MKL
-DBGFLAGS=-traceback -DJTRACE
-FPUFLAGS=-fp-model=$(FPU) -fp-speculation=safe -fprotect-parens -fma -no-ftz -fimf-precision=high #-qsimd-honor-fp-model -qsimd-serialize-fp-reduction
+CPPFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -DJTRACE -I. -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS -qsimd-honor-fp-model -qsimd-serialize-fp-reduction
 ifeq ($(WP),l)
-FPUFLAGS += -DUSE_EXTENDED
+CPPFLAGS += -DUSE_EXTENDED
 endif # ?WP
-ifdef NDEBUG
-OPTFLAGS=-O$(NDEBUG) -x$(MARCH) -fno-math-errno -inline-level=2
-DBGFLAGS += -DNDEBUG -qopt-report=3
-else # DEBUG
-OPTFLAGS=-O0 -x$(MARCH)
-DBGFLAGS += -$(DEBUG) -debug emit_column -debug extended -debug inline-debug-info -debug pubnames -debug parallel -DPRINTOUT=stderr
-endif # ?NDEBUG
-LIBFLAGS=-I. -I../../JACSD/jstrat -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
-LDFLAGS=-rdynamic
-ifdef SLEEF
-LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
+ifeq ($(findstring PRINTOUT,$(PVN_CPPFLAGS)),PRINTOUT)
+CPPFLAGS += -DPRINTOUT=stderr
+endif # PRINTOUT
+ifeq ($(findstring SLEEF,$(PVN_CPPFLAGS)),SLEEF)
+CPPFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF
 endif # SLEEF
 ifndef LAPACK
-LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
+CPPFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
 endif # MKL
 ifeq ($(ABI),ilp64)
-LIBFLAGS += -DMKL_ILP64
+CPPFLAGS += -DMKL_ILP64
 endif # ilp64
-LDFLAGS += -L. -lvecjac$(SUFX) -L../../JACSD -ljstrat$(DEBUG)
-ifdef CR_MATH
-LIBFLAGS += -DUSE_CR_MATH
-LDFLAGS += $(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o
+ifeq ($(findstring CR_MATH,$(PVN_CPPFLAGS)),CR_MATH)
+CPPFLAGS += -DUSE_CR_MATH
 endif # CR_MATH
-ifdef SLEEF
-ifeq ($(wildcard $(SLEEF)/lib64),)
-LDFLAGS += -L$(SLEEF)/lib -Wl,-rpath=$(SLEEF)/lib
-else # lib64
-LDFLAGS += -L$(SLEEF)/lib64 -Wl,-rpath=$(SLEEF)/lib64
-endif # ?lib64
-LDFLAGS += -lsleefquad
-endif # SLEEF
+LDFLAGS += -L. -lvecjac$(SUFX)
 ifdef LAPACK
-LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas -lifcoremt
+LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas
 else # MKL
 LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath=${MKLROOT}/lib -lmkl_intel_$(ABI) -lmkl_$(MKL) -lmkl_core
 endif # ?LAPACK
-LIBFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
-ifdef MKL
-ifeq ($(MKL),intel_thread)
-ifeq ($(findstring qopenmp,$(CPUFLAGS)),)
-LDFLAGS += -liomp5
-endif # ?qopenmp
-endif # intel_thread
-endif # MKL
-LDFLAGS += -lpthread -lm -ldl
-CFLAGS=-std=gnu18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -Wno-parentheses -Wno-unused-command-line-argument -Wno-pointer-sign -Wno-incompatible-pointer-types
-FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -standard-semantics -recursive -threads
-ifdef SLEEF
-CXXFLAGS=-std=gnu++20 -qtbb $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -Wno-unused-command-line-argument
-endif # SLEEF
-ifndef NDEBUG
-CFLAGS += -fcheck=stack,uninit
-FFLAGS += -check all -assume ieee_fpe_flags
-endif # !NDEBUG
-ifdef SLEEF
-ifndef NDEBUG
-CXXFLAGS += -check=stack,uninit
-endif # !NDEBUG
-endif # SLEEF
+LDFLAGS += $(PVN_LIBS)
+CFLAGS += $(CPPFLAGS)
 ifeq ($(ABI),ilp64)
 FFLAGS += -i8
 endif # ilp64
+FFLAGS += $(CPPFLAGS)
 FLFLAGS=-lifcoremt
