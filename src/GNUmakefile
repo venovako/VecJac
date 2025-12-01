@@ -265,7 +265,7 @@ tdnorme$(SUFX).o: tdnorme.c $(LIBS) $(MKFS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 tdnorme$(SUFX).exe: tdnorme$(SUFX).o wdp$(SUFX).o $(LIBS) $(MKFS) # psort$(SUFX).o
-	$(CC) $(CFLAGS) tdnorme$(SUFX).o wdp$(SUFX).o -o $@ $(LDFLAGS) $(FLFLAGS) # psort$(SUFX).o
+	$(CC) $(CFLAGS) tdnorme$(SUFX).o wdp$(SUFX).o -o $@ $(LDFLAGS) $(FLFLAGS)
 endif # SLEEF
 
 tpjs$(SUFX).exe: tpjs.c $(LIBS) $(MKFS)

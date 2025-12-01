@@ -18,18 +18,10 @@ Also, set the make variable ``OPENMP`` to at least ``0``.
 
 Run ``make`` in the ``src`` subdirectory as follows:
 ```bash
-make [COMPILER=x64x|x200|gnu] [MARCH=...] [NDEBUG=0|1|2|3|...|g] [ABI=ilp64|lp64] [FPU=precise|strict] [WP=q|l] [MKL=sequential|intel_thread] [SLEEF=/path/to/sleef] [CR_MATH=/path/to/core-math] [all|clean|help]
+make [ABI=ilp64|lp64] [WP=q|l] [MKL=sequential|intel_thread] [all|clean|help]
 ```
-where ``COMPILER`` should be set to ``x64x`` for Xeon processors or to ``x200`` for Xeon Phi KNLs, and ``NDEBUG`` to the desired optimization level (``3`` is a sensible choice).
 
-The option ``gnu`` selects the GCC family of compilers, for which the [SLEEF](https://sleef.org)-related parts cannot yet be built, and ``SLEEF`` has to remain unset.
-This option might cause the code to miscompile and should *not* be used at the moment!
-Neither ``x64x`` is guaranteed to be safe, since the testing was performed only with the obsolete non-LLVM Intel compilers (see ``src/x64.mk``).
-
-As a hack, setting ``MKL`` *explicitly* to ``sequential`` turns off OpenMP (otherwise it is turned on, unless debugging).
-The ``MARCH`` option might be set to a particular CPU generation (e.g., ``ICELAKE-SERVER``, or its lowercase variant for ``gnu``) or left undefined to take the default value of ``Host`` (or ``common-avx512`` for ``x200``).
-Other options should not be used unless their consequences are fully understood.
-For example, ``make COMPILER=x64x NDEBUG=3 clean all`` will trigger a full, release-mode rebuild for Xeons.
+The definitions from ``src/x64x.mk`` will be used, even though they are not guaranteed to be safe, since the testing was performed only with the obsolete non-LLVM Intel compilers (see ``src/x64.mk``).
 
 ## Running
 
