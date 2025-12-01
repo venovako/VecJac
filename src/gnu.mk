@@ -12,9 +12,11 @@ AR=ar
 ARFLAGS=rsv
 include ../../libpvn/src/pvn.mk
 CC=$(PVN_CC)
+CXX=$(PVN_CXX)
 FC=$(PVN_FC)
 CPPFLAGS=$(PVN_CPPFLAGS)
 CFLAGS=$(PVN_CFLAGS)
+CXXFLAGS=$(PVN_CXXFLAGS)
 FFLAGS=$(PVN_FCFLAGS)
 LDFLAGS=$(PVN_LDFLAGS)
 ifndef MKL
@@ -54,6 +56,7 @@ LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath=${MKLROOT}/lib -lmkl_gf_$(ABI) -lmkl_$(MK
 endif # ?LAPACK
 LDFLAGS += $(PVN_LIBS)
 CFLAGS += $(CPPFLAGS)
+CXXFLAGS += $(CPPFLAGS)
 ifeq ($(ABI),ilp64)
 FFLAGS += -fdefault-integer-8
 endif # ilp64
