@@ -6,8 +6,7 @@ extern int pvn_cjs_free(void *const js);
 
 unsigned *pjs(const long id, const unsigned n, unsigned stp[static restrict 1])
 {
-  long js[4];
-  (void)memset(js, 0, 32u);
+  long js[4] = { 0l, 0l, 0l, 0l };
   unsigned *st = (unsigned*)NULL;
   int *arr = (int*)NULL;
 

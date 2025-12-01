@@ -1,92 +1,61 @@
-ifdef SLEEF
-$(error SLEEF is not yet supported with GCC)
-endif # SLEEF
 SHELL=/bin/bash
 ARCH=$(shell uname)
-ifneq ($(ARCH),Linux)
-$(error GCC build is only supported on Linux)
-endif # !Linux
-ifndef MARCH
-MARCH=native
-endif # !MARCH
 ifndef ABI
 ABI=ilp64
 endif # !ABI
-ifdef NDEBUG
-DEBUG=
-else # DEBUG
-DEBUG=g
-endif # ?NDEBUG
 ifndef WP
 WP=l
 endif # !WP
+SUFX=-$(ABI)_$(WP)
 RM=rm -rfv
 AR=ar
 ARFLAGS=rsv
-CC=gcc$(GNU)
-FC=gfortran$(GNU)
-CPUFLAGS=-fPIC -fexceptions -fno-omit-frame-pointer
-ifdef NDEBUG
-ifdef MKL
-ifeq ($(MKL),gnu_thread)
-CPUFLAGS += -fopenmp
-endif # gnu_thread
-else # !MKL
-CPUFLAGS += -fopenmp
-endif # ?MKL
-SUFX=-$(ABI)_$(NDEBUG)$(WP)
-else # DEBUG
-SUFX=-$(ABI)_$(DEBUG)$(WP)
-endif # ?NDEBUG
+include ../../libpvn/src/pvn.mk
+CC=$(PVN_CC)
+FC=$(PVN_FC)
+CPPFLAGS=$(PVN_CPPFLAGS)
+CFLAGS=$(PVN_CFLAGS)
+FFLAGS=$(PVN_FCFLAGS)
+LDFLAGS=$(PVN_LDFLAGS)
 ifndef MKL
 ifndef LAPACK
 MKL=sequential
 endif # !LAPACK
 endif # !MKL
-OPTFLAGS=-march=$(MARCH)
-DBGFLAGS=-DJTRACE
-FPUFLAGS=-DUSE_EXTENDED -ffp-contract=fast
-ifdef NDEBUG
-OPTFLAGS += -O$(NDEBUG) -fgcse-las -fgcse-sm -fipa-pta -ftree-loop-distribution -ftree-loop-im -ftree-loop-ivcanon -fivopts -fvect-cost-model=unlimited -fvariable-expansion-in-unroller
-DBGFLAGS += -DNDEBUG -fopt-info-optimized-vec
-FPUFLAGS += -fno-math-errno
-else # DEBUG
-OPTFLAGS += -O$(DEBUG)
-DBGFLAGS += -$(DEBUG) -DPRINTOUT=stderr
-endif # ?NDEBUG
-LIBFLAGS=-I. -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
-LDFLAGS=-rdynamic
+CPPFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -DJTRACE -I. -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
+ifeq ($(WP),l)
+CPPFLAGS += -DUSE_EXTENDED
+endif # ?WP
+ifeq ($(findstring PRINTOUT,$(PVN_CPPFLAGS)),PRINTOUT)
+CPPFLAGS += -DPRINTOUT=stderr
+endif # PRINTOUT
+ifeq ($(findstring SLEEF,$(PVN_CPPFLAGS)),SLEEF)
+CPPFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF
+ifdef PVN_CXX
+SLEEF=cpp
+else # !PVN_CXX
+SLEEF=c
+endif # ?PVN_CXX
+endif # SLEEF
 ifndef LAPACK
-LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
+CPPFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
 endif # MKL
 ifeq ($(ABI),ilp64)
-LIBFLAGS += -DMKL_ILP64
+CPPFLAGS += -DMKL_ILP64
 endif # ilp64
-LDFLAGS += -L. -lvecjac$(SUFX)
-ifdef CR_MATH
-LIBFLAGS += -DUSE_CR_MATH
-LDFLAGS += $(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o
+ifeq ($(findstring CR_MATH,$(PVN_CPPFLAGS)),CR_MATH)
+CPPFLAGS += -DUSE_CR_MATH
 endif # CR_MATH
+LDFLAGS += -L. -lvecjac$(SUFX)
 ifdef LAPACK
 LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas
 else # MKL
-LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath=${MKLROOT}/lib -Wl,--no-as-needed -lmkl_gf_$(ABI) -lmkl_$(MKL) -lmkl_core
+LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath=${MKLROOT}/lib -lmkl_gf_$(ABI) -lmkl_$(MKL) -lmkl_core
 endif # ?LAPACK
-LIBFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE
-ifdef MKL
-ifeq ($(MKL),gnu_thread)
-ifeq ($(findstring fopenmp,$(CPUFLAGS)),)
-LDFLAGS += -lgomp
-endif # ?qopenmp
-endif # intel_thread
-endif # MKL
-LDFLAGS += -lpthread -lm -ldl
-CFLAGS=-std=gnu18 $(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -Wno-incompatible-pointer-types
-FFLAGS=$(OPTFLAGS) $(DBGFLAGS) $(LIBFLAGS) $(CPUFLAGS) $(FPUFLAGS) -fprotect-parens
-ifndef NDEBUG
-FFLAGS += -fcheck=all -finit-local-zero -finit-real=snan -finit-derived -pedantic
-endif # DEBUG
+LDFLAGS += $(PVN_LIBS)
+CFLAGS += $(CPPFLAGS)
 ifeq ($(ABI),ilp64)
 FFLAGS += -fdefault-integer-8
 endif # ilp64
+FFLAGS += $(CPPFLAGS)
 FLFLAGS=-lgfortran

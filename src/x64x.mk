@@ -54,7 +54,6 @@ else # MKL
 LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath=${MKLROOT}/lib -lmkl_intel_$(ABI) -lmkl_$(MKL) -lmkl_core
 endif # ?LAPACK
 LDFLAGS += $(PVN_LIBS)
-#-qsimd-honor-fp-model -qsimd-serialize-fp-reduction
 CFLAGS += $(CPPFLAGS)
 ifeq ($(ABI),ilp64)
 FFLAGS += -i8
