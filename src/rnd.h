@@ -34,14 +34,14 @@ static inline int32_t idrand()
 static inline uint64_t uqrand()
 {
   uint64_t q;
-  while (!_rdrand64_step(&q)) /**/;
+  while (!_rdrand64_step((unsigned long long*)&q)) /**/;
   return q;
 }
 
 static inline int64_t iqrand()
 {
   int64_t q;
-  while (!_rdrand64_step((uint64_t*)&q)) /**/;
+  while (!_rdrand64_step((unsigned long long*)&q)) /**/;
   return q;
 }
 
@@ -64,7 +64,7 @@ static inline float sfrand(const float aub)
 static inline double d_rand()
 {
   double d;
-  while (!_rdrand64_step((uint64_t*)&d)) /**/;
+  while (!_rdrand64_step((unsigned long long*)&d)) /**/;
   return d;
 }
 

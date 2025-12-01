@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
   if (gd < 0)
     return EXIT_FAILURE;
 
-  if (cread2_(&m, &n, G, &ldG, &gd))
+  if (cread2_((const fnat*)&m, (const fnat*)&n, G, (const fnat*)&ldG, &gd))
     return EXIT_FAILURE;
 
   if (close(gd))
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   if (resizef_(&sd, (const size_t*)cwork1))
     return EXIT_FAILURE;
-  if (wwrite1_(&n, ws, &sd))
+  if (wwrite1_((const fnat*)&n, ws, &sd))
     return EXIT_FAILURE;
   if (close(sd))
     return EXIT_FAILURE;
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   if (resizef_(&vd, (const size_t*)cwork1))
     return EXIT_FAILURE;
-  if (cwrite2_(&n, &n, V, &ldV, &vd))
+  if (cwrite2_((const fnat*)&n, (const fnat*)&n, V, (const fnat*)&ldV, &vd))
     return EXIT_FAILURE;
   if (close(vd))
     return EXIT_FAILURE;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   if (resizef_(&ud, (const size_t*)cwork1))
     return EXIT_FAILURE;
-  if (cwrite2_(&m, &n, G, &ldG, &ud))
+  if (cwrite2_((const fnat*)&m, (const fnat*)&n, G, (const fnat*)&ldG, &ud))
     return EXIT_FAILURE;
   if (close(ud))
     return EXIT_FAILURE;

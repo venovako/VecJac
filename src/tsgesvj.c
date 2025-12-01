@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
   if (gd < 0)
     return EXIT_FAILURE;
 
-  if (sread2_(&m, &n, G, &ldG, &gd))
+  if (sread2_((const fnat*)&m, (const fnat*)&n, G, (const fnat*)&ldG, &gd))
     return EXIT_FAILURE;
 
   if (close(gd))
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   if (resizef_(&sd, &l))
     return EXIT_FAILURE;
-  if (wwrite1_(&n, ws, &sd))
+  if (wwrite1_((const fnat*)&n, ws, &sd))
     return EXIT_FAILURE;
   if (close(sd))
     return EXIT_FAILURE;
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   if (resizef_(&vd, &l))
     return EXIT_FAILURE;
-  if (swrite2_(&n, &n, V, &ldV, &vd))
+  if (swrite2_((const fnat*)&n, (const fnat*)&n, V, (const fnat*)&ldV, &vd))
     return EXIT_FAILURE;
   if (close(vd))
     return EXIT_FAILURE;
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   if (resizef_(&ud, &l))
     return EXIT_FAILURE;
-  if (swrite2_(&m, &n, G, &ldG, &ud))
+  if (swrite2_((const fnat*)&m, (const fnat*)&n, G, (const fnat*)&ldG, &ud))
     return EXIT_FAILURE;
   if (close(ud))
     return EXIT_FAILURE;

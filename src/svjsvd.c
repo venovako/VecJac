@@ -273,7 +273,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
 #ifdef JTRACE
         Tn += tsc_lap(hz, T, rdtsc_end(rd));
 #endif /* JTRACE */
-        if (overflow = !(nMG <= FLT_MAX)) {
+        if ((overflow = !(nMG <= FLT_MAX))) {
 #ifdef JTRACE
           (void)fprintf(jtr, "sweep=%u, step=%u, M=", sw, st);
           (void)fflush(jtr);
@@ -359,7 +359,7 @@ fint svjsvd_(const fnat m[static restrict 1], const fnat n[static restrict 1], f
         register const VS _tol = _mm512_set1_ps(tol);
         register const VS _a21_ = VSABS(_a21);
         pc[j] = MS2U(_mm512_cmple_ps_mask(_tol, _a21_));
-        if (p[j] = _mm_popcnt_u32(pc[j])) {
+        if ((p[j] = _mm_popcnt_u32(pc[j]))) {
           stt += p[j];
           register const VS f1 = _mm512_load_ps(l1 + i);
           register const VS f2 = _mm512_load_ps(l2 + i);

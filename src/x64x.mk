@@ -23,7 +23,7 @@ ifndef LAPACK
 MKL=sequential
 endif # !LAPACK
 endif # !MKL
-CPPFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -DJTRACE -I. -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS -qsimd-honor-fp-model -qsimd-serialize-fp-reduction
+CPPFLAGS += -D_GNU_SOURCE -D_LARGEFILE64_SOURCE -DJTRACE -I. -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
 ifeq ($(WP),l)
 CPPFLAGS += -DUSE_EXTENDED
 endif # ?WP
@@ -32,6 +32,11 @@ CPPFLAGS += -DPRINTOUT=stderr
 endif # PRINTOUT
 ifeq ($(findstring SLEEF,$(PVN_CPPFLAGS)),SLEEF)
 CPPFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF
+ifdef PVN_CXX
+SLEEF=cpp
+else # !PVN_CXX
+SLEEF=c
+endif # ?PVN_CXX
 endif # SLEEF
 ifndef LAPACK
 CPPFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
@@ -49,6 +54,7 @@ else # MKL
 LDFLAGS += -L${MKLROOT}/lib -Wl,-rpath=${MKLROOT}/lib -lmkl_intel_$(ABI) -lmkl_$(MKL) -lmkl_core
 endif # ?LAPACK
 LDFLAGS += $(PVN_LIBS)
+#-qsimd-honor-fp-model -qsimd-serialize-fp-reduction
 CFLAGS += $(CPPFLAGS)
 ifeq ($(ABI),ilp64)
 FFLAGS += -i8
