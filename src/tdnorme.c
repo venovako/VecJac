@@ -1,7 +1,11 @@
-#include "psort.h"
 #include "wdp.h"
 #include "rnd.h"
 #include "timer.h"
+
+static int dcmp(const double x[static 1], const double y[static 1])
+{
+  return ((*x < *y) ? -1 : ((*y < *x) ? 1 : 0));
+}
 
 int main(int argc, char *argv[])
 {
@@ -113,7 +117,7 @@ int main(int argc, char *argv[])
     (void)fprintf(stdout, "%s,", dtoa(s, (double)tsc_lap(hz, b, e)));
     (void)fflush(stdout);
 
-    dpsort(n, x);
+    qsort(x, n, sizeof(double), (int (*)(const void*, const void*))dcmp);
 
     // use wide precision
     const double sq = wsq(n, x);
