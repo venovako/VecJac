@@ -3,7 +3,6 @@
 
 #if (defined(__ICC) || defined(__INTEL_COMPILER) || defined(__INTEL_CLANG_COMPILER) || defined(__INTEL_LLVM_COMPILER))
 #include <mathimf.h>
-#ifndef USE_EXTENDED
 extern __float128 __copysignq(__float128, __float128);
 extern __float128 __fabsq(__float128);
 extern __float128 __fmaq(__float128, __float128, __float128);
@@ -13,13 +12,11 @@ extern __float128 __frexpq(__float128, int*);
 extern __float128 __hypotq(__float128, __float128);
 extern __float128 __scalbq(__float128, __float128);
 extern __float128 __sqrtq(__float128);
-#endif /* !USE_EXTENDED */
 #else /* !__ICC */
 #include <complex.h>
 #include <math.h>
-#ifndef USE_EXTENDED
-#define USE_EXTENDED
-#endif /* !USE_EXTENDED */
+extern __float128 frexpq(__float128, int*);
+extern __float128 sqrtq(__float128);
 #endif /* ?__ICC */
 
 #ifdef USE_CR_MATH

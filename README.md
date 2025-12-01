@@ -18,10 +18,10 @@ Also, set the make variable ``OPENMP`` to at least ``0``.
 
 Run ``make`` in the ``src`` subdirectory as follows:
 ```bash
-make [ABI=ilp64|lp64] [WP=q|l] [MKL=sequential|intel_thread] [all|clean|help]
+make [COMPILER=x64x|gnu] [ABI=ilp64|lp64] [WP=q|l] [MKL=sequential|intel_thread|gnu_thread] [all|clean|help]
 ```
 
-The definitions from ``src/x64x.mk`` will be used, even though they are not guaranteed to be safe, since the testing was performed only with the obsolete non-LLVM Intel compilers (see ``src/x64.mk``).
+The definitions from ``src/x64x.mk`` will be used by default, even though they are not guaranteed to be safe, since the testing was performed only with the obsolete non-LLVM Intel compilers (see the defunct ``src/x64.mk``).
 
 ## Running
 

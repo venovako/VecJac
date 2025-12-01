@@ -35,7 +35,11 @@ double dnorms_(const fnat m[static restrict 1], const double x[static restrict V
   *rq += rq[7u];
 
   pquad2ef(rq, e1, f1);
+#if (defined(__ICC) || defined(__INTEL_COMPILER) || defined(__INTEL_CLANG_COMPILER) || defined(__INTEL_LLVM_COMPILER))
   *rq = __sqrtq(*rq);
+#else /* !Intel */
+  *rq = sqrtq(*rq);
+#endif /* ?Intel */
   pquad2ef(rq, e0, f0);
   return (double)*rq;
 }

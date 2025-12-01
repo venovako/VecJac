@@ -35,7 +35,7 @@ OBJS=$(SOBJS) $(DOBJS) $(COBJS) $(ZOBJS) $(XOBJS)
 all: $(LIBS) $(EXES)
 
 help:
-	@echo "make [ABI=ilp64|lp64] [WP=q|l] [MKL=sequential|intel_thread] [all|clean|help]"
+	@echo "make [COMPILER=x64x|gnu] [ABI=ilp64|lp64] [WP=q|l] [MKL=sequential|intel_thread|gnu_thread] [all|clean|help]"
 
 libvecjac$(SUFX).a: $(OBJS) $(MKFS)
 	$(AR) $(ARFLAGS) $@ $(OBJS)
