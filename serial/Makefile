@@ -1,4 +1,7 @@
-!INCLUDE ..\..\libpvn\src\pvn.mk
+!IFNDEF LIBPVN
+LIBPVN=..\..\libpvn
+!ENDIF # !LIBPVN
+!INCLUDE $(LIBPVN)\src\pvn.mk
 CC=$(PVN_CC)
 CFLAGS=$(PVN_CFLAGS) $(PVN_CPPFLAGS)
 LDFLAGS=$(PVN_LDFLAGS) $(PVN_LIBS)
