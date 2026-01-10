@@ -12,13 +12,13 @@ doi:[10.1137/22M1478847](https://doi.org/10.1137/22M1478847 "Vectorization of a 
 A recent Intel CPU (with at least the AVX512F instruction subset) and oneAPI Base and HPC Toolkits (e.g., 2021.2 or newer) on a 64-bit Linux (e.g., CentOS 7.9) are required.
 
 First, clone and build [libpvn](https://github.com/venovako/libpvn) repository, with the same parent directory as this one has (e.g., ``venovako/libpvn`` and ``venovako/VecJac``), with the same compilers and the (no-)debug mode as it is meant to be used here.
-Also, set the make variables: ``OPENMP`` to at least ``0``, ``SLEEF``, and ``sleef=0``.
+Also, set the make variables: ``OPENMP`` to at least ``0``, ``SLEEF``, and ``sleef=0``, as shown in `src/build_gcc.sh` and `src/build_icx.sh`.
 
 ### Make options
 
 Run ``make`` in the ``src`` subdirectory as follows:
 ```bash
-make [COMPILER=x64x|gnu] [ABI=ilp64|lp64] [WP=q|l] [MKL=sequential|intel_thread|gnu_thread] [all|clean|help]
+make [COMPILER=x64x|gnu] [ABI=ilp64|lp64] [WP=q|l] [MKL=sequential|intel_thread|gnu_thread] [LIBPVN=...] [all|clean|help]
 ```
 
 The definitions from ``src/x64x.mk`` will be used by default, even though they are not guaranteed to be safe, since the testing was performed only with the obsolete non-LLVM Intel compilers (see the defunct ``src/x64.mk``).
