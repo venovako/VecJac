@@ -10,7 +10,10 @@ SUFX=-$(ABI)_$(WP)
 RM=rm -rfv
 AR=ar
 ARFLAGS=rsv
-include ../../libpvn/src/pvn.mk
+ifndef LIBPVN
+LIBPVN=../../libpvn
+endif # !LIBPVN
+include $(LIBPVN)/src/pvn.mk
 CC=$(PVN_CC)
 FC=$(PVN_FC)
 CPPFLAGS=$(PVN_CPPFLAGS)

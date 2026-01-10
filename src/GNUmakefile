@@ -3,10 +3,6 @@ COMPILER=x64x
 endif # !COMPILER
 include $(COMPILER).mk
 MKFS=GNUmakefile $(COMPILER).mk
-ifneq ($(wildcard local.mk),)
-include local.mk
-MKFS += local.mk
-endif # local.mk
 
 .PHONY: all help clean
 
