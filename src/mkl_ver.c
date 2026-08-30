@@ -25,11 +25,28 @@ int main(int argc, char *argv[])
     const int b = set_cbwr();
     (void)printf("CBWR: %#x; ", (unsigned)b);
     switch (b & ~MKL_CBWR_STRICT) {
+    case MKL_CBWR_COMPATIBLE:
+      (void)printf("MKL_CBWR_COMPATIBLE");
+      break;
+    case MKL_CBWR_SSE2:
+      (void)printf("MKL_CBWR_SSE2");
+      break;
+#ifdef MKL_CBWR_SSE4_2
+    case MKL_CBWR_SSE4_2:
+      (void)printf("MKL_CBWR_SSE4_2");
+      break;
+#endif /* MKL_CBWR_SSE4_2 */
+    case MKL_CBWR_AVX2:
+      (void)printf("MKL_CBWR_AVX2");
+      break;
     case MKL_CBWR_AVX512:
       (void)printf("MKL_CBWR_AVX512");
       break;
     case MKL_CBWR_AVX512_E1:
       (void)printf("MKL_CBWR_AVX512_E1");
+      break;
+    case MKL_CBWR_AVX10:
+      (void)printf("MKL_CBWR_AVX10");
       break;
     default:
       (void)printf("???");
