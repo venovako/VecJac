@@ -25,14 +25,8 @@ int main(int argc, char *argv[])
     const int b = set_cbwr();
     (void)printf("CBWR: %#x; ", (unsigned)b);
     switch (b & ~MKL_CBWR_STRICT) {
-    case MKL_CBWR_AVX512_MIC:
-      (void)printf("MKL_CBWR_AVX512_MIC");
-      break;
     case MKL_CBWR_AVX512:
       (void)printf("MKL_CBWR_AVX512");
-      break;
-    case MKL_CBWR_AVX512_MIC_E1:
-      (void)printf("MKL_CBWR_AVX512_MIC_E1");
       break;
     case MKL_CBWR_AVX512_E1:
       (void)printf("MKL_CBWR_AVX512_E1");
