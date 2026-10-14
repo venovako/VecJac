@@ -1,8 +1,8 @@
 ifndef NVCC
-NVCC=nvcc
+NVCC:=nvcc
 endif # !NVCC
 ifndef SM
-SM=native
+SM:=native
 endif # !SM
 NVCCFLAGS=-std=c++20 -expt-relaxed-constexpr -extended-lambda -restrict -arch=$(SM) -extra-device-vectorization -ewp -res-usage -Wno-deprecated-gpu-targets -D_LARGEFILE64_SOURCE
 ifdef NDEBUG
@@ -11,7 +11,7 @@ else # !NDEBUG
 NVCCFLAGS += -g -G -v -keep
 endif # ?NDEBUG
 ifndef MARCH
-MARCH=native
+MARCH:=native
 endif # !MARCH
 NVCCFLAGS += -Xcompiler=-fopenmp,-march=$(MARCH) -Xptxas=-v,-warn-lmem-usage,-warn-spills
 

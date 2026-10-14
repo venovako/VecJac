@@ -1,29 +1,29 @@
 # MARCH=common-avx512 for KNLs
-SHELL=/bin/bash
-ARCH=$(shell uname)
+SHELL:=/bin/bash
+ARCH:=$(shell uname)
 ifndef ABI
-ABI=ilp64
+ABI:=ilp64
 endif # !ABI
 ifndef WP
-WP=q
+WP:=q
 endif # !WP
-SUFX=-$(ABI)_$(WP)
-RM=rm -rfv
-AR=ar
-ARFLAGS=rsv
+SUFX:=-$(ABI)_$(WP)
+RM:=rm -rfv
+AR:=ar
+ARFLAGS:=rsv
 ifndef LIBPVN
-LIBPVN=../../libpvn
+LIBPVN:=../../libpvn
 endif # !LIBPVN
 include $(LIBPVN)/src/pvn.mk
-CC=$(PVN_CC)
-FC=$(PVN_FC)
+CC:=$(PVN_CC)
+FC:=$(PVN_FC)
 CPPFLAGS=$(PVN_CPPFLAGS)
 CFLAGS=$(PVN_CFLAGS)
 FFLAGS=$(PVN_FCFLAGS)
 LDFLAGS=$(PVN_LDFLAGS)
 ifndef MKL
 ifndef LAPACK
-MKL=sequential
+MKL:=sequential
 endif # !LAPACK
 endif # !MKL
 CPPFLAGS += -DJTRACE -I. -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
@@ -34,7 +34,7 @@ ifeq ($(findstring PRINTOUT,$(PVN_CPPFLAGS)),PRINTOUT)
 CPPFLAGS += -DPRINTOUT=stderr
 endif # PRINTOUT
 ifeq ($(findstring SLEEF,$(PVN_CPPFLAGS)),SLEEF)
-SLEEF=0
+SLEEF:=0
 CPPFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF
 endif # SLEEF
 ifndef LAPACK
@@ -58,4 +58,4 @@ ifeq ($(ABI),ilp64)
 FFLAGS += -i8
 endif # ilp64
 FFLAGS += $(CPPFLAGS)
-FLFLAGS=-lifcoremt
+FLFLAGS:=-lifcoremt

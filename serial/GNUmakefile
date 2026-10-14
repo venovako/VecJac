@@ -1,11 +1,11 @@
 # MARCH=common-avx512 for KNLs
 ifndef LIBPVN
-LIBPVN=../../libpvn
+LIBPVN:=../../libpvn
 endif # !LIBPVN
 include $(LIBPVN)/src/pvn.mk
-CC=$(PVN_CC)
-CFLAGS=$(PVN_CFLAGS) $(PVN_CPPFLAGS)
-LDFLAGS=$(PVN_LDFLAGS) $(PVN_LIBS)
+CC:=$(PVN_CC)
+CFLAGS:=$(PVN_CFLAGS) $(PVN_CPPFLAGS)
+LDFLAGS:=$(PVN_LDFLAGS) $(PVN_LIBS)
 
 all: tsjac2.exe
 

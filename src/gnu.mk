@@ -1,21 +1,21 @@
-SHELL=/bin/bash
-ARCH=$(shell uname)
+SHELL:=/bin/bash
+ARCH:=$(shell uname)
 ifndef ABI
-ABI=ilp64
+ABI:=ilp64
 endif # !ABI
 ifndef WP
-WP=l
+WP:=l
 endif # !WP
-SUFX=-$(ABI)_$(WP)
-RM=rm -rfv
-AR=ar
-ARFLAGS=rsv
+SUFX:=-$(ABI)_$(WP)
+RM:=rm -rfv
+AR:=ar
+ARFLAGS:=rsv
 ifndef LIBPVN
-LIBPVN=../../libpvn
+LIBPVN:=../../libpvn
 endif # !LIBPVN
 include $(LIBPVN)/src/pvn.mk
-CC=$(PVN_CC)
-FC=$(PVN_FC)
+CC:=$(PVN_CC)
+FC:=$(PVN_FC)
 CPPFLAGS=$(PVN_CPPFLAGS)
 CFLAGS=$(PVN_CFLAGS)
 FFLAGS=$(PVN_FCFLAGS)
@@ -33,7 +33,7 @@ ifeq ($(findstring PRINTOUT,$(PVN_CPPFLAGS)),PRINTOUT)
 CPPFLAGS += -DPRINTOUT=stderr
 endif # PRINTOUT
 ifeq ($(findstring SLEEF,$(PVN_CPPFLAGS)),SLEEF)
-SLEEF=0
+SLEEF:=0
 CPPFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF
 endif # SLEEF
 ifndef LAPACK
@@ -57,4 +57,4 @@ ifeq ($(ABI),ilp64)
 FFLAGS += -fdefault-integer-8
 endif # ilp64
 FFLAGS += $(CPPFLAGS)
-FLFLAGS=-lgfortran
+FLFLAGS:=-lgfortran

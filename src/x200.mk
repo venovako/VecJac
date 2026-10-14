@@ -1,29 +1,29 @@
-SHELL=/bin/bash
-ARCH=$(shell uname)
+SHELL:=/bin/bash
+ARCH:=$(shell uname)
 ifndef MARCH
-MARCH=common-avx512
+MARCH:=common-avx512
 endif # !MARCH
 ifndef ABI
-ABI=ilp64
+ABI:=ilp64
 endif # !ABI
 ifdef NDEBUG
-DEBUG=
+DEBUG:=
 else # DEBUG
-DEBUG=g
+DEBUG:=g
 endif # ?NDEBUG
 ifndef FPU
-FPU=precise
+FPU:=precise
 endif # !FPU
 ifndef WP
-WP=q
+WP:=q
 endif # !WP
-RM=rm -rfv
-AR=ar
-ARFLAGS=rsv
-CC=icx
-FC=ifx
+RM:=rm -rfv
+AR:=ar
+ARFLAGS:=rsv
+CC:=icx
+FC:=ifx
 ifdef SLEEF
-CXX=icpx
+CXX:=icpx
 endif # SLEEF
 CPUFLAGS=-fPIC -fexceptions -fasynchronous-unwind-tables -fno-omit-frame-pointer -mprefer-vector-width=512 -vec-threshold0
 ifdef NDEBUG
@@ -40,7 +40,7 @@ SUFX=-$(ABI)_$(DEBUG)$(WP)
 endif # ?NDEBUG
 ifndef MKL
 ifndef LAPACK
-MKL=sequential
+MKL:=sequential
 endif # !LAPACK
 endif # !MKL
 DBGFLAGS=-traceback -DJTRACE
@@ -58,7 +58,7 @@ endif # ?NDEBUG
 LIBFLAGS=-I. -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS
 LDFLAGS=-rdynamic
 ifdef SLEEF
-LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/include
+LIBFLAGS += -DDZNRME_SEQRED -DSCNRME_SEQRED -DUSE_SLEEF -I$(SLEEF)/../include
 endif # SLEEF
 ifndef LAPACK
 LIBFLAGS += -DUSE_MKL -I${MKLROOT}/include/intel64/$(ABI) -I${MKLROOT}/include
@@ -72,12 +72,7 @@ LIBFLAGS += -DUSE_CR_MATH
 LDFLAGS += $(CR_MATH)/src/binary32/hypot/hypotf.o $(CR_MATH)/src/binary64/hypot/hypot.o
 endif # CR_MATH
 ifdef SLEEF
-ifeq ($(wildcard $(SLEEF)/lib64),)
-LDFLAGS += -L$(SLEEF)/lib -Wl,-rpath=$(SLEEF)/lib
-else # lib64
-LDFLAGS += -L$(SLEEF)/lib64 -Wl,-rpath=$(SLEEF)/lib64
-endif # ?lib64
-LDFLAGS += -lsleefquad
+LDFLAGS += -L$(SLEEF) -Wl,-rpath=$(SLEEF) -lsleefquad
 endif # SLEEF
 ifdef LAPACK
 LDFLAGS += -L$(LAPACK) -ltmglib -llapack -lrefblas -lifcoremt
@@ -110,4 +105,4 @@ endif # SLEEF
 ifeq ($(ABI),ilp64)
 FFLAGS += -i8
 endif # ilp64
-FLFLAGS=-lifcoremt
+FLFLAGS:=-lifcoremt
