@@ -22,7 +22,7 @@ FFLAGS=$(PVN_FCFLAGS)
 LDFLAGS=$(PVN_LDFLAGS)
 ifndef MKL
 ifndef LAPACK
-MKL=sequential
+MKL:=sequential
 endif # !LAPACK
 endif # !MKL
 CPPFLAGS += -DJTRACE -I. -DUSE_INL -DUSE_2SUM #-DUSE_SECANTS

@@ -1,32 +1,32 @@
 ifndef COMPILER
-COMPILER=x64x
+COMPILER:=x64x
 endif # !COMPILER
 include $(COMPILER).mk
-MKFS=GNUmakefile $(COMPILER).mk
+MKFS:=GNUmakefile $(COMPILER).mk
 
 .PHONY: all help clean
 
-LIBS=libvecjac$(SUFX).a
+LIBS:=libvecjac$(SUFX).a
 
-SEXES=bslevd2$(SUFX).exe tsbjac2$(SUFX).exe tsgesvj$(SUFX).exe tsvjsvd$(SUFX).exe sflops$(SUFX).exe
+SEXES:=bslevd2$(SUFX).exe tsbjac2$(SUFX).exe tsgesvj$(SUFX).exe tsvjsvd$(SUFX).exe sflops$(SUFX).exe
 DEXES=bdlevd2$(SUFX).exe tdbjac2$(SUFX).exe tdgesvj$(SUFX).exe tdvjsvd$(SUFX).exe dflops$(SUFX).exe
-CEXES=bclevd2$(SUFX).exe tcbjac2$(SUFX).exe tcgesvj$(SUFX).exe tcvjsvd$(SUFX).exe
-ZEXES=bzlevd2$(SUFX).exe tzbjac2$(SUFX).exe tzgesvj$(SUFX).exe tzvjsvd$(SUFX).exe
-XEXES=gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tpjs$(SUFX).exe
+CEXES:=bclevd2$(SUFX).exe tcbjac2$(SUFX).exe tcgesvj$(SUFX).exe tcvjsvd$(SUFX).exe
+ZEXES:=bzlevd2$(SUFX).exe tzbjac2$(SUFX).exe tzgesvj$(SUFX).exe tzvjsvd$(SUFX).exe
+XEXES:=gen2rand$(SUFX).exe mkl_ver$(SUFX).exe tpjs$(SUFX).exe
 ifdef SLEEF
 DEXES += tdnorme$(SUFX).exe
 endif # SLEEF
-EXES=$(SEXES) $(DEXES) $(CEXES) $(ZEXES) $(XEXES)
+EXES:=$(SEXES) $(DEXES) $(CEXES) $(ZEXES) $(XEXES)
 
-SOBJS=sbjac2$(SUFX).o sdpscl$(SUFX).o sgsscl$(SUFX).o sjrot$(SUFX).o sjrotf$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o snssvj$(SUFX).o sscale$(SUFX).o sswp$(SUFX).o svjsvd$(SUFX).o
+SOBJS:=sbjac2$(SUFX).o sdpscl$(SUFX).o sgsscl$(SUFX).o sjrot$(SUFX).o sjrotf$(SUFX).o snorm2$(SUFX).o snormx$(SUFX).o snssvj$(SUFX).o sscale$(SUFX).o sswp$(SUFX).o svjsvd$(SUFX).o
 DOBJS=dbjac2$(SUFX).o ddpscl$(SUFX).o dgsscl$(SUFX).o djrot$(SUFX).o djrotf$(SUFX).o dnorm2$(SUFX).o dnormx$(SUFX).o dnssvj$(SUFX).o dscale$(SUFX).o dswp$(SUFX).o dvjsvd$(SUFX).o
-COBJS=cbjac2$(SUFX).o cdpscl$(SUFX).o cgsscl$(SUFX).o cjrot$(SUFX).o cjrotf$(SUFX).o cmerge$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cnssvj$(SUFX).o cscale$(SUFX).o csplit$(SUFX).o cvjsvd$(SUFX).o
-ZOBJS=zbjac2$(SUFX).o zdpscl$(SUFX).o zgsscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o znssvj$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
-XOBJS=aalloc$(SUFX).o common$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o
+COBJS:=cbjac2$(SUFX).o cdpscl$(SUFX).o cgsscl$(SUFX).o cjrot$(SUFX).o cjrotf$(SUFX).o cmerge$(SUFX).o cnorm2$(SUFX).o cnormx$(SUFX).o cnssvj$(SUFX).o cscale$(SUFX).o csplit$(SUFX).o cvjsvd$(SUFX).o
+ZOBJS:=zbjac2$(SUFX).o zdpscl$(SUFX).o zgsscl$(SUFX).o zjrot$(SUFX).o zjrotf$(SUFX).o zmerge$(SUFX).o znorm2$(SUFX).o znormx$(SUFX).o znssvj$(SUFX).o zscale$(SUFX).o zsplit$(SUFX).o zvjsvd$(SUFX).o
+XOBJS:=aalloc$(SUFX).o common$(SUFX).o laev2$(SUFX).o mtxio$(SUFX).o pjs$(SUFX).o rnd$(SUFX).o timer$(SUFX).o vec$(SUFX).o vecjac$(SUFX).o wnrme$(SUFX).o
 ifdef SLEEF
 DOBJS += dnormb$(SUFX).o dnorme$(SUFX).o dnormf$(SUFX).o dnorms$(SUFX).o
 endif # SLEEF
-OBJS=$(SOBJS) $(DOBJS) $(COBJS) $(ZOBJS) $(XOBJS)
+OBJS:=$(SOBJS) $(DOBJS) $(COBJS) $(ZOBJS) $(XOBJS)
 
 all: $(LIBS) $(EXES)
 
